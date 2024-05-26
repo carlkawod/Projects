@@ -1,0 +1,9 @@
+#BlueJ class context
+comment0.target=Tux
+comment1.params=
+comment1.target=void\ act()
+comment2.params=
+comment2.target=void\ checkKeyPress()
+comment3.params=
+comment3.target=void\ lookOut()
+numComments=4

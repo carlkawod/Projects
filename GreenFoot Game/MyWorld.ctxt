@@ -1,0 +1,17 @@
+#BlueJ class context
+comment0.target=MyWorld
+comment1.params=
+comment1.target=MyWorld()
+comment2.params=
+comment2.target=void\ prepare()
+comment3.params=
+comment3.target=void\ addTux()
+comment4.params=count
+comment4.target=void\ addBalloons(int)
+comment5.params=count
+comment5.target=void\ addFish(int)
+comment6.params=count
+comment6.target=void\ addRandomBombs(int)
+comment7.params=
+comment7.target=void\ act()
+numComments=8
