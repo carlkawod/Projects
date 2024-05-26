@@ -1,0 +1,162 @@
+---
+title: "project draft"
+author: "Carl Kawodza"
+date: "2023-12-04"
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(socviz)
+library(tidyverse)
+```
+
+
+```{r}
+data(boomer)
+```
+
+
+```{r}
+str(boomer)
+```
+
+
+```{r}
+missing_values <- colSums(is.na(boomer))
+print(missing_values)
+```
+
+
+```{r}
+duplicates <- sum(duplicated(boomer))
+print(paste("Number of duplicates:", duplicates))
+```
+
+
+```{r}
+#Handling missing values by imputation
+boomer_imputed <- boomer%>%
+  mutate_all(~ifelse(is.na(.), mean(., na.rm = TRUE), .))
+```
+
+```{r}
+#Removing duplicates
+boomer_no_duplicates <- distinct(boomer)
+```
+
+
+```{r}
+#How does the total population vary over time? Are there specific periods of notable population growth or decline?
+boomer$date <- as.Date(boomer$date)
+
+# Plotting the total population over time
+ggplot(boomer, aes(x = date, y = total_pop)) +
+  geom_line() +
+  labs(title = "Total Population Over Time",
+       x = "Date",
+       y = "Total Population") +
+  theme_minimal()
+```
+
+```{r}
+#summary statistics
+summary(boomer[c('total_pop', 'births')])
+```
+
+
+```{r}
+ggplot(boomer, aes(x = country, y = births / total_pop * 1000, fill = country)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Birth Rate Across Countries",
+       x = "Country",
+       y = "Birth Rate (per 1000 people)",
+       fill = "Country") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+```
+
+
+```{r}
+```
+
+
+
+```{r}
+#Are there any seasonal variations in birth rates throughout the year?
+
+library(ggplot2)
+
+#Plotting the birth rates across different months
+ggplot(boomer, aes(x = factor(births), fill = factor(births))) +
+  geom_bar() +
+  labs(title = "Seasonal Variations in Birth Rates",
+       x = "Month",
+       y = "Number of Births") +
+  scale_x_discrete(labels = month.name) +  
+  theme_minimal()
+```
+
+```{r}
+#For a specific country, what is the distribution of births across different months?
+
+library(ggplot2)
+
+#Plotting the distribution of births across different countries
+ggplot(boomer, aes(x = factor(country), fill = factor(country))) +
+  geom_bar() +
+  labs(title = "Distribution of Births Across Different Countries",
+       x = "Country",
+       y = "Number of Births") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  
+```
+
+```{r}
+#What is the overall trend in population growth or decline over the years?
+library(ggplot2)
+boomer$date <- as.Date(boomer$date)
+
+# Extract the year from the date
+boomer$year <- lubridate::year(boomer$date)
+
+# Plotting a boxplot to show the overall trend in population growth or decline over the years
+ggplot(boomer, aes(x = factor(year), y = total_pop)) +
+  geom_boxplot() +
+  labs(title = "Population Growth Over the Years",
+       x = "Year",
+       y = "Total Population") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r}
+#Is there any correlation between the total population and the number of births within a given time frame?
+library(ggplot2)
+boomer$date <- as.Date(boomer$date)
+
+#Scatter plot to visualize the relationship
+ggplot(boomer, aes(x = births, y = total_pop)) +
+  geom_point() +
+  labs(title = "Correlation Between Total Population and Births",
+       x = "Number of Births",
+       y = "Total Population") +
+  theme_minimal()
+
+```
+
+```{r}
+#Calculating correlation coefficient
+correlation_coefficient <- cor(boomer$total_pop, boomer$births)
+print(paste("Correlation Coefficient: ", round(correlation_coefficient, 2)))
+```
+
+
+
