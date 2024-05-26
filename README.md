@@ -1,7 +1,9 @@
 <h1>Fitlife</h1> 
 FitLife is a comprehensive web platform designed to promote holistic health and wellness by providing a wide range of resources, including personalized fitness plans, mental wellness programs, fitness meal plans, and high-quality fitness equipment. This project showcases my skills in web development, user experience design, and health and fitness content creation.
 
-[Fitlife](youtube.com)
+<img width="1440" alt="Screen Shot 2024-05-26 at 11 56 15 AM" src="https://github.com/carlkawod/Projects/assets/152246694/2c16d6ea-0acf-4a35-8f75-237ce3a36433">
+
+
 
 <h1>R Project </h1> 
 This project involves the analysis of the "boomer" dataset using R, with the goal of understanding population dynamics and birth trends. The project demonstrates data cleaning, handling missing values, removing duplicates, and visualizing key metrics related to population and birth rates.
