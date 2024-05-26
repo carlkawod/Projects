@@ -1,7 +1,8 @@
 <h1>Fitlife</h1> 
 FitLife is a comprehensive web platform designed to promote holistic health and wellness by providing a wide range of resources, including personalized fitness plans, mental wellness programs, fitness meal plans, and high-quality fitness equipment. This project showcases my skills in web development, user experience design, and health and fitness content creation.
 
-<img width="1440" alt="Screen Shot 2024-05-26 at 11 56 15 AM" src="https://github.com/carlkawod/Projects/assets/152246694/2c16d6ea-0acf-4a35-8f75-237ce3a36433">
+
+https://github.com/carlkawod/Projects/assets/152246694/900efd3d-be6e-45d3-9948-cc2a04ea1789
 
 
 
