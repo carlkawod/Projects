@@ -1,0 +1,24 @@
+/* Scoped to content lists only, not navbar */
+.content-list ul {
+  border: 1px solid #555555;
+}
+
+.content-list li {
+  text-align: center;
+  border-bottom: 2px solid #555555;
+  background-color: white;
+  color: black !important;
+}
+
+.content-list li:last-child {
+  border-bottom: none;
+}
+
+nav {
+    min-height: 75px;
+}
+
+.search-header .col {
+  padding-top: 25px;
+  padding-bottom: 25px;
+}
