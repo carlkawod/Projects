@@ -1,174 +1,452 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>
+        // 1. Check if the user is logged in
+        const isLoggedIn = sessionStorage.getItem("isLoggedIn");
+
+        // 2. If they are NOT logged in, kick them back to the login page
+        if (isLoggedIn !== "true") 
+        {
+            window.location.href = "index.html"; // CHANGE THIS to the actual name of your login file
+        }
+    </script>
+    
     <meta charset="UTF-8">
     <title>Student Information Card Page</title>
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-
-    <link rel="stylesheet" href="styles.css">
+    
+    <link rel="stylesheet" href="styles.css">    
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">        
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 </head>
 
 <body>
-
-<!-- NavBar -->
-<nav class="navbar navbar-dark bg-dark fixed-top">
-    <div class="container-fluid">
-        <button class="navbar-toggler flex-shrink-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasDarkNavbar">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    </div>
-</nav>
-
-<!-- Offcanvas moved outside nav so it isn't clipped by nav's fixed height -->
-<div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="offcanvasDarkNavbar" style="z-index: 1055;">
-    <div class="offcanvas-header">
-        <button type="button" class="navbar-toggler" data-bs-dismiss="offcanvas">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    </div>
-
-    <div class="offcanvas-body">
-        <ul class="navbar-nav justify-content-end flex-grow-1">
-            <li class="nav-item">
-                <a class="nav-link active" href="index.html">Search Student</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">Make Reports</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="index.html">Log Out</a>
-            </li>
-        </ul>
-    </div>
-</div>
-
-<h2 id="studentTitle" style="padding-top: 150px; padding-left: 50px; color: rgb(0, 0, 0);">
-    Loading...
-</h2>
-
-<div class="container" style="border: 2px solid black; margin-top: 70px; padding: 20px;">
-    <div class="row align-items-start">
-        <div class="col-12 col-md-auto ps-5 text-center mb-3 mb-md-0">
-            <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" fill="currentColor" class="bi bi-person-square" viewBox="0 0 16 16">
-                <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
-                <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a1 1 0 0 0-1-1H2z"/>
-            </svg>
+    <nav class="navbar navbar-dark bg-dark fixed-top">
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="offcanvasDarkNavbar" aria-labelledby="offcanvasDarkNavbarLabel">
+                <div class="offcanvas-header">
+                    <button type="button" class="navbar-toggler" data-bs-dismiss="offcanvas" aria-label="Close">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                </div>
+                <div class="offcanvas-body">
+                    <ul class="navbar-nav justify-content-end flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="search.html">Search Student</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Make Reports</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="index.html">Log Out</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
+    </nav>
 
-        <div class="col-6 col-md">
-            <h4>Student ID:</h4>
-            <h4>Email:</h4>
-            <h4>Expected Graduation Year:</h4>
-        </div>
-
-        <div class="col-6 col-md">
-            <h4 id="studentIdValue">-</h4>
-            <h4 id="studentEmailValue">-</h4>
-            <h4 id="studentGradValue">-</h4>
-        </div>
+    <div class="container mt-5" style="padding-top: 50px; color: rgb(0, 0, 0);">
+        <h2><span id="displayName">Loading...</span></h2>
+        <hr>
     </div>
 
-    <div class="row mt-3">
-        <div class="col-12 col-md-auto text-md-end">
-            <h3>Major:</h3>
+    <div class="container" style="border: 2px solid black; margin-top: 20px; padding: 20px;">
+        <div class="row align-items-start">
+            <div class="col ps-5 text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" fill="currentColor" class="bi bi-person-square" viewBox="0 0 16 16">
+                    <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                    <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm12 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1v-1c0-1-1-4-6-4s-6 3-6 4v1a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/>
+                </svg>    
+            </div>
+            <div class="col">
+                <h4> Student ID:</h4>
+                <h4> Email:</h4>
+                <h4> Expected Graduation Year:</h4>
+            </div>
+            <div class="col">
+                <p><strong></strong> <span id="displayId"></span></p>
+                <p><strong></strong> <span id="displayEmail"></span></p>
+                <p><strong></strong> <span id="displayGrad"></span></p>
+            </div>
         </div>
 
-        <div class="col-12 col-md fw-bold">
-            <h3 id="studentMajorValue">-</h3>
-        </div>
-    </div>
-
-    <div class="row mt-2">
-        <div class="col-12 col-sm-6">
-            <h3>Course:</h3>
-            <select class="form-select" aria-label="Course select">
-                <option selected>Select</option>
-            </select>
+        <div class="row mt-4">
+            <div class="col text-end">
+                <h3> Major: </h3>
+            </div>
+            <div class="col fw-bold" style="padding-right: 750px; font-size: 20px;">
+                <p><strong><span id="displayMajor"></span></strong></p>
+            </div>
         </div>
 
-        <div class="col-12 col-sm-6 mt-3 mt-sm-0">
-            <h3>Semester:</h3>
-            <select class="form-select" aria-label="Semester select">
-                <option selected>Select</option>
-            </select>
+        <div class="row">
+            <div class="col">
+                <h3> Course: </h3> 
+                <select class="form-select" aria-label="Course select">
+                    <option selected>Select</option>
+                    <option value="1">Placeholder</option>
+                    <option value="2">Placeholder</option>
+                    <option value="3">Placeholder</option>
+                </select>
+            </div>
+            <div class="col">
+                <h3> Semester: </h3>
+                <select class="form-select" aria-label="Semester select">
+                    <option selected>Select</option>
+                    <option value="1">Placeholder</option>
+                    <option value="2">Placeholder</option>
+                    <option value="3">Placeholder</option>
+                </select>
+            </div>
         </div>
-    </div>
+        
+        <div class="scrollable container mt-4">
+            <div class="container text-center">
+                <div class="row align-items-start">
+                    <div class="col">Assignments</div>
+                    <div class="col">Rate</div>
+                    <div class="col">PLO 1</div>
+                    <div class="col">PLO 2</div>
+                    <div class="col">PLO 3</div>
+                </div>
+            </div>
 
-    <div class="scrollable container">
-        <div style="max-height: 250px; overflow-y: scroll; border: 1px solid black; margin-top: 20px;">
-            <table class="table table-bordered text-center mb-0">
-                <thead>
+            <div style="max-height: 250px; overflow-y: scroll; border: 1px solid black; margin-top: 20px;">
+                <table class="table table-bordered text-center mb-0">
+                    <thead>
+                        <tr>
+                            <th style="background-color: #d3d3d3;">Assignments</th>
+                            <th style="background-color: #4da6ff;">PLO 1</th>
+                            <th style="background-color: #4da6ff;">PLO 2</th>
+                            <th style="background-color: #4da6ff;">PLO 3</th>
+                            <th style="background-color: #4da6ff;">PLO 4</th>
+                        </tr>
+                    </thead>
+                    <!--students assignemts-->
+                    <tbody id="assignmentTableBody">
                     <tr>
-                        <th style="background-color: #d3d3d3;">Assignments</th>
-                        <th style="background-color: #d3d3d3;">Rate</th>
-                        <th style="background-color: #4da6ff;">PLO 1</th>
-                        <th style="background-color: #4da6ff;">PLO 2</th>
-                        <th style="background-color: #4da6ff;">PLO 3</th>
-                        <th style="background-color: #4da6ff;">PLO 4</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>N/A</td>
-                        <td>N/A</td>
-                        <td><input type="checkbox" class="form-check-input" disabled></td>
-                        <td><input type="checkbox" class="form-check-input" disabled></td>
-                        <td><input type="checkbox" class="form-check-input" disabled></td>
-                        <td><input type="checkbox" class="form-check-input" disabled></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="mt-2">
-            <button class="btn btn-secondary btn-sm">Add new assignments</button>
+                        <td></td>
+                                </select>
+                            </td>
+                            <td><input type="checkbox" class="form-check-input"></td>
+                            <td><input type="checkbox" class="form-check-input"></td>
+                            <td><input type="checkbox" class="form-check-input"></td>
+                            <td><input type="checkbox" class="form-check-input"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <br/>
+            <div class="mt-2">
+                <button class="btn-1" onclick="openAddAsgn()">Add New Assignments</button>
+            </div>
+            <br/>
         </div>
     </div>
-</div>
 
-<footer style="padding: 20px"></footer>
+    <footer style="padding: 20px"></footer>
 
-<script>
+    <!-- MODALS -->
+    <div id="mAdd" style="display: none;">
+      <div class="modal d-block position-static">
+        <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+            <h2 class="m-0 fs-4">Add New Assignment</h2>
+            <button class="mx btn btn-sm border-0 fs-5" style="background: none;" onclick="cm('mAdd')">✕</button>
+        </div>
+        <div class="mbdy">
+          <div style="margin-bottom:12px;">
+            <label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Assignment type:</label>
+                <select id="asgnType" class="form-select form-select-sm" style="width: 30%;">                
+                <option>Exam</option>
+                <option>Homework</option>
+                <option>Project</option>
+                <option>Lab</option>
+                <option>Quiz</option>
+                <option>Other</option>
+            </select>
+          </div>
+          <p style="font-size:12px;color:#555;font-weight:600;margin-bottom:6px;">Which PLOs does this assignment address?</p><br/>
+          <table style="border:none; width:100%; text-align: center;">
+            <thead style="text-align: center;">
+                <tr style="height: 30px;">
+                    <th style="background-color: #fff; width: 35%;"></th>
+                    <th colspan="4" style="background-color: #4da6ff; border: 1px solid #b2b2b2;">PLOs</th>
+                </tr>
+                <tr style="height: 40px;">
+                    <th>Assignment</th>
+                    <th style="background-color: #4da6ff; border: 1px solid #b2b2b2;">PLO 1</th>
+                    <th style="background-color: #4da6ff; border: 1px solid #b2b2b2;">PLO 2</th>
+                    <th style="background-color: #4da6ff; border: 1px solid #b2b2b2;">PLO 3</th>
+                    <th style="background-color: #4da6ff; border: 1px solid #b2b2b2;">PLO 4</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="height: 40px;">
+                    <td style="background-color: #fff; border: 1px solid #b2b2b2;">
+                        <input type="text" id="asgnName" class="form-control form-control-sm" placeholder="Assignment Name..">
+                    </td>               
+                    <td style="background-color: #fff; border: 1px solid #b2b2b2;"><input type="checkbox" id="p11"/></td>
+                    <td style="background-color: #fff; border: 1px solid #b2b2b2;"><input type="checkbox" id="p12"/></td>
+                    <td style="background-color: #fff; border: 1px solid #b2b2b2;"><input type="checkbox" id="p13"/></td>
+                    <td style="background-color: #fff; border: 1px solid #b2b2b2;"><input type="checkbox" id="p14"/></td>
+                </tr>
+                <tr style="font-size: 1rem; height: 40px;">
+                    <td style="background-color: #fff; border: 1px solid #b2b2b2;"></td>
+                    <td style="background-color: #fff; border: 1px solid #b2b2b2;"><button class="btn-2" onclick="openAsgnOverview()">go</button></td>
+                    <td style="background-color: #fff; border: 1px solid #b2b2b2;"><button class="btn-2" onclick="openAsgnOverview2()">go</button></td>
+                    <td style="background-color: #fff; border: 1px solid #b2b2b2;"><button class="btn-2" onclick="openAsgnOverview3()">go</button></td>
+                    <td style="background-color: #fff; border: 1px solid #b2b2b2;"><button class="btn-2" onclick="openAsgnOverview4()">go</button></td>
+                </tr>
+            </tbody>
+          </table>
+          <div>
+            <br/>
+            <label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Any comments on assignment:</label>
+            <textarea class="form-control form-control-sm" placeholder="Enter comments here..."></textarea>
+            <div class="d-flex justify-content-between mt-4">
+                <button class="btn-1" onclick="cm('mAdd')">Cancel</button>
+                <button class="btn-1" onclick="confirmAddAsgn()">Add →</button>
+            </div>
+            <br/>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    function getStudentIdFromUrl() {
-        const params = new URLSearchParams(window.location.search);
-        return params.get('studentId');
+    <div id="mAsgnOverview" style="display: none;">
+        <div class="modal d-block position-static">
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                <h2 class="m-0 fs-4">Assignment Name</h2>
+                <button class="mx btn btn-sm border-0 fs-5" style="background: none;" onclick="cm('mAsgnOverview')">✕</button>
+            </div>
+            <div class="mbdy">
+                <div class="overview-con">
+                    <h1>PLO 1</h1>
+                    <p>Metric 1 ...</p>
+                    <p>Metric 2 ...</p>
+                    <p>Metric 3 ...</p>
+                    <p>Metric 4 ...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="mAsgnOverview2" style="display: none;">
+        <div class="modal d-block position-static">
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                <h2 class="m-0 fs-4">Assignment Name</h2>
+                <button class="mx btn btn-sm border-0 fs-5" style="background: none;" onclick="cm('mAsgnOverview2')">✕</button>
+            </div>
+            <div class="mbdy">
+                <div class="overview-con">
+                    <h1>PLO 2</h1>
+                    <p>Metric 1 ...</p>
+                    <p>Metric 2 ...</p>
+                    <p>Metric 3 ...</p>
+                    <p>Metric 4 ...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="mAsgnOverview3" style="display: none;">
+        <div class="modal d-block position-static">
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                <h2 class="m-0 fs-4">Assignment Name</h2>
+                <button class="mx btn btn-sm border-0 fs-5" style="background: none;" onclick="cm('mAsgnOverview3')">✕</button>
+            </div>
+            <div class="mbdy">
+                <div class="overview-con">
+                    <h1>PLO 3</h1>
+                    <p>Metric 1 ...</p>
+                    <p>Metric 2 ...</p>
+                    <p>Metric 3 ...</p>
+                    <p>Metric 4 ...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="mAsgnOverview4" style="display: none;">
+        <div class="modal d-block position-static">
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                <h2 class="m-0 fs-4">Assignment Name</h2>
+                <button class="mx btn btn-sm border-0 fs-5" style="background: none;" onclick="cm('mAsgnOverview4')">✕</button>
+            </div>
+            <div class="mbdy">
+                <div class="overview-con">
+                    <h1>PLO 4</h1>
+                    <p>Metric 1 ...</p>
+                    <p>Metric 2 ...</p>
+                    <p>Metric 3 ...</p>
+                    <p>Metric 4 ...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            // Note: If your search page button uses "?sid=", change this to .get('sid')
+            const urlParams = new URLSearchParams(window.location.search);
+            const studentId = urlParams.get('sid'); 
+
+            if (studentId) {
+                // Ask your C# server for the data (Using relative route so it works on any port)
+                $.ajax({
+                    url: '/search', 
+                    method: 'GET',
+                    data: { id: studentId }, 
+                    success: function (results) {
+                        
+                        if (results && results.length > 0) {
+                            const student = results[0]; 
+                            
+                            $('#displayName').text(student.LastName + ", " + student.FirstName + " - [Active]");
+                            $('#displayId').text(student.StudentID);
+                            $('#displayYear').text(student.Year);
+                            $('#displayGrad').text(student.ExpectedGradYear);
+                            $('#displayEmail').text(student.Email);
+                            $('#displayMajor').text(student.Major);
+                            loadAssignments(studentId);
+                            
+                        } else {
+                            $('#displayName').text("Student Not Found");
+                            alert("No student matches this ID.");
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error fetching data:", error);
+                        $('#displayName').text("Error Loading Data");
+                    }
+                });
+
+            } else {
+                alert("No student selected. Returning to search.");
+                window.location.href = "search.html"; 
+            }
+        });
+
+        function openAddAsgn() {
+            //document.getElementById('newAsgnName').value='';
+            // reset checkboxes
+            //[[1,1,0,0,0],[2,1,0,1,0]].forEach(([r,...vals])=>{
+                //[1,2,3,4].forEach((c,ci)=>{document.getElementById(`p${r}${c}`).checked=!!vals[ci];});
+            //});
+            om('mAdd');
+        }
+        function openAsgnOverview() { om('mAsgnOverview'); }
+        function openAsgnOverview2() { om('mAsgnOverview2'); }
+        function openAsgnOverview3() { om('mAsgnOverview3'); }
+        function openAsgnOverview4() { om('mAsgnOverview4'); }
+        
+        function om(id) {
+            document.getElementById(id).style.display = 'block';
+        }
+        function cm(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+        // This function will be called when the page loads to populate the assignments table
+        function loadAssignments(studentId) {
+        $.ajax({
+            url: '/assignments',
+            method: 'GET',
+            data: { sid: studentId },
+            success: function (assignments) {
+                const tbody = $('#assignmentTableBody');
+                tbody.empty(); // Clear out any old rows
+
+                if (assignments.length === 0) {
+                    tbody.append('<tr><td colspan="6">No assignments found for this student.</td></tr>');
+                    return;
+                }
+
+                // Loop through each assignment from the database and create a table row
+                assignments.forEach(function (a) {
+                    // Determine if checkboxes should be checked based on the database booleans
+                    const p1 = a.plo1 ? 'checked' : '';
+                    const p2 = a.plo2 ? 'checked' : '';
+                    const p3 = a.plo3 ? 'checked' : '';
+                    const p4 = a.plo4 ? 'checked' : '';
+
+                    const row = `
+                        <tr>
+                            <td><strong>${a.assignmentName}</strong></td>
+                            
+                            <td><input type="checkbox" class="form-check-input" ${p1} disabled></td>
+                            <td><input type="checkbox" class="form-check-input" ${p2} disabled></td>
+                            <td><input type="checkbox" class="form-check-input" ${p3} disabled></td>
+                            <td><input type="checkbox" class="form-check-input" ${p4} disabled></td>
+                        </tr>
+                    `;
+                    tbody.append(row);
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Failed to load assignments:", error);
+            }
+        });
     }
 
-    $(document).ready(function () {
-        const studentId = getStudentIdFromUrl();
+        //add assignment confirmation logic
+        function confirmAddAsgn() {
+        // 1. Get the student ID from the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const studentId = urlParams.get('sid');
 
-	//error if doesn't have id
         if (!studentId) {
-            alert('No student ID provided.');
+            alert("Cannot add assignment: No student selected.");
             return;
         }
 
-        // ask back end
-        $.ajax({
-            url: '/student/' + encodeURIComponent(studentId),
-            method: 'GET',
-            success: function (student) {
-                $('#studentTitle').text(
-                    (student.lastName ?? '') + ', ' + (student.firstName ?? '') + ' - [' + (student.status ?? 'Active') + ']'
-                );
+        // 2. Gather all the data from the modal
+        const assignmentData = {
+            StudentID: studentId,
+            AssignmentType: $('#asgnType').val(),
+            AssignmentName: $('#asgnName').val(),
+            PLO1: $('#p11').is(':checked'), 
+            PLO2: $('#p12').is(':checked'),
+            PLO3: $('#p13').is(':checked'),
+            PLO4: $('#p14').is(':checked'),
+            Comments: $('#asgnComments').val()
+        };
 
-                $('#studentIdValue').text(student.studentID ?? '-');
-                $('#studentEmailValue').text(student.email ?? 'N/A');
-                $('#studentGradValue').text(student.expGradTerm ?? '-');
-                $('#studentMajorValue').text(student.major ?? 'N/A');
+        if (!assignmentData.AssignmentName) {
+            alert("Please enter an Assignment Name.");
+            return;
+        }
+
+        // 3. Send the data to your C# backend
+        $.ajax({
+            url: '/add-assignment', 
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(assignmentData),
+            success: function (response) {
+                
+                // Clear the form fields for next time
+                $('#asgnName').val('');
+                $('#asgnComments').val('');
+                $('#p11, #p12, #p13, #p14').prop('checked', false);
+                
+                // Close the modal
+                cm('mAdd'); 
+
+                // 👇 THIS IS THE MAGIC LINE 👇
+                // Force the table to instantly redraw itself using the newest database data!
+                loadAssignments(studentId);
+                
             },
-            error: function () {
-                alert('Student not found.');
+            error: function (xhr, status, error) {
+                console.error("Database Error:", xhr.responseText);
+                alert("Failed to save the assignment. Check the server console.");
             }
         });
-    });
-</script>
-
-
+    }
+    </script>
 </body>
 </html>
