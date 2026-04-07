@@ -8,7 +8,7 @@
         // 2. If they are NOT logged in, kick them back to the login page
         if (isLoggedIn !== "true") 
         {
-            window.location.href = "index.html"; // CHANGE THIS to the actual name of your login file
+            window.location.href = "index.html";
         }
     </script>
     
@@ -129,12 +129,9 @@
                             <th style="background-color: #4da6ff;">PLO 4</th>
                         </tr>
                     </thead>
-                    <!--students assignemts-->
                     <tbody id="assignmentTableBody">
                     <tr>
                         <td></td>
-                                </select>
-                            </td>
                             <td><input type="checkbox" class="form-check-input"></td>
                             <td><input type="checkbox" class="form-check-input"></td>
                             <td><input type="checkbox" class="form-check-input"></td>
@@ -209,7 +206,7 @@
           <div>
             <br/>
             <label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Any comments on assignment:</label>
-            <textarea class="form-control form-control-sm" placeholder="Enter comments here..."></textarea>
+            <textarea id="asgnComments" class="form-control form-control-sm" placeholder="Enter comments here..."></textarea>
             <div class="d-flex justify-content-between mt-4">
                 <button class="btn-1" onclick="cm('mAdd')">Cancel</button>
                 <button class="btn-1" onclick="confirmAddAsgn()">Add →</button>
@@ -221,7 +218,7 @@
     </div>
 
     <div id="mAsgnOverview" style="display: none;">
-        <div class="modal d-block position-static">
+        <div class="modal">
             <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
                 <h2 class="m-0 fs-4">Assignment Name</h2>
                 <button class="mx btn btn-sm border-0 fs-5" style="background: none;" onclick="cm('mAsgnOverview')">✕</button>
@@ -237,8 +234,9 @@
             </div>
         </div>
     </div>
+
     <div id="mAsgnOverview2" style="display: none;">
-        <div class="modal d-block position-static">
+        <div class="modal">
             <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
                 <h2 class="m-0 fs-4">Assignment Name</h2>
                 <button class="mx btn btn-sm border-0 fs-5" style="background: none;" onclick="cm('mAsgnOverview2')">✕</button>
@@ -254,8 +252,9 @@
             </div>
         </div>
     </div>
+
     <div id="mAsgnOverview3" style="display: none;">
-        <div class="modal d-block position-static">
+        <div class="modal">
             <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
                 <h2 class="m-0 fs-4">Assignment Name</h2>
                 <button class="mx btn btn-sm border-0 fs-5" style="background: none;" onclick="cm('mAsgnOverview3')">✕</button>
@@ -271,8 +270,9 @@
             </div>
         </div>
     </div>
+
     <div id="mAsgnOverview4" style="display: none;">
-        <div class="modal d-block position-static">
+        <div class="modal">
             <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
                 <h2 class="m-0 fs-4">Assignment Name</h2>
                 <button class="mx btn btn-sm border-0 fs-5" style="background: none;" onclick="cm('mAsgnOverview4')">✕</button>
@@ -291,12 +291,10 @@
 
     <script>
         $(document).ready(function () {
-            // Note: If your search page button uses "?sid=", change this to .get('sid')
             const urlParams = new URLSearchParams(window.location.search);
             const studentId = urlParams.get('sid'); 
 
             if (studentId) {
-                // Ask your C# server for the data (Using relative route so it works on any port)
                 $.ajax({
                     url: '/search', 
                     method: 'GET',
@@ -332,11 +330,6 @@
         });
 
         function openAddAsgn() {
-            //document.getElementById('newAsgnName').value='';
-            // reset checkboxes
-            //[[1,1,0,0,0],[2,1,0,1,0]].forEach(([r,...vals])=>{
-                //[1,2,3,4].forEach((c,ci)=>{document.getElementById(`p${r}${c}`).checked=!!vals[ci];});
-            //});
             om('mAdd');
         }
         function openAsgnOverview() { om('mAsgnOverview'); }
@@ -350,103 +343,88 @@
         function cm(id) {
             document.getElementById(id).style.display = 'none';
         }
-        // This function will be called when the page loads to populate the assignments table
+
         function loadAssignments(studentId) {
-        $.ajax({
-            url: '/assignments',
-            method: 'GET',
-            data: { sid: studentId },
-            success: function (assignments) {
-                const tbody = $('#assignmentTableBody');
-                tbody.empty(); // Clear out any old rows
+            $.ajax({
+                url: '/assignments',
+                method: 'GET',
+                data: { sid: studentId },
+                success: function (assignments) {
+                    const tbody = $('#assignmentTableBody');
+                    tbody.empty();
 
-                if (assignments.length === 0) {
-                    tbody.append('<tr><td colspan="6">No assignments found for this student.</td></tr>');
-                    return;
+                    if (assignments.length === 0) {
+                        tbody.append('<tr><td colspan="6">No assignments found for this student.</td></tr>');
+                        return;
+                    }
+
+                    assignments.forEach(function (a) {
+                        const p1 = a.plo1 ? 'checked' : '';
+                        const p2 = a.plo2 ? 'checked' : '';
+                        const p3 = a.plo3 ? 'checked' : '';
+                        const p4 = a.plo4 ? 'checked' : '';
+
+                        const row = `
+                            <tr>
+                                <td><strong>${a.assignmentName}</strong></td>
+                                <td><input type="checkbox" class="form-check-input" ${p1} disabled></td>
+                                <td><input type="checkbox" class="form-check-input" ${p2} disabled></td>
+                                <td><input type="checkbox" class="form-check-input" ${p3} disabled></td>
+                                <td><input type="checkbox" class="form-check-input" ${p4} disabled></td>
+                            </tr>
+                        `;
+                        tbody.append(row);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error("Failed to load assignments:", error);
                 }
+            });
+        }
 
-                // Loop through each assignment from the database and create a table row
-                assignments.forEach(function (a) {
-                    // Determine if checkboxes should be checked based on the database booleans
-                    const p1 = a.plo1 ? 'checked' : '';
-                    const p2 = a.plo2 ? 'checked' : '';
-                    const p3 = a.plo3 ? 'checked' : '';
-                    const p4 = a.plo4 ? 'checked' : '';
-
-                    const row = `
-                        <tr>
-                            <td><strong>${a.assignmentName}</strong></td>
-                            
-                            <td><input type="checkbox" class="form-check-input" ${p1} disabled></td>
-                            <td><input type="checkbox" class="form-check-input" ${p2} disabled></td>
-                            <td><input type="checkbox" class="form-check-input" ${p3} disabled></td>
-                            <td><input type="checkbox" class="form-check-input" ${p4} disabled></td>
-                        </tr>
-                    `;
-                    tbody.append(row);
-                });
-            },
-            error: function (xhr, status, error) {
-                console.error("Failed to load assignments:", error);
-            }
-        });
-    }
-
-        //add assignment confirmation logic
         function confirmAddAsgn() {
-        // 1. Get the student ID from the URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const studentId = urlParams.get('sid');
+            const urlParams = new URLSearchParams(window.location.search);
+            const studentId = urlParams.get('sid');
 
-        if (!studentId) {
-            alert("Cannot add assignment: No student selected.");
-            return;
-        }
-
-        // 2. Gather all the data from the modal
-        const assignmentData = {
-            StudentID: studentId,
-            AssignmentType: $('#asgnType').val(),
-            AssignmentName: $('#asgnName').val(),
-            PLO1: $('#p11').is(':checked'), 
-            PLO2: $('#p12').is(':checked'),
-            PLO3: $('#p13').is(':checked'),
-            PLO4: $('#p14').is(':checked'),
-            Comments: $('#asgnComments').val()
-        };
-
-        if (!assignmentData.AssignmentName) {
-            alert("Please enter an Assignment Name.");
-            return;
-        }
-
-        // 3. Send the data to your C# backend
-        $.ajax({
-            url: '/add-assignment', 
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(assignmentData),
-            success: function (response) {
-                
-                // Clear the form fields for next time
-                $('#asgnName').val('');
-                $('#asgnComments').val('');
-                $('#p11, #p12, #p13, #p14').prop('checked', false);
-                
-                // Close the modal
-                cm('mAdd'); 
-
-                // 👇 THIS IS THE MAGIC LINE 👇
-                // Force the table to instantly redraw itself using the newest database data!
-                loadAssignments(studentId);
-                
-            },
-            error: function (xhr, status, error) {
-                console.error("Database Error:", xhr.responseText);
-                alert("Failed to save the assignment. Check the server console.");
+            if (!studentId) {
+                alert("Cannot add assignment: No student selected.");
+                return;
             }
-        });
-    }
+
+            const assignmentData = {
+                StudentID: studentId,
+                AssignmentType: $('#asgnType').val(),
+                AssignmentName: $('#asgnName').val(),
+                PLO1: $('#p11').is(':checked'), 
+                PLO2: $('#p12').is(':checked'),
+                PLO3: $('#p13').is(':checked'),
+                PLO4: $('#p14').is(':checked'),
+                Comments: $('#asgnComments').val()
+            };
+
+            if (!assignmentData.AssignmentName) {
+                alert("Please enter an Assignment Name.");
+                return;
+            }
+
+            $.ajax({
+                url: '/add-assignment', 
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(assignmentData),
+                success: function (response) {
+                    $('#asgnName').val('');
+                    $('#asgnComments').val('');
+                    $('#p11, #p12, #p13, #p14').prop('checked', false);
+                    cm('mAdd'); 
+                    loadAssignments(studentId);
+                },
+                error: function (xhr, status, error) {
+                    console.error("Database Error:", xhr.responseText);
+                    alert("Failed to save the assignment. Check the server console.");
+                }
+            });
+        }
     </script>
 </body>
 </html>
