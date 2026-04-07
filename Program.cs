@@ -14,7 +14,7 @@ var app = builder.Build();
 app.UseStaticFiles();
 
 // EPPlus license context (required for v5+; NonCommercial is free for academic/personal use)
-ExcelPackage.License.SetNonCommercialPersonal("My Name");
+ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
 app.MapGet("/", () => Results.Redirect("/index.html"));
 
