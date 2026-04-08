@@ -8,7 +8,7 @@
         // 2. If they are NOT logged in, kick them back to the login page
         if (isLoggedIn !== "true") 
         {
-            window.location.href = "index.html"; // CHANGE THIS to the actual name of your login file
+            window.location.href = "index.html";
         }
     </script>
     
@@ -37,15 +37,18 @@
         <div class="offcanvas-body">
             <ul class="navbar-nav justify-content-end flex-grow-1">
                 <li class="nav-item"><a class="nav-link active" href="#">Search Student</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Make Reports</a></li>
+                <li class="nav-item"><a class="nav-link" href="report.html">Make Reports</a></li>
                 <li class="nav-item"><a class="nav-link" onclick="logOut()">Log Out</a></li>
             </ul>
         </div>
     </div>
-    <h2 style="padding-top: 60px; padding-left: 50px; color: rgb(171, 171, 16);">Search Student</h2>
 </nav>
 
-<div class="container-fluid text-center" style="margin-top: 200px; border: 2px solid #555555; background-color: rgb(199, 196, 196);">
+<div class="container mt-5" style="padding-top: 60px; color: rgb(171, 171, 16);">
+    <h2><span id="displayName">Search Student</span></h2>
+</div>
+
+<div class="container-fluid text-center" style="margin-top: 60px; border: 2px solid #555555; background-color: rgb(199, 196, 196);">
     <div class="row">
         <div class="col border-end border-dark">Last Name</div>
         <div class="col border-end border-dark">First Name</div>
@@ -280,6 +283,7 @@
                     $('#noResults').hide();
                     $('#resultsTable').show();
                     results.forEach(function (student) {
+                        // Convert StudentID to string in case SQLite returns it as a number
                         var sid = String(student.StudentID);
                         $('#resultsBody').append(
                             '<tr>' +
@@ -317,9 +321,12 @@
         });
     });
 
+    // Placeholder for View Student
     $(document).on('click', '.view-student-btn', function () {
+        // No functionality yet — will be wired up in a future sprint
     });
 
+    // Open Remove confirmation modal and fill in the student's name and ID
     $(document).on('click', '.remove-student-btn', function () {
         var btn = $(this);
         $('#removeStudentID').val(btn.data('id'));
@@ -329,6 +336,7 @@
         modal.show();
     });
 
+    // Confirmed remove — DELETE to /delete with the student ID
     $('#confirmRemoveBtn').on('click', function () {
         var id = $('#removeStudentID').val();
 
@@ -336,6 +344,7 @@
             url: '/delete?id=' + encodeURIComponent(id),
             method: 'DELETE',
             success: function () {
+                // Close the modal and re-run search so the row disappears
                 bootstrap.Modal.getInstance(document.getElementById('removeStudentModal')).hide();
                 $('#searchBtn').trigger('click');
             },
@@ -350,6 +359,7 @@
         $('#removeAlert').hide();
     });
 
+    // Open Edit modal and pre-fill fields with the student's current data
     $(document).on('click', '.edit-student-btn', function () {
         var btn = $(this);
         $('#editStudentID').val(btn.data('id'));
@@ -364,6 +374,7 @@
         modal.show();
     });
 
+    // Save edits — POST to /edit with the updated fields
     $('#saveEditBtn').on('click', function () {
         var student = {
             studentID:          $('#editStudentID').val().trim(),
@@ -387,6 +398,7 @@
             data: JSON.stringify(student),
             success: function () {
                 showAlert('#editAlert', 'success', 'Student updated successfully!');
+                // Re-run the search so the table reflects the changes
                 $('#searchBtn').trigger('click');
             },
             error: function (xhr) {
@@ -400,6 +412,8 @@
         $('#editAlert').hide();
     });
 
+
+    // ── Create Student ───────────────────────────────────────────────────────
     $('#saveStudentBtn').on('click', function () {
         var student = {
             studentID:          $('#createStudentID').val().trim(),
@@ -437,6 +451,8 @@
         $('#createAlert').hide();
     });
 
+
+    // ── Import Students ──────────────────────────────────────────────────────
     $('#uploadFileBtn').on('click', function () {
         var fileInput = document.getElementById('importFileInput');
 
@@ -478,6 +494,8 @@
         $('#importFileInput').val('');
     });
 
+
+    // ── Helper ───────────────────────────────────────────────────────────────
     function showAlert(selector, type, message) {
         $(selector)
             .removeClass('alert-success alert-danger')
@@ -487,12 +505,16 @@
     }
 
     function logOut() {
-        const isSure = confirm("Are you sure you want to log out?");
-        if (isSure) {
-            sessionStorage.removeItem("isLoggedIn");
-            window.location.replace("index.html");
-        }
+    // 1. Ask the user for confirmation
+    const isSure = confirm("Are you sure you want to log out?");
+    
+    // 2. If they click "OK" (true), run the logout steps
+    if (isSure) {
+      sessionStorage.removeItem("isLoggedIn");
+      window.location.replace("index.html");
     }
+    // If they click "Cancel", nothing happens and they stay on the page.
+  }
 
 </script>
 
