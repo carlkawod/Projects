@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <script>
-//
         // 1. Check if the user is logged in
         const isLoggedIn = sessionStorage.getItem("isLoggedIn");
 
@@ -142,6 +141,14 @@
                     <label for="createExpectedGradYear" class="form-label">Expected Graduation Year</label>
                     <input type="text" class="form-control" id="createExpectedGradYear" placeholder="e.g. 2027">
                 </div>
+                <div class="mb-3">
+                    <label for="createEmail" class="form-label">Email</label>
+                    <input type="text" class="form-control" id="createEmail" placeholder="e.g. student@lindenwood.edu">
+                </div>
+                <div class="mb-3">
+                    <label for="createMajor" class="form-label">Major</label>
+                    <input type="text" class="form-control" id="createMajor" placeholder="e.g. Computer Science">
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -163,7 +170,7 @@
             <div class="modal-body">
                 <div id="importAlert" class="alert" style="display:none;"></div>
                 <p class="text-muted">Upload a <strong>.csv</strong> or <strong>.xlsx</strong> file. The file must have these columns in order:</p>
-                <p><code>StudentID, FirstName, LastName, Year, ExpectedGradYear</code></p>
+                <p><code>StudentID, FirstName, LastName, Year, ExpectedGradYear, Email, Major</code></p>
                 <div class="mb-3">
                     <label for="importFileInput" class="form-label">Choose File</label>
                     <input type="file" class="form-control" id="importFileInput" accept=".csv,.xlsx">
@@ -208,6 +215,14 @@
                 <div class="mb-3">
                     <label for="editExpectedGradYear" class="form-label">Expected Graduation Year</label>
                     <input type="text" class="form-control" id="editExpectedGradYear">
+                </div>
+                <div class="mb-3">
+                    <label for="editEmail" class="form-label">Email</label>
+                    <input type="text" class="form-control" id="editEmail">
+                </div>
+                <div class="mb-3">
+                    <label for="editMajor" class="form-label">Major</label>
+                    <input type="text" class="form-control" id="editMajor">
                 </div>
             </div>
             <div class="modal-footer">
@@ -265,7 +280,6 @@
                     $('#noResults').hide();
                     $('#resultsTable').show();
                     results.forEach(function (student) {
-                        // Convert StudentID to string in case SQLite returns it as a number
                         var sid = String(student.StudentID);
                         $('#resultsBody').append(
                             '<tr>' +
@@ -281,7 +295,9 @@
                                     'data-firstname="' + student.FirstName        + '" ' +
                                     'data-lastname="'  + student.LastName         + '" ' +
                                     'data-year="'      + student.Year             + '" ' +
-                                    'data-grad="'      + student.ExpectedGradYear + '">' +
+                                    'data-grad="'      + student.ExpectedGradYear + '" ' +
+                                    'data-email="'     + (student.Email ?? '')    + '" ' +
+                                    'data-major="'     + (student.Major ?? '')    + '">' +
                                 'Edit Student' +
                                 '</button>' +
                                 '<button class="btn btn-outline-secondary btn-sm remove-student-btn" ' +
@@ -301,12 +317,9 @@
         });
     });
 
-    // Placeholder for View Student
     $(document).on('click', '.view-student-btn', function () {
-        // No functionality yet — will be wired up in a future sprint
     });
 
-    // Open Remove confirmation modal and fill in the student's name and ID
     $(document).on('click', '.remove-student-btn', function () {
         var btn = $(this);
         $('#removeStudentID').val(btn.data('id'));
@@ -316,7 +329,6 @@
         modal.show();
     });
 
-    // Confirmed remove — DELETE to /delete with the student ID
     $('#confirmRemoveBtn').on('click', function () {
         var id = $('#removeStudentID').val();
 
@@ -324,7 +336,6 @@
             url: '/delete?id=' + encodeURIComponent(id),
             method: 'DELETE',
             success: function () {
-                // Close the modal and re-run search so the row disappears
                 bootstrap.Modal.getInstance(document.getElementById('removeStudentModal')).hide();
                 $('#searchBtn').trigger('click');
             },
@@ -339,7 +350,6 @@
         $('#removeAlert').hide();
     });
 
-    // Open Edit modal and pre-fill fields with the student's current data
     $(document).on('click', '.edit-student-btn', function () {
         var btn = $(this);
         $('#editStudentID').val(btn.data('id'));
@@ -347,19 +357,22 @@
         $('#editLastName').val(btn.data('lastname'));
         $('#editYear').val(btn.data('year'));
         $('#editExpectedGradYear').val(btn.data('grad'));
+        $('#editEmail').val(btn.data('email'));
+        $('#editMajor').val(btn.data('major'));
         $('#editAlert').hide();
         var modal = new bootstrap.Modal(document.getElementById('editStudentModal'));
         modal.show();
     });
 
-    // Save edits — POST to /edit with the updated fields
     $('#saveEditBtn').on('click', function () {
         var student = {
             studentID:          $('#editStudentID').val().trim(),
             firstName:          $('#editFirstName').val().trim(),
             lastName:           $('#editLastName').val().trim(),
             year:               $('#editYear').val().trim(),
-            expectedGradYear:   $('#editExpectedGradYear').val().trim()
+            expectedGradYear:   $('#editExpectedGradYear').val().trim(),
+            email:              $('#editEmail').val().trim(),
+            major:              $('#editMajor').val().trim()
         };
 
         if (!student.firstName || !student.lastName || !student.year || !student.expectedGradYear) {
@@ -374,7 +387,6 @@
             data: JSON.stringify(student),
             success: function () {
                 showAlert('#editAlert', 'success', 'Student updated successfully!');
-                // Re-run the search so the table reflects the changes
                 $('#searchBtn').trigger('click');
             },
             error: function (xhr) {
@@ -388,15 +400,15 @@
         $('#editAlert').hide();
     });
 
-
-    // ── Create Student ───────────────────────────────────────────────────────
     $('#saveStudentBtn').on('click', function () {
         var student = {
             studentID:          $('#createStudentID').val().trim(),
             firstName:          $('#createFirstName').val().trim(),
             lastName:           $('#createLastName').val().trim(),
             year:               $('#createYear').val().trim(),
-            expectedGradYear:   $('#createExpectedGradYear').val().trim()
+            expectedGradYear:   $('#createExpectedGradYear').val().trim(),
+            email:              $('#createEmail').val().trim(),
+            major:              $('#createMajor').val().trim()
         };
 
         if (!student.studentID || !student.firstName || !student.lastName ||
@@ -412,7 +424,7 @@
             data: JSON.stringify(student),
             success: function () {
                 showAlert('#createAlert', 'success', 'Student created successfully!');
-                $('#createStudentID, #createFirstName, #createLastName, #createYear, #createExpectedGradYear').val('');
+                $('#createStudentID, #createFirstName, #createLastName, #createYear, #createExpectedGradYear, #createEmail, #createMajor').val('');
             },
             error: function (xhr) {
                 var msg = xhr.responseText || 'Failed to create student.';
@@ -425,8 +437,6 @@
         $('#createAlert').hide();
     });
 
-
-    // ── Import Students ──────────────────────────────────────────────────────
     $('#uploadFileBtn').on('click', function () {
         var fileInput = document.getElementById('importFileInput');
 
@@ -468,8 +478,6 @@
         $('#importFileInput').val('');
     });
 
-
-    // ── Helper ───────────────────────────────────────────────────────────────
     function showAlert(selector, type, message) {
         $(selector)
             .removeClass('alert-success alert-danger')
@@ -479,16 +487,12 @@
     }
 
     function logOut() {
-    // 1. Ask the user for confirmation
-    const isSure = confirm("Are you sure you want to log out?");
-    
-    // 2. If they click "OK" (true), run the logout steps
-    if (isSure) {
-      sessionStorage.removeItem("isLoggedIn");
-      window.location.replace("index.html");
+        const isSure = confirm("Are you sure you want to log out?");
+        if (isSure) {
+            sessionStorage.removeItem("isLoggedIn");
+            window.location.replace("index.html");
+        }
     }
-    // If they click "Cancel", nothing happens and they stay on the page.
-  }
 
 </script>
 
