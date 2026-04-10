@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <script>
+//
         // 1. Check if the user is logged in
         const isLoggedIn = sessionStorage.getItem("isLoggedIn");
 
@@ -89,20 +90,14 @@
         <div class="row">
             <div class="col">
                 <h3> Course: </h3> 
-                <select class="form-select" aria-label="Course select">
-                    <option selected>Select</option>
-                    <option value="1">Placeholder</option>
-                    <option value="2">Placeholder</option>
-                    <option value="3">Placeholder</option>
+                <select id="courseSelect" class="form-select" aria-label="Course select">
+                    <option selected value="">Select</option>
                 </select>
             </div>
             <div class="col">
                 <h3> Semester: </h3>
-                <select class="form-select" aria-label="Semester select">
-                    <option selected>Select</option>
-                    <option value="1">Placeholder</option>
-                    <option value="2">Placeholder</option>
-                    <option value="3">Placeholder</option>
+                <select id="semesterSelect" class="form-select" aria-label="Semester select">
+                    <option selected value="">Select</option>
                 </select>
             </div>
         </div>
@@ -131,12 +126,8 @@
                     </thead>
                     <tbody id="assignmentTableBody">
                     <tr>
-                        <td></td>
-                            <td><input type="checkbox" class="form-check-input"></td>
-                            <td><input type="checkbox" class="form-check-input"></td>
-                            <td><input type="checkbox" class="form-check-input"></td>
-                            <td><input type="checkbox" class="form-check-input"></td>
-                        </tr>
+                        <td colspan="5">Select a course to see assignments.</td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
@@ -300,7 +291,6 @@
                     method: 'GET',
                     data: { id: studentId }, 
                     success: function (results) {
-                        
                         if (results && results.length > 0) {
                             const student = results[0]; 
                             
@@ -310,8 +300,8 @@
                             $('#displayGrad').text(student.ExpectedGradYear);
                             $('#displayEmail').text(student.Email);
                             $('#displayMajor').text(student.Major);
-                            loadAssignments(studentId);
-                            
+
+                            loadCourses(studentId);
                         } else {
                             $('#displayName').text("Student Not Found");
                             alert("No student matches this ID.");
@@ -344,17 +334,57 @@
             document.getElementById(id).style.display = 'none';
         }
 
-        function loadAssignments(studentId) {
+        function loadCourses(studentId) {
+            $.ajax({
+                url: '/student-courses',
+                method: 'GET',
+                data: { sid: studentId },
+                success: function (courses) {
+                    const courseSelect = $('#courseSelect');
+                    courseSelect.empty();
+                    courseSelect.append('<option value="">Select</option>');
+
+                    if (!courses || courses.length === 0) {
+                        $('#assignmentTableBody').html('<tr><td colspan="5">No courses found for this student.</td></tr>');
+                        return;
+                    }
+
+                    courses.forEach(function (course) {
+                        courseSelect.append(
+                            `<option value="${course.courseId}">${course.courseName}</option>`
+                        );
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error("Failed to load courses:", error);
+                }
+            });
+        }
+
+        $('#courseSelect').on('change', function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const studentId = urlParams.get('sid');
+            const courseId = $(this).val();
+
+            if (!courseId) {
+                $('#assignmentTableBody').html('<tr><td colspan="5">Select a course to see assignments.</td></tr>');
+                return;
+            }
+
+            loadAssignments(studentId, courseId);
+        });
+
+        function loadAssignments(studentId, courseId) {
             $.ajax({
                 url: '/assignments',
                 method: 'GET',
-                data: { sid: studentId },
+                data: { sid: studentId, courseId: courseId },
                 success: function (assignments) {
                     const tbody = $('#assignmentTableBody');
                     tbody.empty();
 
                     if (assignments.length === 0) {
-                        tbody.append('<tr><td colspan="6">No assignments found for this student.</td></tr>');
+                        tbody.append('<tr><td colspan="5">No assignments found for this course.</td></tr>');
                         return;
                     }
 
@@ -385,14 +415,21 @@
         function confirmAddAsgn() {
             const urlParams = new URLSearchParams(window.location.search);
             const studentId = urlParams.get('sid');
+            const courseId = $('#courseSelect').val();
 
             if (!studentId) {
                 alert("Cannot add assignment: No student selected.");
                 return;
             }
 
+            if (!courseId) {
+                alert("Please select a course first.");
+                return;
+            }
+
             const assignmentData = {
                 StudentID: studentId,
+                CourseID: courseId,
                 AssignmentType: $('#asgnType').val(),
                 AssignmentName: $('#asgnName').val(),
                 PLO1: $('#p11').is(':checked'), 
@@ -417,7 +454,7 @@
                     $('#asgnComments').val('');
                     $('#p11, #p12, #p13, #p14').prop('checked', false);
                     cm('mAdd'); 
-                    loadAssignments(studentId);
+                    loadAssignments(studentId, courseId);
                 },
                 error: function (xhr, status, error) {
                     console.error("Database Error:", xhr.responseText);
