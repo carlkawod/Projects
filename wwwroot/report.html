@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <script>
+
 //
         // 1. Check if the user is logged in
         const isLoggedIn = sessionStorage.getItem("isLoggedIn");
@@ -140,12 +141,11 @@
         <div class="scrollable container">
             <div style="max-height: 250px; overflow-y: scroll; border: 1px solid black; margin-top: 20px;">
                 <table class="table table-bordered text-center mb-0" style="font-size: 22px;">
-                    <tr>
-                        <td>Data structures and Algorithms</td>
-                    </tr>
-                    <tr>
-                        <td>Computer Science II</td>
-                    </tr>
+                    <tbody id="coursesTableBody">
+                        <tr>
+                            <td>Loading courses...</td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -173,6 +173,8 @@
                             $('#displayEmail').text(student.Email || '');
                             $('#displayGrad').text(student.ExpectedGradYear || '');
                             $('#displayMajor').text(student.Major || '');
+
+                            loadCourses(studentId);
                         } else {
                             $('#displayName').text("Student Not Found");
                             alert("No student matches this ID.");
@@ -188,6 +190,36 @@
                 window.location.href = "searchstudreport.html";
             }
         });
+
+        function loadCourses(studentId) {
+            $.ajax({
+                url: '/student-courses',
+                method: 'GET',
+                data: { sid: studentId },
+                success: function (courses) {
+                    const tbody = $('#coursesTableBody');
+                    tbody.empty();
+
+                    if (!courses || courses.length === 0) {
+                        tbody.append('<tr><td>No courses found for this student.</td></tr>');
+                        return;
+                    }
+
+                    courses.forEach(function (course) {
+                        tbody.append(
+                            `<tr>
+                                <td>${course.courseName}</td>
+                            </tr>`
+                        );
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error("Failed to load courses:", error);
+                    tbody = $('#coursesTableBody');
+                    tbody.html('<tr><td>Failed to load courses.</td></tr>');
+                }
+            });
+        }
     </script>
 
 </body>
