@@ -1,7 +1,7 @@
 using Microsoft.Data.Sqlite;
 using OfficeOpenXml;
 using System.Text.Json;
-//
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Make JSON deserialization case-insensitive so "studentID" from JS maps to "StudentID" in the DTO
@@ -190,7 +190,6 @@ app.MapPost("/import", async (IFormFile file) =>
 
     return Results.Json(new { message = $"Import complete. {inserted} student(s) added." });
 })
-
 .DisableAntiforgery();
 
 
@@ -225,11 +224,8 @@ app.MapPut("/edit", async (HttpContext http) =>
 });
 
 
-
-
-
 // ── Delete Student ────────────────────────────────────────────────────────────
-// Removes the student and any related Assignment rows by StudentID.
+// Removes the student and any related rows by StudentID.
 app.MapDelete("/delete", (string? id) =>
 {
     if (string.IsNullOrWhiteSpace(id))
@@ -238,13 +234,11 @@ app.MapDelete("/delete", (string? id) =>
     using var connection = new SqliteConnection("Data Source=AssesmentReportGenerator.db");
     connection.Open();
 
-    // Delete related Assignment rows first to satisfy the foreign key constraint
-    var deleteAssignments = connection.CreateCommand();
-    deleteAssignments.CommandText = "DELETE FROM Assignment WHERE StudentID = @id";
-    deleteAssignments.Parameters.AddWithValue("@id", id);
-    deleteAssignments.ExecuteNonQuery();
+    var deleteStudentAssignments = connection.CreateCommand();
+    deleteStudentAssignments.CommandText = "DELETE FROM StudentAssignment WHERE StudentID = @id";
+    deleteStudentAssignments.Parameters.AddWithValue("@id", id);
+    deleteStudentAssignments.ExecuteNonQuery();
 
-    // Now delete the student
     var deleteStudent = connection.CreateCommand();
     deleteStudent.CommandText = "DELETE FROM Student WHERE StudentID = @id";
     deleteStudent.Parameters.AddWithValue("@id", id);
@@ -256,6 +250,37 @@ app.MapDelete("/delete", (string? id) =>
         : Results.Ok("Student removed.");
 });
 
+// ── Get Courses for a Student ────────────────────────────────────────────────
+app.MapGet("/student-courses", (string sid) =>
+{
+    using var connection = new SqliteConnection("Data Source=AssesmentReportGenerator.db");
+    connection.Open();
+
+    var command = connection.CreateCommand();
+    command.CommandText = @"
+        SELECT DISTINCT c.CourseID, c.CourseName
+        FROM StudentAssignment sa
+        INNER JOIN Assignment a ON sa.AssignmentID = a.AssignmentID
+        INNER JOIN Course c ON a.CourseID = c.CourseID
+        WHERE sa.StudentID = @sid
+        ORDER BY c.CourseName";
+    command.Parameters.AddWithValue("@sid", sid);
+
+    using var reader = command.ExecuteReader();
+    var courses = new List<object>();
+
+    while (reader.Read())
+    {
+        courses.Add(new
+        {
+            courseId = reader["CourseID"]?.ToString() ?? "",
+            courseName = reader["CourseName"]?.ToString() ?? ""
+        });
+    }
+
+    return Results.Ok(courses);
+});
+
 // ── Add Assignment ────────────────────────────────────────────────────────────
 app.MapPost("/add-assignment", async (HttpContext http) =>
 {
@@ -264,44 +289,71 @@ app.MapPost("/add-assignment", async (HttpContext http) =>
     if (asgn == null || string.IsNullOrWhiteSpace(asgn.AssignmentName))
         return Results.BadRequest("Assignment name is required.");
 
+    if (string.IsNullOrWhiteSpace(asgn.StudentID))
+        return Results.BadRequest("StudentID is required.");
+
+    if (string.IsNullOrWhiteSpace(asgn.CourseID))
+        return Results.BadRequest("CourseID is required.");
+
     using var connection = new SqliteConnection("Data Source=AssesmentReportGenerator.db");
     connection.Open();
 
-    var command = connection.CreateCommand();
-    command.CommandText = @"
-        INSERT INTO Assignment (StudentID, AssignmentType, AssignmentName, PLO1, PLO2, PLO3, PLO4, Comments)
-        VALUES (@sid, @type, @name, @plo1, @plo2, @plo3, @plo4, @comments)";
+    // 1. Insert into Assignment
+    var insertAssignment = connection.CreateCommand();
+    insertAssignment.CommandText = @"
+        INSERT INTO Assignment (AssignmentType, AssignmentName, PLO1, PLO2, PLO3, PLO4, Comments, CourseID)
+        VALUES (@type, @name, @plo1, @plo2, @plo3, @plo4, @comments, @courseId)";
     
-    command.Parameters.AddWithValue("@sid", asgn.StudentID ?? "");
-    command.Parameters.AddWithValue("@type", asgn.AssignmentType ?? "");
-    command.Parameters.AddWithValue("@name", asgn.AssignmentName);
-    // SQLite doesn't have booleans, so we store true/false as 1 or 0
-    command.Parameters.AddWithValue("@plo1", asgn.PLO1 ? 1 : 0);
-    command.Parameters.AddWithValue("@plo2", asgn.PLO2 ? 1 : 0);
-    command.Parameters.AddWithValue("@plo3", asgn.PLO3 ? 1 : 0);
-    command.Parameters.AddWithValue("@plo4", asgn.PLO4 ? 1 : 0);
-    command.Parameters.AddWithValue("@comments", asgn.Comments ?? "");
+    insertAssignment.Parameters.AddWithValue("@type", asgn.AssignmentType ?? "");
+    insertAssignment.Parameters.AddWithValue("@name", asgn.AssignmentName);
+    insertAssignment.Parameters.AddWithValue("@plo1", asgn.PLO1 ? 1 : 0);
+    insertAssignment.Parameters.AddWithValue("@plo2", asgn.PLO2 ? 1 : 0);
+    insertAssignment.Parameters.AddWithValue("@plo3", asgn.PLO3 ? 1 : 0);
+    insertAssignment.Parameters.AddWithValue("@plo4", asgn.PLO4 ? 1 : 0);
+    insertAssignment.Parameters.AddWithValue("@comments", asgn.Comments ?? "");
+    insertAssignment.Parameters.AddWithValue("@courseId", asgn.CourseID);
 
-    command.ExecuteNonQuery();
+    insertAssignment.ExecuteNonQuery();
+
+    // 2. Get the new AssignmentID
+    var getIdCommand = connection.CreateCommand();
+    getIdCommand.CommandText = "SELECT last_insert_rowid()";
+    var newAssignmentId = Convert.ToInt32(getIdCommand.ExecuteScalar());
+
+    // 3. Link it to the student in StudentAssignment
+    var linkCommand = connection.CreateCommand();
+    linkCommand.CommandText = @"
+        INSERT INTO StudentAssignment (StudentID, AssignmentID)
+        VALUES (@sid, @aid)";
+    linkCommand.Parameters.AddWithValue("@sid", asgn.StudentID);
+    linkCommand.Parameters.AddWithValue("@aid", newAssignmentId);
+    linkCommand.ExecuteNonQuery();
+
     return Results.Ok("Assignment added.");
 });
 
-// ── Get Assignments for a Student ──────────────────────────────────────────
-app.MapGet("/assignments", (string sid) =>
+// ── Get Assignments for a Student and Course ────────────────────────────────
+app.MapGet("/assignments", (string sid, string? courseId) =>
 {
     using var connection = new SqliteConnection("Data Source=AssesmentReportGenerator.db");
     connection.Open();
 
     var command = connection.CreateCommand();
-    command.CommandText = "SELECT * FROM Assignment WHERE StudentID = @sid";
+    command.CommandText = @"
+        SELECT a.AssignmentName, a.PLO1, a.PLO2, a.PLO3, a.PLO4
+        FROM StudentAssignment sa
+        INNER JOIN Assignment a ON sa.AssignmentID = a.AssignmentID
+        WHERE sa.StudentID = @sid
+          AND (@courseId IS NULL OR @courseId = '' OR a.CourseID = @courseId)
+        ORDER BY a.AssignmentName";
     command.Parameters.AddWithValue("@sid", sid);
+    command.Parameters.AddWithValue("@courseId", courseId ?? "");
 
     using var reader = command.ExecuteReader();
     var assignments = new List<object>();
 
     while (reader.Read())
     {
-        // Notice the left side of the equals sign is strictly camelCase now!
         assignments.Add(new {
             assignmentName = reader["AssignmentName"] != DBNull.Value ? reader["AssignmentName"].ToString() : "Unnamed",
             plo1 = reader["PLO1"] != DBNull.Value && Convert.ToInt32(reader["PLO1"]) == 1,
@@ -315,6 +367,7 @@ app.MapGet("/assignments", (string sid) =>
 });
 
 app.Run();
+
 // Simple class used for both /create and /import to hold student fields.
 // Property names must match the JSON keys sent from the frontend.
 public class LoginRequest
@@ -325,6 +378,7 @@ public class LoginRequest
 
 public record AssignmentDto(
     string StudentID, 
+    string CourseID,
     string AssignmentType, 
     string AssignmentName, 
     bool PLO1, 
