@@ -251,6 +251,30 @@ app.MapDelete("/delete", (string? id) =>
         : Results.Ok("Student removed.");
 });
 
+// ── Get All Courses ───────────────────────────────────────────────────────────
+app.MapGet("/courses", () =>
+{
+    using var connection = new SqliteConnection("Data Source=AssesmentReportGenerator.db");
+    connection.Open();
+
+    var command = connection.CreateCommand();
+    command.CommandText = "SELECT CourseID, CourseName FROM Course ORDER BY CourseName";
+
+    using var reader = command.ExecuteReader();
+    var courses = new List<object>();
+
+    while (reader.Read())
+    {
+        courses.Add(new
+        {
+            courseId   = reader["CourseID"]?.ToString()   ?? "",
+            courseName = reader["CourseName"]?.ToString() ?? ""
+        });
+    }
+
+    return Results.Ok(courses);
+});
+
 // ── Get Courses for a Student ────────────────────────────────────────────────
 app.MapGet("/student-courses", (string sid) =>
 {
