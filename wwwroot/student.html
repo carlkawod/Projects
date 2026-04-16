@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <script>
-//
         // 1. Check if the user is logged in
         const isLoggedIn = sessionStorage.getItem("isLoggedIn");
 
@@ -61,11 +60,13 @@
     <div class="container" style="border: 2px solid black; margin-top: 20px; padding: 20px;">
         <div class="row align-items-start">
             <div class="col ps-5 text-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" fill="currentColor" class="bi bi-person-square" viewBox="0 0 16 16">
-                    <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
-                    <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a1 1 0 0 0-1-1z"/>
-                </svg>    
-            </div>
+            
+            <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" fill="currentColor" class="bi bi-person-square" viewBox="0 0 16 16">
+                <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2zm12 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1v-1c0-1-1-4-6-4s-6 3-6 4v1a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12z"/>
+            </svg>    
+            
+        </div>
             <div class="col">
                 <h4> Student ID:</h4>
                 <h4> Email:</h4>
@@ -102,16 +103,6 @@
             </div>
         </div>
         
-        <div class="scrollable container mt-4">
-            <div class="container text-center">
-                <div class="row align-items-start">
-                    <div class="col">Assignments</div>
-                    <div class="col">Rate</div>
-                    <div class="col">PLO 1</div>
-                    <div class="col">PLO 2</div>
-                    <div class="col">PLO 3</div>
-                </div>
-            </div>
 
             <div style="max-height: 250px; overflow-y: scroll; border: 1px solid black; margin-top: 20px;">
                 <table class="table table-bordered text-center mb-0">
@@ -141,12 +132,11 @@
 
     <footer style="padding: 20px"></footer>
 
-    <!-- MODALS -->
     <div id="mAdd" style="display: none;">
       <div class="modal">
         <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
             <h2 class="m-0 fs-4">Add New Assignment</h2>
-            <button class="mx btn btn-sm border-0 fs-5" style="background: none;" onclick="cm('mAdd')">✕</button>
+            <button class="mx btn btn-sm border-0 fs-5" style="background: none;" onclick="closeMainAssignmentModal()">✕</button>
         </div>
         <div class="mbdy">
           <div style="margin-bottom:12px;">
@@ -199,7 +189,7 @@
             <label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Any comments on assignment:</label>
             <textarea id="asgnComments" class="form-control form-control-sm" placeholder="Enter comments here..."></textarea>
             <div class="d-flex justify-content-between mt-4">
-                <button class="btn-1" onclick="cm('mAdd')">Cancel</button>
+                <button class="btn-1" onclick="closeMainAssignmentModal()">Cancel</button>
                 <button class="btn-1" onclick="confirmAddAsgn()">Add →</button>
             </div>
             <br/>
@@ -211,16 +201,19 @@
     <div id="mAsgnOverview" style="display: none;">
         <div class="modal">
             <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
-                <h2 class="m-0 fs-4">Assignment Name</h2>
-                <button class="mx btn btn-sm border-0 fs-5" style="background: none;" onclick="cm('mAsgnOverview')">✕</button>
+                <h2 class="m-0 fs-4">Select the metrics this assignment covers</h2>
+                <button class="mx btn btn-sm border-0 fs-5" style="background: none;" onclick="closeMetricsModal(this)">✕</button>
             </div>
             <div class="mbdy">
                 <div class="overview-con">
-                    <h1>PLO 1</h1>
-                    <p>Metric 1 ...</p>
-                    <p>Metric 2 ...</p>
-                    <p>Metric 3 ...</p>
-                    <p>Metric 4 ...</p>
+                    <h1 id="plo1-head">PLO 1</h1>
+                    <div class="metric-row"><input type="checkbox" id="plo1_1"><label for="plo1_1" id="plo1-metric1"> 1 ...</label></div>
+                    <div class="metric-row"><input type="checkbox" id="plo1_2"><label for="plo1_2" id="plo1-metric2">Metric 2 ...</label></div>
+                    <div class="metric-row"><input type="checkbox" id="plo1_3"><label for="plo1_3" id="plo1-metric3">Metric 3 ...</label></div>
+                    <div class="metric-row"><input type="checkbox" id="plo1_4"><label for="plo1_4" id="plo1-metric4">Metric 4 ...</label></div>
+                </div>
+                <div class="mt-4 text-end">
+                    <button type="button" class="btn btn-primary" onclick="saveMetricsAndClose(this)">OK</button>
                 </div>
             </div>
         </div>
@@ -229,16 +222,17 @@
     <div id="mAsgnOverview2" style="display: none;">
         <div class="modal">
             <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
-                <h2 class="m-0 fs-4">Assignment Name</h2>
-                <button class="mx btn btn-sm border-0 fs-5" style="background: none;" onclick="cm('mAsgnOverview2')">✕</button>
+                <h2 class="m-0 fs-4">Select the metrics this assignment covers</h2>
+                <button class="mx btn btn-sm border-0 fs-5" style="background: none;" onclick="closeMetricsModal(this)">✕</button>
             </div>
             <div class="mbdy">
                 <div class="overview-con">
-                    <h1>PLO 2</h1>
-                    <p>Metric 1 ...</p>
-                    <p>Metric 2 ...</p>
-                    <p>Metric 3 ...</p>
-                    <p>Metric 4 ...</p>
+                    <h1 id="plo2-head">PLO 2</h1>
+                    <div class="metric-row"><input type="checkbox" id="plo2_1"><label for="plo2_1" id="plo2-metric1"> 1 ...</label></div>
+                    <div class="metric-row"><input type="checkbox" id="plo2_2"><label for="plo2_2" id="plo2-metric2">Metric 2 ...</label></div>
+                </div>
+                <div class="mt-4 text-end">
+                    <button type="button" class="btn btn-primary" onclick="saveMetricsAndClose(this)">OK</button>
                 </div>
             </div>
         </div>
@@ -247,16 +241,18 @@
     <div id="mAsgnOverview3" style="display: none;">
         <div class="modal">
             <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
-                <h2 class="m-0 fs-4">Assignment Name</h2>
-                <button class="mx btn btn-sm border-0 fs-5" style="background: none;" onclick="cm('mAsgnOverview3')">✕</button>
+                <h2 class="m-0 fs-4">Select the metrics this assignment covers</h2>
+                <button class="mx btn btn-sm border-0 fs-5" style="background: none;" onclick="closeMetricsModal(this)">✕</button>
             </div>
             <div class="mbdy">
                 <div class="overview-con">
-                    <h1>PLO 3</h1>
-                    <p>Metric 1 ...</p>
-                    <p>Metric 2 ...</p>
-                    <p>Metric 3 ...</p>
-                    <p>Metric 4 ...</p>
+                    <h1 id="plo3-head">PLO 3</h1>
+                    <div class="metric-row"><input type="checkbox" id="plo3_1"><label for="plo3_1" id="plo3-metric1"> 1 ...</label></div>
+                    <div class="metric-row"><input type="checkbox" id="plo3_2"><label for="plo3_2" id="plo3-metric2">Metric 2 ...</label></div>
+                    <div class="metric-row"><input type="checkbox" id="plo3_3"><label for="plo3_3" id="plo3-metric3">Metric 3 ...</label></div>
+                </div>
+                <div class="mt-4 text-end">
+                    <button type="button" class="btn btn-primary" onclick="saveMetricsAndClose(this)">OK</button>
                 </div>
             </div>
         </div>
@@ -265,22 +261,25 @@
     <div id="mAsgnOverview4" style="display: none;">
         <div class="modal">
             <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
-                <h2 class="m-0 fs-4">Assignment Name</h2>
-                <button class="mx btn btn-sm border-0 fs-5" style="background: none;" onclick="cm('mAsgnOverview4')">✕</button>
+                <h2 class="m-0 fs-4">Select the metrics this assignment covers</h2>
+                <button class="mx btn btn-sm border-0 fs-5" style="background: none;" onclick="closeMetricsModal(this)">✕</button>
             </div>
             <div class="mbdy">
                 <div class="overview-con">
-                    <h1>PLO 4</h1>
-                    <p>Metric 1 ...</p>
-                    <p>Metric 2 ...</p>
-                    <p>Metric 3 ...</p>
-                    <p>Metric 4 ...</p>
+                    <h1 id="plo4-head">PLO 4</h1>
+                    <div class="metric-row"><input type="checkbox" id="plo4_1"><label for="plo4_1" id="plo4-metric1"> 1 ...</label></div>
+                </div>
+                <div class="mt-4 text-end">
+                    <button type="button" class="btn btn-primary" onclick="saveMetricsAndClose(this)">OK</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        // --- GLOBAL VARIABLES ---
+        let stagedMetrics = [];
+
         $(document).ready(function () {
             const urlParams = new URLSearchParams(window.location.search);
             const studentId = urlParams.get('sid'); 
@@ -301,6 +300,42 @@
                             $('#displayEmail').text(student.Email);
                             $('#displayMajor').text(student.Major);
 
+                            switch (student.Major) {
+                                case "Computer Science":
+                                    $('#plo1-head').text("PLO 1: Graduates demonstrate an ability to develop quality computer software");
+                                    $('#plo1-metric1').text("Metric 1: Graduates demonstrate extensive programming ability in at least two programming languages")
+                                    $('#plo1-metric2').text("Metric 2: Graduates demonstrate an ability to apply software engineering principles in the development of computer software")
+                                    $('#plo1-metric3').text("Metric 3: Graduates demonstrate an ability to develop and analyze algorithms")
+                                    $('#plo1-metric4').text("Metric 4: Graduates demonstrate an ability to design and implement appropriate user interfaces")
+                                    $('#plo2-head').text("PLO 2: Graduates are able to evaluate the functional relationship between operational components of computer systems");
+                                    $('#plo2-metric1').text("Metric 1: Graduates have extensive knowledge of operating systems concepts and their functional implementation")
+                                    $('#plo2-metric2').text("Metric 2: Graduates have extensive knowledge of the architecture and organization of computer systems")
+                                    $('#plo3-head').text("PLO 3: Graduates will exhibit professional conduct and behavior consistent with contemporary professional standards");
+                                    $('#plo3-metric1').text("Metric 1: Graduates exhibit good oral communications skills")
+                                    $('#plo3-metric2').text("Metric 2: Graduates exhibit good written communications skills")
+                                    $('#plo3-metric3').text("Metric 3: Graduates exhibit ethical codes of conduct")
+                                    $('#plo4-head').text("PLO 4: Graduates are able to identify the interrelationship between computer science and other disciplines");
+                                    $('#plo4-metric1').text("Metric 1: Graduates are able to apply skills learned in Computer Science to real world applications")
+                                    break;
+
+                                case "Computer Information Systems":
+                                    $('#plo1-head').text("PLO 1: Graduates demonstrate an ability to develop quality computer software");
+                                    $('#plo1-metric1').text("Metric 1: Graduates demonstrate extensive programming ability in at least two programming languages")
+                                    $('#plo1-metric2').text("Metric 2: Graduates demonstrate an ability to apply software engineering principles in the development of computer software")
+                                    $('#plo1-metric3').text("Metric 3: Graduates demonstrate an ability to develop and analyze algorithms")
+                                    $('#plo1-metric4').text("Metric 4: Graduates demonstrate an ability to design and implement appropriate user interfaces")
+                                    $('#plo2-head').text("PLO 2: Graduates have broadened their knowledge of basic Business concepts, and either Computer Science or Computer Information Systems concepts");
+                                    $('#plo2-metric1').text("Metric 1: Graduates have broadened their knowledge of basic Business concepts")
+                                    $('#plo2-metric2').text("Metric 2: Graduates have broadened their knowledge of Computer Science or Computer Information Systems concepts")
+                                    $('#plo3-head').text("PLO 3: Graduates will exhibit professional conduct and behavior consistent with contemporary professional standards");
+                                    $('#plo3-metric1').text("Metric 1: Graduates exhibit good oral communications skills")
+                                    $('#plo3-metric2').text("Metric 2: Graduates exhibit good written communications skills")
+                                    $('#plo3-metric3').text("Metric 3: Graduates exhibit ethical codes of conduct")
+                                    $('#plo4-head').text("PLO 4: Graduates are able to identify the interrelationship between computer science and other disciplines");
+                                    $('#plo4-metric1').text("Metric 1: Graduates are able to apply skills learned in Computer Science to real world applications")
+                                    break;
+                                }
+
                             loadCourses(studentId);
                         } else {
                             $('#displayName').text("Student Not Found");
@@ -319,9 +354,65 @@
             }
         });
 
+        // --- METRICS STAGING & RESET LOGIC ---
+
+        function saveMetricsAndClose(btnElement) {
+            stagedMetrics = []; // Clear the old waiting room
+            
+            // Grab EVERY checkbox that starts with "plo" across all modals
+            const allCheckboxes = document.querySelectorAll('input[type="checkbox"][id^="plo"]');
+            
+            // Save the IDs of the checked ones
+            allCheckboxes.forEach(function(box) {
+                if (box.checked) {
+                    stagedMetrics.push(box.id); 
+                }
+            });
+
+            // Find which modal we are inside, and close it
+            const parentModalId = btnElement.closest('div[id^="mAsgnOverview"]').id;
+            cm(parentModalId); 
+        }
+
+        function closeMetricsModal(btnElement) {
+            // Revert all checkboxes back to whatever is saved in stagedMetrics
+            const allCheckboxes = document.querySelectorAll('input[type="checkbox"][id^="plo"]');
+            allCheckboxes.forEach(function(box) {
+                box.checked = stagedMetrics.includes(box.id);
+            });
+
+            // Find which modal we are inside, and close it
+            const parentModalId = btnElement.closest('div[id^="mAsgnOverview"]').id;
+            cm(parentModalId); 
+        }
+
+        function resetAssignmentData() {
+            // 1. Clear the staging array in memory
+            stagedMetrics = [];
+
+            // 2. Uncheck every metric checkbox 
+            const allCheckboxes = document.querySelectorAll('input[type="checkbox"][id^="plo"]');
+            allCheckboxes.forEach(function(box) {
+                box.checked = false;
+            });
+
+            // 3. Uncheck the main PLO checkboxes and clear text inputs
+            $('#asgnName').val('');
+            $('#asgnComments').val('');
+            $('#p11, #p12, #p13, #p14').prop('checked', false);
+        }
+
+        // --- MODAL OPEN/CLOSE FUNCTIONS ---
+
         function openAddAsgn() {
             om('mAdd');
         }
+
+        function closeMainAssignmentModal() {
+            cm('mAdd'); // Hides the main modal
+            resetAssignmentData(); // Wipes the main PLOs AND the hidden metrics clean!
+        }
+
         function openAsgnOverview() { om('mAsgnOverview'); }
         function openAsgnOverview2() { om('mAsgnOverview2'); }
         function openAsgnOverview3() { om('mAsgnOverview3'); }
@@ -333,6 +424,8 @@
         function cm(id) {
             document.getElementById(id).style.display = 'none';
         }
+
+        // --- DATA LOADING & SAVING ---
 
         function loadCourses(studentId) {
             $.ajax({
@@ -427,6 +520,12 @@
                 return;
             }
 
+            if (!$('#asgnName').val()) {
+                alert("Please enter an Assignment Name.");
+                return;
+            }
+
+            // 1. Build the base object with main PLOs
             const assignmentData = {
                 StudentID: studentId,
                 CourseID: courseId,
@@ -439,10 +538,15 @@
                 Comments: $('#asgnComments').val()
             };
 
-            if (!assignmentData.AssignmentName) {
-                alert("Please enter an Assignment Name.");
-                return;
-            }
+            // 2. Loop through every metric checkbox and add it to the object as a boolean
+            // This creates assignmentData.plo1_1, assignmentData.plo2_1, etc.
+            const allCheckboxes = document.querySelectorAll('input[type="checkbox"][id^="plo"]');
+            allCheckboxes.forEach(function(box) {
+                assignmentData[box.id] = stagedMetrics.includes(box.id);
+            });
+
+            // Sanity check to see exactly what is being sent to your C# backend
+            console.log("Sending to database:", assignmentData);
 
             $.ajax({
                 url: '/add-assignment', 
@@ -450,10 +554,10 @@
                 contentType: 'application/json',
                 data: JSON.stringify(assignmentData),
                 success: function (response) {
-                    $('#asgnName').val('');
-                    $('#asgnComments').val('');
-                    $('#p11, #p12, #p13, #p14').prop('checked', false);
+                    // Close the modal and wipe all the checkboxes clean for the next assignment
                     cm('mAdd'); 
+                    resetAssignmentData();
+                    
                     loadAssignments(studentId, courseId);
                 },
                 error: function (xhr, status, error) {
@@ -462,6 +566,7 @@
                 }
             });
         }
+        
     </script>
 </body>
 </html>
