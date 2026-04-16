@@ -742,6 +742,29 @@ app.MapPost("/add-assignment-course", async (HttpContext http) =>
 });
 
 
+// ── Unenroll Student from Course ─────────────────────────────────────────────
+app.MapDelete("/unenroll", async (HttpContext http) =>
+{
+    var dto = await http.Request.ReadFromJsonAsync<EnrollmentDto>();
+
+    if (dto == null || string.IsNullOrWhiteSpace(dto.StudentID) || string.IsNullOrWhiteSpace(dto.CourseID))
+        return Results.BadRequest("StudentID and CourseID are required.");
+
+    using var connection = new SqliteConnection("Data Source=AssesmentReportGenerator.db");
+    connection.Open();
+
+    var command = connection.CreateCommand();
+    command.CommandText = "DELETE FROM Enrollment WHERE StudentID = @sid AND CourseID = @cid";
+    command.Parameters.AddWithValue("@sid", dto.StudentID);
+    command.Parameters.AddWithValue("@cid", dto.CourseID);
+    var rows = command.ExecuteNonQuery();
+
+    return rows == 0
+        ? Results.NotFound("Enrollment not found.")
+        : Results.Ok("Student removed from course.");
+});
+
+
 // ── Get Students Enrolled in a Course ────────────────────────────────────────
 app.MapGet("/course-students", (string courseId) =>
 {
