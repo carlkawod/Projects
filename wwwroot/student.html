@@ -139,15 +139,24 @@
             <button class="mx btn btn-sm border-0 fs-5" style="background: none;" onclick="closeCreateCourse()">✕</button>
         </div>
         <div class="mbdy">
+          <div style="margin-bottom: 12px;">
+            <label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Course ID:</label>
+            <input type="text" id="newCourseId" class="form-control form-control-sm" style="width:40%;" placeholder="e.g. CSC30000">
+          </div>
+          <div style="margin-bottom: 12px;">
+            <label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Course Name:</label>
+            <input type="text" id="newCourseName" class="form-control form-control-sm" style="width:70%;" placeholder="e.g. Software Engineering">
+          </div>
           <div style="margin-bottom: 16px;">
-            <label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Select Course:</label>
-            <select id="createCourseSelect" class="form-select form-select-sm" style="width: 60%;">
-              <option value="">-- Select a course --</option>
-            </select>
+            <label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Credits:</label>
+            <input type="number" id="newCourseCredits" class="form-control form-control-sm" style="width:20%;" value="3" min="1" max="6">
           </div>
           <div class="d-flex justify-content-between mt-4">
             <button class="btn-1" onclick="closeCreateCourse()">Cancel</button>
-            <button class="btn-1" onclick="openAddAsgnFromCourse()">Add New Assignments</button>
+            <div>
+                <button class="btn-1" style="margin-right:8px;" onclick="openAddAsgnFromCourse()">Add New Assignments</button>
+                <button class="btn-1" onclick="confirmCreateCourse()">Create →</button>
+            </div>
           </div>
           <br/>
         </div>
@@ -161,6 +170,10 @@
             <button class="mx btn btn-sm border-0 fs-5" style="background: none;" onclick="closeMainAssignmentModal()">✕</button>
         </div>
         <div class="mbdy">
+          <div style="margin-bottom:12px;">
+            <label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Course:</label>
+            <select id="asgnCourseSelect" class="form-select form-select-sm" style="width: 60%;"></select>
+          </div>
           <div style="margin-bottom:12px;">
             <label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Assignment type:</label>
                 <select id="asgnType" class="form-select form-select-sm" style="width: 30%;">                
@@ -427,41 +440,80 @@
         // --- MODAL OPEN/CLOSE FUNCTIONS ---
 
         function openCreateCourse() {
-            // Load all courses from the database into the dropdown
+            om('mCreateCourse');
+        }
+
+        function closeCreateCourse() {
+            $('#newCourseId').val('');
+            $('#newCourseName').val('');
+            $('#newCourseCredits').val('3');
+            cm('mCreateCourse');
+        }
+
+        function confirmCreateCourse() {
+            const courseId   = $('#newCourseId').val().trim();
+            const courseName = $('#newCourseName').val().trim();
+            const credits    = parseInt($('#newCourseCredits').val()) || 3;
+
+            if (!courseId)   { alert('Please enter a Course ID.');   return; }
+            if (!courseName) { alert('Please enter a Course Name.'); return; }
+
+            $.ajax({
+                url: '/create-course',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ CourseID: courseId, CourseName: courseName, Credits: credits }),
+                success: function () {
+                    alert('Course created successfully.');
+                    closeCreateCourse();
+                    const urlParams = new URLSearchParams(window.location.search);
+                    loadCourses(urlParams.get('sid'));
+                },
+                error: function (xhr) {
+                    alert('Failed to create course: ' + xhr.responseText);
+                }
+            });
+        }
+
+        function openAddAsgnFromCourse() {
+            // Load all courses into the assignment modal's dropdown
             $.ajax({
                 url: '/courses',
                 method: 'GET',
                 success: function (courses) {
-                    const sel = $('#createCourseSelect');
+                    const sel = $('#asgnCourseSelect');
                     sel.empty();
                     sel.append('<option value="">-- Select a course --</option>');
                     courses.forEach(function (c) {
                         sel.append(`<option value="${c.courseId}">${c.courseName}</option>`);
                     });
+                    cm('mCreateCourse');
+                    om('mAdd');
                 },
                 error: function () {
                     alert('Failed to load courses.');
                 }
             });
-            om('mCreateCourse');
-        }
-
-        function closeCreateCourse() {
-            cm('mCreateCourse');
-        }
-
-        function openAddAsgnFromCourse() {
-            const courseId = $('#createCourseSelect').val();
-            if (!courseId) {
-                alert('Please select a course first.');
-                return;
-            }
-            cm('mCreateCourse');
-            om('mAdd');
         }
 
         function openAddAsgn() {
-            om('mAdd');
+            $.ajax({
+                url: '/courses',
+                method: 'GET',
+                success: function (courses) {
+                    const sel = $('#asgnCourseSelect');
+                    sel.empty();
+                    sel.append('<option value="">-- Select a course --</option>');
+                    courses.forEach(function (c) {
+                        sel.append(`<option value="${c.courseId}">${c.courseName}</option>`);
+                    });
+                    // Pre-select if a course is already chosen in the main dropdown
+                    const currentCourse = $('#courseSelect').val();
+                    if (currentCourse) sel.val(currentCourse);
+                    om('mAdd');
+                },
+                error: function () { om('mAdd'); }
+            });
         }
 
         function closeMainAssignmentModal() {
@@ -564,18 +616,10 @@
         function confirmAddAsgn() {
             const urlParams = new URLSearchParams(window.location.search);
             const studentId = urlParams.get('sid');
-            // Use the Create Course modal's selection; fall back to main courseSelect
-            const courseId = $('#createCourseSelect').val() || $('#courseSelect').val();
+            const courseId  = $('#asgnCourseSelect').val() || $('#courseSelect').val();
 
-            if (!studentId) {
-                alert("Cannot add assignment: No student selected.");
-                return;
-            }
-
-            if (!courseId) {
-                alert("Please select a course first.");
-                return;
-            }
+            if (!studentId) { alert("Cannot add assignment: No student selected."); return; }
+            if (!courseId)  { alert("Please select a course first."); return; }
 
             if (!$('#asgnName').val()) {
                 alert("Please enter an Assignment Name.");
@@ -611,11 +655,8 @@
                 contentType: 'application/json',
                 data: JSON.stringify(assignmentData),
                 success: function (response) {
-                    // Close the modal and wipe all the checkboxes clean for the next assignment
                     cm('mAdd'); 
                     resetAssignmentData();
-                    
-                    // Reload student courses so the new course appears in the main dropdown
                     loadCourses(studentId);
                     loadAssignments(studentId, courseId);
                 },
