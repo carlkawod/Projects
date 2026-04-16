@@ -612,6 +612,63 @@ app.MapGet("/students", () =>
 });
 
 
+// ── Add Assignment (Course level — no student required) ───────────────────────
+app.MapPost("/add-assignment-course", async (HttpContext http) =>
+{
+    var asgn = await http.Request.ReadFromJsonAsync<AssignmentDto>();
+
+    if (asgn == null || string.IsNullOrWhiteSpace(asgn.AssignmentName))
+        return Results.BadRequest("Assignment name is required.");
+    if (string.IsNullOrWhiteSpace(asgn.CourseID))
+        return Results.BadRequest("CourseID is required.");
+
+    using var connection = new SqliteConnection("Data Source=AssesmentReportGenerator.db");
+    connection.Open();
+
+    var insertAssignment = connection.CreateCommand();
+    insertAssignment.CommandText = @"
+        INSERT INTO Assignment (
+            AssignmentType, AssignmentName, CourseID, SemesterID, Comments,
+            PLO1, PLO2, PLO3, PLO4,
+            plo1_1, plo1_2, plo1_3, plo1_4,
+            plo2_1, plo2_2,
+            plo3_1, plo3_2, plo3_3,
+            plo4_1
+        )
+        VALUES (
+            @type, @name, @courseId, @semesterId, @comments,
+            @plo1, @plo2, @plo3, @plo4,
+            @m1_1, @m1_2, @m1_3, @m1_4,
+            @m2_1, @m2_2,
+            @m3_1, @m3_2, @m3_3,
+            @m4_1
+        )";
+
+    insertAssignment.Parameters.AddWithValue("@type",       asgn.AssignmentType ?? "");
+    insertAssignment.Parameters.AddWithValue("@name",       asgn.AssignmentName);
+    insertAssignment.Parameters.AddWithValue("@courseId",   asgn.CourseID);
+    insertAssignment.Parameters.AddWithValue("@semesterId", string.IsNullOrWhiteSpace(asgn.SemesterID) ? DBNull.Value : (object)asgn.SemesterID);
+    insertAssignment.Parameters.AddWithValue("@comments",   asgn.Comments ?? "");
+    insertAssignment.Parameters.AddWithValue("@plo1", asgn.PLO1 ? 1 : 0);
+    insertAssignment.Parameters.AddWithValue("@plo2", asgn.PLO2 ? 1 : 0);
+    insertAssignment.Parameters.AddWithValue("@plo3", asgn.PLO3 ? 1 : 0);
+    insertAssignment.Parameters.AddWithValue("@plo4", asgn.PLO4 ? 1 : 0);
+    insertAssignment.Parameters.AddWithValue("@m1_1", asgn.plo1_1 ? 1 : 0);
+    insertAssignment.Parameters.AddWithValue("@m1_2", asgn.plo1_2 ? 1 : 0);
+    insertAssignment.Parameters.AddWithValue("@m1_3", asgn.plo1_3 ? 1 : 0);
+    insertAssignment.Parameters.AddWithValue("@m1_4", asgn.plo1_4 ? 1 : 0);
+    insertAssignment.Parameters.AddWithValue("@m2_1", asgn.plo2_1 ? 1 : 0);
+    insertAssignment.Parameters.AddWithValue("@m2_2", asgn.plo2_2 ? 1 : 0);
+    insertAssignment.Parameters.AddWithValue("@m3_1", asgn.plo3_1 ? 1 : 0);
+    insertAssignment.Parameters.AddWithValue("@m3_2", asgn.plo3_2 ? 1 : 0);
+    insertAssignment.Parameters.AddWithValue("@m3_3", asgn.plo3_3 ? 1 : 0);
+    insertAssignment.Parameters.AddWithValue("@m4_1", asgn.plo4_1 ? 1 : 0);
+    insertAssignment.ExecuteNonQuery();
+
+    return Results.Ok("Assignment added.");
+});
+
+
 // ── Get Enrolled Students for a Course ───────────────────────────────────────
 app.MapGet("/course-enrollments", (string courseId) =>
 {
