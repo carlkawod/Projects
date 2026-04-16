@@ -435,7 +435,27 @@
 </div>
 
 
-<!-- ── COURSE STUDENTS MODAL ──────────────────────────────────────────────── -->
+<!-- ── REMOVE STUDENT FROM COURSE CONFIRM MODAL ──────────────────────────── -->
+<div class="modal fade" id="removeFromCourseModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background:#1a1a1a;color:white;border-bottom:1px solid #333;">
+                <h5 class="modal-title">Remove Student</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to remove <strong id="removeFromCourseName"></strong> from <strong id="removeFromCourseCourse"></strong>? This cannot be undone.</p>
+                <input type="hidden" id="removeFromCourseStudentId">
+                <input type="hidden" id="removeFromCourseId">
+                <input type="hidden" id="removeFromCourseNameHidden">
+            </div>
+            <div class="modal-footer" style="background:#1a1a1a;border-top:1px solid #333;">
+                <button type="button" class="btn" data-bs-dismiss="modal" style="background:#444;color:white;border:none;">Cancel</button>
+                <button type="button" class="btn" id="confirmRemoveFromCourse" style="background:#c0392b;color:white;border:none;">Remove</button>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="modal fade" id="courseStudentsModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -541,22 +561,30 @@
 
 
     function removeStudentFromCourse(studentId, studentName, courseId, courseName) {
-        if (!confirm(`Remove ${studentName} from ${courseName}?`)) return;
+        $('#removeFromCourseStudentId').val(studentId);
+        $('#removeFromCourseId').val(courseId);
+        $('#removeFromCourseNameHidden').val(courseName);
+        $('#removeFromCourseName').text(studentName);
+        $('#removeFromCourseCourse').text(courseName);
+        new bootstrap.Modal(document.getElementById('removeFromCourseModal')).show();
+    }
+
+    $('#confirmRemoveFromCourse').on('click', function () {
+        var studentId  = $('#removeFromCourseStudentId').val();
+        var courseId   = $('#removeFromCourseId').val();
+        var courseName = $('#removeFromCourseNameHidden').val();
 
         $.ajax({
-            url: '/unenroll',
-            method: 'DELETE',
+            url: '/unenroll', method: 'DELETE',
             contentType: 'application/json',
             data: JSON.stringify({ StudentID: studentId, CourseID: courseId }),
             success: function () {
-                // Refresh the modal list
+                bootstrap.Modal.getInstance(document.getElementById('removeFromCourseModal')).hide();
                 openCourseStudents(courseId, courseName);
             },
-            error: function (xhr) {
-                alert('Failed to remove student: ' + xhr.responseText);
-            }
+            error: function (xhr) { alert('Failed to remove student: ' + xhr.responseText); }
         });
-    }
+    });
 
 
     // ── Load & Render Courses ─────────────────────────────────────────────────
