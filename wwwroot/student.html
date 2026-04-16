@@ -41,6 +41,9 @@
                             <a class="nav-link active" aria-current="page" href="search.html">Search Student</a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" href="course.html">Courses</a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="report.html">Make Reports</a>
                         </li>
                         <li class="nav-item">
@@ -89,13 +92,18 @@
         </div>
 
         <div class="row">
-            <div class="col-6">
+            <div class="col">
                 <h3> Course: </h3> 
                 <select id="courseSelect" class="form-select" aria-label="Course select">
                     <option selected value="">Select</option>
                 </select>
             </div>
-
+            <div class="col">
+                <h3> Semester: </h3>
+                <select id="semesterSelect" class="form-select" aria-label="Semester select">
+                    <option selected value="">Select</option>
+                </select>
+            </div>
         </div>
         
 
@@ -127,7 +135,6 @@
 
     <!-- Fixed bottom action bar -->
     <div class="fixed-bottom d-flex justify-content-center gap-3 pb-4" style="background-color: rgba(255,255,255,0.95); padding-top: 12px; border-top: 1px solid #ddd;">
-        <button type="button" class="btn btn-light" style="border: 2px solid #000;" onclick="openCreateCourse()">Create Course</button>
         <button type="button" class="btn btn-light" style="border: 2px solid #000;" onclick="openEnroll()">Enroll in Course</button>
     </div>
 
@@ -396,6 +403,7 @@
                                 }
 
                             loadCourses(studentId);
+                            loadSemesters();
                         } else {
                             $('#displayName').text("Student Not Found");
                             alert("No student matches this ID.");
@@ -649,6 +657,22 @@
 
         // --- DATA LOADING & SAVING ---
 
+        function loadSemesters() {
+            $.ajax({
+                url: '/semesters',
+                method: 'GET',
+                success: function (semesters) {
+                    const sel = $('#semesterSelect');
+                    sel.empty();
+                    sel.append('<option value="">Select</option>');
+                    semesters.forEach(function (s) {
+                        sel.append(`<option value="${s.semesterId}">${s.semesterName}</option>`);
+                    });
+                },
+                error: function () { console.error('Failed to load semesters.'); }
+            });
+        }
+
         function loadCourses(studentId) {
             $.ajax({
                 url: '/student-courses',
@@ -676,13 +700,13 @@
             });
         }
 
-        $('#courseSelect').on('change', function () {
+        $('#courseSelect, #semesterSelect').on('change', function () {
             const urlParams = new URLSearchParams(window.location.search);
             const studentId  = urlParams.get('sid');
             const courseId   = $('#courseSelect').val();
-            const semesterId = "";
+            const semesterId = $('#semesterSelect').val();
 
-            if (!courseId) {
+            if (!courseId && !semesterId) {
                 $('#assignmentTableBody').html('<tr><td colspan="5">Select a course to see assignments.</td></tr>');
                 return;
             }
@@ -784,7 +808,7 @@
                     cm('mAdd'); 
                     resetAssignmentData();
                     loadCourses(studentId);
-                    loadAssignments(studentId, courseId, "");
+                    loadAssignments(studentId, courseId);
                 },
                 error: function (xhr, status, error) {
                     console.error("Database Error:", xhr.responseText);
