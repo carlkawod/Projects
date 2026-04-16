@@ -33,6 +33,20 @@ using (var connection = new SqliteConnection("Data Source=AssesmentReportGenerat
         alter.ExecuteNonQuery();
     }
 
+    // Add Semesters column to Course if missing
+    var checkSemesters = connection.CreateCommand();
+    checkSemesters.CommandText = "PRAGMA table_info(Course)";
+    bool hasSemestersCol = false;
+    using (var r = checkSemesters.ExecuteReader())
+        while (r.Read())
+            if (r["name"].ToString() == "Semesters") { hasSemestersCol = true; break; }
+    if (!hasSemestersCol)
+    {
+        var alter = connection.CreateCommand();
+        alter.CommandText = "ALTER TABLE Course ADD COLUMN Semesters TEXT";
+        alter.ExecuteNonQuery();
+    }
+
     // Add Major column to Course if missing
     var checkMajor = connection.CreateCommand();
     checkMajor.CommandText = "PRAGMA table_info(Course)";
@@ -292,7 +306,7 @@ app.MapGet("/courses", () =>
     connection.Open();
 
     var command = connection.CreateCommand();
-    command.CommandText = "SELECT CourseID, CourseName, Credits, Major FROM Course ORDER BY CourseName";
+    command.CommandText = "SELECT CourseID, CourseName, Credits, Major, Semesters FROM Course ORDER BY CourseName";
 
     using var reader = command.ExecuteReader();
     var courses = new List<object>();
@@ -301,7 +315,8 @@ app.MapGet("/courses", () =>
             courseId   = reader["CourseID"]?.ToString()   ?? "",
             courseName = reader["CourseName"]?.ToString() ?? "",
             credits    = reader["Credits"]  != DBNull.Value ? (int?)Convert.ToInt32(reader["Credits"]) : null,
-            major      = reader["Major"]?.ToString() ?? ""
+            major      = reader["Major"]?.ToString()     ?? "",
+            semesters  = reader["Semesters"]?.ToString() ?? ""
         });
 
     return Results.Ok(courses);
@@ -338,11 +353,12 @@ app.MapPost("/create-course", async (HttpContext http) =>
     connection.Open();
 
     var command = connection.CreateCommand();
-    command.CommandText = "INSERT INTO Course (CourseID, CourseName, Credits, Major) VALUES (@id, @name, @credits, @major)";
-    command.Parameters.AddWithValue("@id",      course.CourseID);
-    command.Parameters.AddWithValue("@name",    course.CourseName);
-    command.Parameters.AddWithValue("@credits", course.Credits ?? 3);
-    command.Parameters.AddWithValue("@major",   course.Major ?? "");
+    command.CommandText = "INSERT INTO Course (CourseID, CourseName, Credits, Major, Semesters) VALUES (@id, @name, @credits, @major, @semesters)";
+    command.Parameters.AddWithValue("@id",       course.CourseID);
+    command.Parameters.AddWithValue("@name",     course.CourseName);
+    command.Parameters.AddWithValue("@credits",  course.Credits ?? 3);
+    command.Parameters.AddWithValue("@major",    course.Major ?? "");
+    command.Parameters.AddWithValue("@semesters", course.Semesters ?? "");
     command.ExecuteNonQuery();
 
     return Results.Ok("Course created.");
@@ -574,12 +590,13 @@ app.MapPut("/edit-course", async (HttpContext http) =>
 
     var command = connection.CreateCommand();
     command.CommandText = @"
-        UPDATE Course SET CourseName = @name, Credits = @credits, Major = @major
+        UPDATE Course SET CourseName = @name, Credits = @credits, Major = @major, Semesters = @semesters
         WHERE CourseID = @id";
-    command.Parameters.AddWithValue("@id",      course.CourseID);
-    command.Parameters.AddWithValue("@name",    course.CourseName ?? "");
-    command.Parameters.AddWithValue("@credits", course.Credits ?? 3);
-    command.Parameters.AddWithValue("@major",   course.Major ?? "");
+    command.Parameters.AddWithValue("@id",        course.CourseID);
+    command.Parameters.AddWithValue("@name",      course.CourseName ?? "");
+    command.Parameters.AddWithValue("@credits",   course.Credits ?? 3);
+    command.Parameters.AddWithValue("@major",     course.Major ?? "");
+    command.Parameters.AddWithValue("@semesters", course.Semesters ?? "");
 
     var rows = command.ExecuteNonQuery();
     return rows == 0
@@ -756,6 +773,7 @@ record CourseDto
     public string? CourseName { get; init; }
     public int?    Credits    { get; init; }
     public string? Major      { get; init; }
+    public string? Semesters  { get; init; }
 }
 
 record EnrollmentDto
