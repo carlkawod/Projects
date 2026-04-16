@@ -49,6 +49,10 @@
     </div>
 </nav>
 
+<!-- <div class="container mt-5" style="padding-top: 60px; color: rgb(171, 171, 16);">
+    <h2><span id="displayName">Search Student</span></h2>
+</div> -->
+
 <div class="container text-center" style="margin-top: 60px; border: 2px solid #555555; background-color: rgb(199, 196, 196);">
     <div class="row">
         <div class="col border-end border-dark">Last Name</div>
@@ -87,7 +91,7 @@
                 <th>Student ID</th>
                 <th>First Name</th>
                 <th>Last Name</th>
-                <th>Year</th>
+                <th>Major</th>
                 <th>Expected Grad Year</th>
                 <th style="width: 25%;">Actions</th>
             </tr>
@@ -115,7 +119,9 @@
                 <div id="createAlert" class="alert" style="display:none;"></div>
                 <div class="mb-3">
                     <label for="createStudentID" class="form-label">Student ID</label>
-                    <input type="text" class="form-control" id="createStudentID" placeholder="e.g. 123456">
+                    <input type="text" class="form-control" id="createStudentID" placeholder="e.g. A00123456"
+                        oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '')">
+                    <small class="text-muted">Letters and numbers only — no special characters.</small>
                 </div>
                 <div class="mb-3">
                     <label for="createFirstName" class="form-label">First Name</label>
@@ -138,8 +144,12 @@
                     <input type="text" class="form-control" id="createEmail" placeholder="e.g. student@lindenwood.edu">
                 </div>
                 <div class="mb-3">
-                    <label for="createMajor" class="form-label">Major</label>
-                    <input type="text" class="form-control" id="createMajor" placeholder="e.g. Computer Science">
+                    <label for="createMajor" class="form-label">Major <span class="text-danger">*</span></label>
+                    <select class="form-select" id="createMajor" required>
+                        <option value="">-- Select a Major --</option>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Computer Information Systems">Computer Information Systems</option>
+                    </select>
                 </div>
             </div>
             <div class="modal-footer">
@@ -187,6 +197,7 @@
             </div>
             <div class="modal-body">
                 <div id="editAlert" class="alert" style="display:none;"></div>
+                <!-- StudentID is read-only — it's the key used to identify which record to update -->
                 <div class="mb-3">
                     <label for="editStudentID" class="form-label">Student ID</label>
                     <input type="text" class="form-control" id="editStudentID" readonly>
@@ -212,8 +223,12 @@
                     <input type="text" class="form-control" id="editEmail">
                 </div>
                 <div class="mb-3">
-                    <label for="editMajor" class="form-label">Major</label>
-                    <input type="text" class="form-control" id="editMajor">
+                    <label for="editMajor" class="form-label">Major <span class="text-danger">*</span></label>
+                    <select class="form-select" id="editMajor" required>
+                        <option value="">-- Select a Major --</option>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Computer Information Systems">Computer Information Systems</option>
+                    </select>
                 </div>
             </div>
             <div class="modal-footer">
@@ -235,7 +250,9 @@
             </div>
             <div class="modal-body">
                 <div id="removeAlert" class="alert" style="display:none;"></div>
+                <!-- Name is filled in by JavaScript when the button is clicked -->
                 <p>Are you sure you want to remove <strong id="removeStudentName"></strong>? This cannot be undone.</p>
+                <!-- Hidden field to carry the ID through to the delete request -->
                 <input type="hidden" id="removeStudentID">
             </div>
             <div class="modal-footer">
@@ -270,13 +287,14 @@
                     $('#noResults').hide();
                     $('#resultsTable').show();
                     results.forEach(function (student) {
+                        // Convert StudentID to string in case SQLite returns it as a number
                         var sid = String(student.StudentID);
                         $('#resultsBody').append(
                             '<tr>' +
                             '<td>' + sid + '</td>' +
                             '<td>' + student.FirstName + '</td>' +
                             '<td>' + student.LastName + '</td>' +
-                            '<td>' + student.Year + '</td>' +
+                            '<td>' + (student.Major ?? '') + '</td>' +
                             '<td>' + student.ExpectedGradYear + '</td>' +
                             '<td>' +
                                 '<button class="btn btn-outline-secondary btn-sm view-student-btn me-2" onclick="window.location.href=\'student.html?sid=' + student.StudentID + '\'"">View Student</button>' +
@@ -307,9 +325,12 @@
         });
     });
 
+    // Placeholder for View Student
     $(document).on('click', '.view-student-btn', function () {
+        // No functionality yet — will be wired up in a future sprint
     });
 
+    // Open Remove confirmation modal and fill in the student's name and ID
     $(document).on('click', '.remove-student-btn', function () {
         var btn = $(this);
         $('#removeStudentID').val(btn.data('id'));
@@ -319,6 +340,7 @@
         modal.show();
     });
 
+    // Confirmed remove — DELETE to /delete with the student ID
     $('#confirmRemoveBtn').on('click', function () {
         var id = $('#removeStudentID').val();
 
@@ -326,8 +348,9 @@
             url: '/delete?id=' + encodeURIComponent(id),
             method: 'DELETE',
             success: function () {
+                // Close the modal and re-run search so the row disappears
                 bootstrap.Modal.getInstance(document.getElementById('removeStudentModal')).hide();
-                $('#searchBtnBottom').trigger('click');
+                $('#searchBtn').trigger('click');
             },
             error: function (xhr) {
                 var msg = xhr.responseText || 'Failed to remove student.';
@@ -340,6 +363,7 @@
         $('#removeAlert').hide();
     });
 
+    // Open Edit modal and pre-fill fields with the student's current data
     $(document).on('click', '.edit-student-btn', function () {
         var btn = $(this);
         $('#editStudentID').val(btn.data('id'));
@@ -348,12 +372,13 @@
         $('#editYear').val(btn.data('year'));
         $('#editExpectedGradYear').val(btn.data('grad'));
         $('#editEmail').val(btn.data('email'));
-        $('#editMajor').val(btn.data('major'));
+        $('#editMajor').val(btn.data('major') || '');
         $('#editAlert').hide();
         var modal = new bootstrap.Modal(document.getElementById('editStudentModal'));
         modal.show();
     });
 
+    // Save edits — POST to /edit with the updated fields
     $('#saveEditBtn').on('click', function () {
         var student = {
             studentID:          $('#editStudentID').val().trim(),
@@ -377,7 +402,8 @@
             data: JSON.stringify(student),
             success: function () {
                 showAlert('#editAlert', 'success', 'Student updated successfully!');
-                $('#searchBtnBottom').trigger('click');
+                // Re-run the search so the table reflects the changes
+                $('#searchBtn').trigger('click');
             },
             error: function (xhr) {
                 var msg = xhr.responseText || 'Failed to update student.';
@@ -390,6 +416,8 @@
         $('#editAlert').hide();
     });
 
+
+    // ── Create Student ───────────────────────────────────────────────────────
     $('#saveStudentBtn').on('click', function () {
         var student = {
             studentID:          $('#createStudentID').val().trim(),
@@ -402,8 +430,8 @@
         };
 
         if (!student.studentID || !student.firstName || !student.lastName ||
-            !student.year || !student.expectedGradYear) {
-            showAlert('#createAlert', 'danger', 'All fields are required.');
+            !student.year || !student.expectedGradYear || !student.major) {
+            showAlert('#createAlert', 'danger', 'All fields are required, including Major.');
             return;
         }
 
@@ -414,7 +442,8 @@
             data: JSON.stringify(student),
             success: function () {
                 showAlert('#createAlert', 'success', 'Student created successfully!');
-                $('#createStudentID, #createFirstName, #createLastName, #createYear, #createExpectedGradYear, #createEmail, #createMajor').val('');
+                $('#createStudentID, #createFirstName, #createLastName, #createYear, #createExpectedGradYear, #createEmail').val('');
+                $('#createMajor').val('');
             },
             error: function (xhr) {
                 var msg = xhr.responseText || 'Failed to create student.';
@@ -427,6 +456,8 @@
         $('#createAlert').hide();
     });
 
+
+    // ── Import Students ──────────────────────────────────────────────────────
     $('#uploadFileBtn').on('click', function () {
         var fileInput = document.getElementById('importFileInput');
 
@@ -468,6 +499,8 @@
         $('#importFileInput').val('');
     });
 
+
+    // ── Helper ───────────────────────────────────────────────────────────────
     function showAlert(selector, type, message) {
         $(selector)
             .removeClass('alert-success alert-danger')
@@ -477,12 +510,16 @@
     }
 
     function logOut() {
-        const isSure = confirm("Are you sure you want to log out?");
-        if (isSure) {
-            sessionStorage.removeItem("isLoggedIn");
-            window.location.replace("index.html");
-        }
+    // 1. Ask the user for confirmation
+    const isSure = confirm("Are you sure you want to log out?");
+    
+    // 2. If they click "OK" (true), run the logout steps
+    if (isSure) {
+      sessionStorage.removeItem("isLoggedIn");
+      window.location.replace("index.html");
     }
+    // If they click "Cancel", nothing happens and they stay on the page.
+  }
 
 </script>
 
