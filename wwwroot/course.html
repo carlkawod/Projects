@@ -57,6 +57,7 @@
                 <th>Course Name</th>
                 <th>Credits</th>
                 <th>Major</th>
+                <th>Semesters</th>
                 <th style="width: 25%;">Actions</th>
             </tr>
         </thead>
@@ -104,6 +105,23 @@
                         </div>
                     </div>
                 </div>
+                <div class="mb-3">
+                    <label class="form-label">Available Semesters</label>
+                    <div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="createSemFall" value="Fall">
+                            <label class="form-check-label" for="createSemFall">Fall</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="createSemSpring" value="Spring">
+                            <label class="form-check-label" for="createSemSpring">Spring</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="createSemSummer" value="Summer">
+                            <label class="form-check-label" for="createSemSummer">Summer</label>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -146,6 +164,23 @@
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="editMajorIT" value="Computer Information Systems">
                             <label class="form-check-label" for="editMajorIT">Computer Information Systems</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Available Semesters</label>
+                    <div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="editSemFall" value="Fall">
+                            <label class="form-check-label" for="editSemFall">Fall</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="editSemSpring" value="Spring">
+                            <label class="form-check-label" for="editSemSpring">Spring</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="editSemSummer" value="Summer">
+                            <label class="form-check-label" for="editSemSummer">Summer</label>
                         </div>
                     </div>
                 </div>
@@ -454,9 +489,10 @@
                     <td>${c.courseName}</td>
                     <td>${c.credits ?? '--'}</td>
                     <td>${c.major || '--'}</td>
+                    <td>${c.semesters || '--'}</td>
                     <td>
                         <button class="btn btn-outline-secondary btn-sm me-1"
-                            onclick="openEditCourse('${c.courseId}', '${c.courseName.replace(/'/g,"\\'")}', ${c.credits ?? 3}, '${c.major || ''}')">
+                            onclick="openEditCourse('${c.courseId}', '${c.courseName.replace(/'/g,"\\'")}', ${c.credits ?? 3}, '${c.major || ''}', '${c.semesters || ''}')">
                             Edit
                         </button>
                         <button class="btn btn-outline-secondary btn-sm me-1"
@@ -482,6 +518,7 @@
         $('#createCourseCredits').val('3');
         $('#createMajorCS').prop('checked', true);
         $('#createMajorIT').prop('checked', false);
+        $('#createSemFall, #createSemSpring, #createSemSummer').prop('checked', false);
         $('#createCourseAlert').hide();
         new bootstrap.Modal(document.getElementById('createCourseModal')).show();
     }
@@ -500,10 +537,15 @@
         if (majors.length === 0) { showAlert('#createCourseAlert', 'danger', 'Please select at least one major.'); return; }
         const major = majors.join(',');
 
+        const sems = [];
+        if ($('#createSemFall').is(':checked'))   sems.push('Fall');
+        if ($('#createSemSpring').is(':checked')) sems.push('Spring');
+        if ($('#createSemSummer').is(':checked')) sems.push('Summer');
+
         $.ajax({
             url: '/create-course', method: 'POST',
             contentType: 'application/json',
-            data: JSON.stringify({ CourseID: courseId, CourseName: courseName, Credits: credits, Major: major }),
+            data: JSON.stringify({ CourseID: courseId, CourseName: courseName, Credits: credits, Major: major, Semesters: sems.join(',') }),
             success: function () {
                 newCourseIdAfterCreate   = courseId;
                 newCourseNameAfterCreate = courseName;
@@ -519,12 +561,15 @@
 
     // ── Edit Course ───────────────────────────────────────────────────────────
 
-    function openEditCourse(id, name, credits, major) {
+    function openEditCourse(id, name, credits, major, semesters) {
         $('#editCourseId').val(id);
         $('#editCourseName').val(name);
         $('#editCourseCredits').val(credits);
         $('#editMajorCS').prop('checked', major.includes('Computer Science'));
         $('#editMajorIT').prop('checked', major.includes('Computer Information Systems'));
+        $('#editSemFall').prop('checked',   semesters.includes('Fall'));
+        $('#editSemSpring').prop('checked', semesters.includes('Spring'));
+        $('#editSemSummer').prop('checked', semesters.includes('Summer'));
         $('#editCourseAlert').hide();
         new bootstrap.Modal(document.getElementById('editCourseModal')).show();
     }
@@ -538,14 +583,18 @@
         if ($('#editMajorCS').is(':checked')) majors.push('Computer Science');
         if ($('#editMajorIT').is(':checked')) majors.push('Computer Information Systems');
         if (majors.length === 0) { showAlert('#editCourseAlert', 'danger', 'Please select at least one major.'); return; }
-        const major = majors.join(',');
+
+        const sems = [];
+        if ($('#editSemFall').is(':checked'))   sems.push('Fall');
+        if ($('#editSemSpring').is(':checked')) sems.push('Spring');
+        if ($('#editSemSummer').is(':checked')) sems.push('Summer');
 
         if (!courseName) { showAlert('#editCourseAlert', 'danger', 'Course Name cannot be empty.'); return; }
 
         $.ajax({
             url: '/edit-course', method: 'PUT',
             contentType: 'application/json',
-            data: JSON.stringify({ CourseID: courseId, CourseName: courseName, Credits: credits, Major: major }),
+            data: JSON.stringify({ CourseID: courseId, CourseName: courseName, Credits: credits, Major: majors.join(','), Semesters: sems.join(',') }),
             success: function () {
                 bootstrap.Modal.getInstance(document.getElementById('editCourseModal')).hide();
                 loadCourses();
