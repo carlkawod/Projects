@@ -509,9 +509,13 @@
                             <td>${s.major || '--'}</td>
                             <td>${s.expectedGradYear || '--'}</td>
                             <td>
-                                <button class="btn btn-outline-secondary btn-sm"
+                                <button class="btn btn-outline-secondary btn-sm me-1"
                                     onclick="window.location.href='student.html?sid=${s.studentId}'">
                                     View
+                                </button>
+                                <button class="btn btn-outline-danger btn-sm"
+                                    onclick="removeStudentFromCourse('${s.studentId}', '${s.firstName} ${s.lastName}', '${courseId}', '${courseName.replace(/'/g,"\\'")}')">
+                                    Remove
                                 </button>
                             </td>
                         </tr>
@@ -520,6 +524,25 @@
             },
             error: function () {
                 $('#courseStudentsBody').html('<tr><td colspan="6">Failed to load students.</td></tr>');
+            }
+        });
+    }
+
+
+    function removeStudentFromCourse(studentId, studentName, courseId, courseName) {
+        if (!confirm(`Remove ${studentName} from ${courseName}?`)) return;
+
+        $.ajax({
+            url: '/unenroll',
+            method: 'DELETE',
+            contentType: 'application/json',
+            data: JSON.stringify({ StudentID: studentId, CourseID: courseId }),
+            success: function () {
+                // Refresh the modal list
+                openCourseStudents(courseId, courseName);
+            },
+            error: function (xhr) {
+                alert('Failed to remove student: ' + xhr.responseText);
             }
         });
     }
