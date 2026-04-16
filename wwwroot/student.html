@@ -89,18 +89,13 @@
         </div>
 
         <div class="row">
-            <div class="col">
+            <div class="col-6">
                 <h3> Course: </h3> 
                 <select id="courseSelect" class="form-select" aria-label="Course select">
                     <option selected value="">Select</option>
                 </select>
             </div>
-            <div class="col">
-                <h3> Semester: </h3>
-                <select id="semesterSelect" class="form-select" aria-label="Semester select">
-                    <option selected value="">Select</option>
-                </select>
-            </div>
+
         </div>
         
 
@@ -401,7 +396,6 @@
                                 }
 
                             loadCourses(studentId);
-                            loadSemesters();
                         } else {
                             $('#displayName').text("Student Not Found");
                             alert("No student matches this ID.");
@@ -655,22 +649,6 @@
 
         // --- DATA LOADING & SAVING ---
 
-        function loadSemesters() {
-            $.ajax({
-                url: '/semesters',
-                method: 'GET',
-                success: function (semesters) {
-                    const sel = $('#semesterSelect');
-                    sel.empty();
-                    sel.append('<option value="">Select</option>');
-                    semesters.forEach(function (s) {
-                        sel.append(`<option value="${s.semesterId}">${s.semesterName}</option>`);
-                    });
-                },
-                error: function () { console.error('Failed to load semesters.'); }
-            });
-        }
-
         function loadCourses(studentId) {
             $.ajax({
                 url: '/student-courses',
@@ -698,13 +676,13 @@
             });
         }
 
-        $('#courseSelect, #semesterSelect').on('change', function () {
+        $('#courseSelect').on('change', function () {
             const urlParams = new URLSearchParams(window.location.search);
             const studentId  = urlParams.get('sid');
             const courseId   = $('#courseSelect').val();
-            const semesterId = $('#semesterSelect').val();
+            const semesterId = "";
 
-            if (!courseId && !semesterId) {
+            if (!courseId) {
                 $('#assignmentTableBody').html('<tr><td colspan="5">Select a course to see assignments.</td></tr>');
                 return;
             }
@@ -806,7 +784,7 @@
                     cm('mAdd'); 
                     resetAssignmentData();
                     loadCourses(studentId);
-                    loadAssignments(studentId, courseId);
+                    loadAssignments(studentId, courseId, "");
                 },
                 error: function (xhr, status, error) {
                     console.error("Database Error:", xhr.responseText);
