@@ -318,13 +318,13 @@
                         var major = student.Major || '';
                         var badgeClass = major === 'Computer Information Systems' ? 'major-badge major-badge-cis' : 'major-badge';
                         $('#resultsBody').append(
-                            '<tr>' +
+                            '<tr style="cursor:pointer;" onclick="window.location.href=\'student.html?sid=' + sid + '\'">' +
                             '<td>' + sid + '</td>' +
                             '<td>' + student.FirstName + '</td>' +
                             '<td>' + student.LastName + '</td>' +
                             '<td><span class="' + badgeClass + '">' + major + '</span></td>' +
                             '<td>' + (student.ExpectedGradYear || '') + '</td>' +
-                            '<td>' +
+                            '<td onclick="event.stopPropagation();">' +
                                 '<div class="dropdown">' +
                                 '<button class="btn btn-sm btn-dark dropdown-toggle" type="button" data-bs-toggle="dropdown" style="font-size:11px; background:#1a1a1a; border-color:#1a1a1a; color:#c8b830;">Actions</button>' +
                                 '<ul class="dropdown-menu dropdown-menu-end" style="font-size:12px; min-width:130px; padding:0; border-radius:6px; overflow:hidden; border:0.5px solid #ddd; box-shadow:0 4px 12px rgba(0,0,0,0.12);">' +
