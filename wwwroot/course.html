@@ -446,14 +446,14 @@
             <div class="modal-body p-0">
                 <div style="max-height: 450px; overflow-y: auto;">
                     <table class="table table-striped table-hover mb-0" style="font-size: 14px; text-align: center;">
-                        <thead class="table-dark" style="position: sticky; top: 0;">
+                        <thead style="position: sticky; top: 0;">
                             <tr>
-                                <th>Student ID</th>
-                                <th>First Name</th>
-                                <th>Last Name</th>
-                                <th style="color:#c8b830 !important;background:#1a1a1a !important;">Major</th>
-                                <th>Grad Year</th>
-                                <th style="width: 130px;">Actions</th>
+                                <th style="background:#1a1a1a !important;color:#c8b830 !important;">Student ID</th>
+                                <th style="background:#1a1a1a !important;color:#c8b830 !important;">First Name</th>
+                                <th style="background:#1a1a1a !important;color:#c8b830 !important;">Last Name</th>
+                                <th style="background:#1a1a1a !important;color:#c8b830 !important;">Major</th>
+                                <th style="background:#1a1a1a !important;color:#c8b830 !important;">Grad Year</th>
+                                <th style="background:#1a1a1a !important;color:#c8b830 !important;width:120px;">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="courseStudentsBody">
@@ -518,14 +518,16 @@
                             <td>${s.major || '--'}</td>
                             <td>${s.expectedGradYear || '--'}</td>
                             <td>
-                                <button class="btn btn-outline-secondary btn-sm me-1"
-                                    onclick="window.location.href='student.html?sid=${s.studentId}'">
-                                    View
-                                </button>
-                                <button class="btn btn-outline-danger btn-sm"
-                                    onclick="removeStudentFromCourse('${s.studentId}', '${s.firstName} ${s.lastName}', '${courseId}', '${courseName.replace(/'/g,"\\'")}')">
-                                    Remove
-                                </button>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                                        style="background:#1a1a1a;color:#c8b830;border:none;font-size:11px;">Actions</button>
+                                    <ul class="dropdown-menu dropdown-menu-end" style="font-size:12px;min-width:130px;padding:0;border-radius:6px;overflow:hidden;border:0.5px solid #ddd;box-shadow:0 4px 12px rgba(0,0,0,0.12);">
+                                        <li><a class="dropdown-item" style="cursor:pointer;padding:8px 14px;border-bottom:0.5px solid #eee;"
+                                            onclick="window.location.href='student.html?sid=${s.studentId}'">View Student</a></li>
+                                        <li><a class="dropdown-item text-danger" style="cursor:pointer;padding:8px 14px;"
+                                            onclick="removeStudentFromCourse('${s.studentId}', '${s.firstName} ${s.lastName}', '${courseId}', '${courseName.replace(/'/g,"\\'")}')">Remove</a></li>
+                                    </ul>
+                                </div>
                             </td>
                         </tr>
                     `);
