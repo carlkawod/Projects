@@ -124,13 +124,35 @@
             </div>
             <br/>
             <div class="mt-2">
-                <button class="btn-1" onclick="openAddAsgn()">Add New Assignments</button>
+                <button class="btn-1" onclick="openCreateCourse()">Create Course</button>
             </div>
             <br/>
         </div>
     </div>
 
     <footer style="padding: 20px"></footer>
+
+    <div id="mCreateCourse" style="display: none;">
+      <div class="modal">
+        <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+            <h2 class="m-0 fs-4">Create Course</h2>
+            <button class="mx btn btn-sm border-0 fs-5" style="background: none;" onclick="closeCreateCourse()">✕</button>
+        </div>
+        <div class="mbdy">
+          <div style="margin-bottom: 16px;">
+            <label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Select Course:</label>
+            <select id="createCourseSelect" class="form-select form-select-sm" style="width: 60%;">
+              <option value="">-- Select a course --</option>
+            </select>
+          </div>
+          <div class="d-flex justify-content-between mt-4">
+            <button class="btn-1" onclick="closeCreateCourse()">Cancel</button>
+            <button class="btn-1" onclick="openAddAsgnFromCourse()">Add New Assignments</button>
+          </div>
+          <br/>
+        </div>
+      </div>
+    </div>
 
     <div id="mAdd" style="display: none;">
       <div class="modal">
@@ -404,6 +426,40 @@
 
         // --- MODAL OPEN/CLOSE FUNCTIONS ---
 
+        function openCreateCourse() {
+            // Load all courses from the database into the dropdown
+            $.ajax({
+                url: '/courses',
+                method: 'GET',
+                success: function (courses) {
+                    const sel = $('#createCourseSelect');
+                    sel.empty();
+                    sel.append('<option value="">-- Select a course --</option>');
+                    courses.forEach(function (c) {
+                        sel.append(`<option value="${c.courseId}">${c.courseName}</option>`);
+                    });
+                },
+                error: function () {
+                    alert('Failed to load courses.');
+                }
+            });
+            om('mCreateCourse');
+        }
+
+        function closeCreateCourse() {
+            cm('mCreateCourse');
+        }
+
+        function openAddAsgnFromCourse() {
+            const courseId = $('#createCourseSelect').val();
+            if (!courseId) {
+                alert('Please select a course first.');
+                return;
+            }
+            cm('mCreateCourse');
+            om('mAdd');
+        }
+
         function openAddAsgn() {
             om('mAdd');
         }
@@ -508,7 +564,8 @@
         function confirmAddAsgn() {
             const urlParams = new URLSearchParams(window.location.search);
             const studentId = urlParams.get('sid');
-            const courseId = $('#courseSelect').val();
+            // Use the Create Course modal's selection; fall back to main courseSelect
+            const courseId = $('#createCourseSelect').val() || $('#courseSelect').val();
 
             if (!studentId) {
                 alert("Cannot add assignment: No student selected.");
@@ -558,6 +615,8 @@
                     cm('mAdd'); 
                     resetAssignmentData();
                     
+                    // Reload student courses so the new course appears in the main dropdown
+                    loadCourses(studentId);
                     loadAssignments(studentId, courseId);
                 },
                 error: function (xhr, status, error) {
