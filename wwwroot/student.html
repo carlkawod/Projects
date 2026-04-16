@@ -29,9 +29,6 @@
             <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <a class="navbar-brand me-auto ms-3" style="color: rgb(171, 171, 16); font-size: 28px;" id="displayName">Loading...</a>
-            <button type="button" class="btn btn-light ms-3" onclick="openCreateCourse()">Create Course</button>
-            <button type="button" class="btn btn-light ms-3" onclick="openEnroll()">Enroll in Course</button>
             <div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="offcanvasDarkNavbar" aria-labelledby="offcanvasDarkNavbarLabel">
                 <div class="offcanvas-header">
                     <button type="button" class="navbar-toggler" data-bs-dismiss="offcanvas" aria-label="Close">
@@ -54,6 +51,11 @@
             </div>
         </div>
     </nav>
+
+    <div class="container mt-5" style="padding-top: 50px; color: rgb(0, 0, 0);">
+        <h2><span id="displayName">Loading...</span></h2>
+        <hr>
+    </div>
 
     <div class="container" style="border: 2px solid black; margin-top: 90px; padding: 20px;">
         <div class="row align-items-start">
@@ -355,7 +357,7 @@
                         if (results && results.length > 0) {
                             const student = results[0]; 
                             
-                            $('#displayName').text(student.LastName + ", " + student.FirstName);
+                            $('#displayName').text(student.LastName + ", " + student.FirstName + " - [Active]");
                             $('#displayId').text(student.StudentID);
                             $('#displayYear').text(student.Year);
                             $('#displayGrad').text(student.ExpectedGradYear);
