@@ -45,8 +45,8 @@
     <!-- Major Filter Tabs -->
     <div class="d-flex gap-2 mb-4">
         <button class="btn btn-dark active" id="tabCS" onclick="filterMajor('Computer Science')">Computer Science</button>
-        <button class="btn btn-outline-dark" id="tabIT" onclick="filterMajor('Computer Information Systems')">Computer Information Systems</button>
-        <button class="btn btn-outline-dark" id="tabAll" onclick="filterMajor('')">All</button>
+        <button class="btn" style="background:transparent;color:#1a1a1a;border:1px solid #1a1a1a;" id="tabIT" onclick="filterMajor('Computer Information Systems')">Computer Information Systems</button>
+        <button class="btn" style="background:transparent;color:#1a1a1a;border:1px solid #1a1a1a;" id="tabAll" onclick="filterMajor('')">All</button>
     </div>
 
     <!-- Courses Table -->
@@ -74,7 +74,7 @@
 <div class="modal fade" id="createCourseModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header bg-dark text-white">
+            <div class="modal-header" style="background:#1a1a1a; color:white; border-bottom:1px solid #333;">
                 <h5 class="modal-title">Create New Course</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -123,9 +123,9 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-dark" onclick="confirmCreateCourse()">Create Course</button>
+            <div class="modal-footer" style="background:#1a1a1a; border-top:1px solid #333;">
+                <button type="button" class="btn" data-bs-dismiss="modal" style="background:#444;color:white;border:none;">Cancel</button>
+                <button type="button" class="btn" style="background:#1a1a1a;color:#c8b830;border:none;" onclick="confirmCreateCourse()">Create Course</button>
             </div>
         </div>
     </div>
@@ -136,7 +136,7 @@
 <div class="modal fade" id="editCourseModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header bg-dark text-white">
+            <div class="modal-header" style="background:#1a1a1a; color:white; border-bottom:1px solid #333;">
                 <h5 class="modal-title">Edit Course</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -185,10 +185,10 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-outline-dark" onclick="openAddAsgnFromEdit()">Add Assignment</button>
-                <button type="button" class="btn btn-dark" onclick="confirmEditCourse()">Save Changes</button>
+            <div class="modal-footer" style="background:#1a1a1a; border-top:1px solid #333;">
+                <button type="button" class="btn" data-bs-dismiss="modal" style="background:#444;color:white;border:none;">Cancel</button>
+                <button type="button" class="btn" style="background:transparent;color:#1a1a1a;border:1px solid #1a1a1a;" onclick="openAddAsgnFromEdit()">Add Assignment</button>
+                <button type="button" class="btn" style="background:#1a1a1a;color:#c8b830;border:none;" onclick="confirmEditCourse()">Save Changes</button>
             </div>
         </div>
     </div>
@@ -199,7 +199,7 @@
 <div class="modal fade" id="removeCourseModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header bg-dark text-white">
+            <div class="modal-header" style="background:#1a1a1a; color:white; border-bottom:1px solid #333;">
                 <h5 class="modal-title">Remove Course</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -208,9 +208,9 @@
                 <p>Are you sure you want to remove <strong id="removeCourseNameDisplay"></strong>? This will also remove all enrollments for this course.</p>
                 <input type="hidden" id="removeCourseId">
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" onclick="confirmRemoveCourse()">Remove</button>
+            <div class="modal-footer" style="background:#1a1a1a; border-top:1px solid #333;">
+                <button type="button" class="btn" data-bs-dismiss="modal" style="background:#444;color:white;border:none;">Cancel</button>
+                <button type="button" class="btn" style="background:#c0392b;color:white;border:none;" onclick="confirmRemoveCourse()">Remove</button>
             </div>
         </div>
     </div>
@@ -221,7 +221,7 @@
 <div class="modal fade" id="enrollStudentsModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header bg-dark text-white">
+            <div class="modal-header" style="background:#1a1a1a; color:white; border-bottom:1px solid #333;">
                 <h5 class="modal-title">Enroll Students: <span id="enrollCourseNameDisplay"></span></h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -256,9 +256,9 @@
                     <select id="enrollSemesterSelect" class="form-select" style="width: 250px;"></select>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-dark" onclick="confirmEnrollStudents()">Enroll Selected →</button>
+            <div class="modal-footer" style="background:#1a1a1a; border-top:1px solid #333;">
+                <button type="button" class="btn" data-bs-dismiss="modal" style="background:#444;color:white;border:none;">Cancel</button>
+                <button type="button" class="btn" style="background:#1a1a1a;color:#c8b830;border:none;" onclick="confirmEnrollStudents()">Enroll Selected →</button>
             </div>
         </div>
     </div>
@@ -269,7 +269,7 @@
 <div class="modal fade" id="postCreateModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-sm modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header bg-dark text-white">
+            <div class="modal-header" style="background:#1a1a1a; color:white; border-bottom:1px solid #333;">
                 <h5 class="modal-title">Course Created!</h5>
             </div>
             <div class="modal-body text-center">
@@ -277,7 +277,7 @@
             </div>
             <div class="modal-footer justify-content-center">
                 <button type="button" class="btn btn-secondary" onclick="closePostCreate()">Not Now</button>
-                <button type="button" class="btn btn-dark" onclick="openCourseAddAsgn()">Add Assignments</button>
+                <button type="button" class="btn" style="background:#1a1a1a;color:#c8b830;border:none;" onclick="openCourseAddAsgn()">Add Assignments</button>
             </div>
         </div>
     </div>
@@ -288,7 +288,7 @@
 <div class="modal fade" id="courseAddAsgnModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header bg-dark text-white">
+            <div class="modal-header" style="background:#1a1a1a; color:white; border-bottom:1px solid #333;">
                 <h5 class="modal-title">Add Assignment: <span id="courseAsgnCourseName"></span></h5>
                 <button type="button" class="btn-close btn-close-white" onclick="closeCourseAddAsgn()"></button>
             </div>
@@ -357,9 +357,9 @@
                     <textarea id="courseAsgnComments" class="form-control" placeholder="Any comments..."></textarea>
                 </div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer" style="background:#1a1a1a; border-top:1px solid #333;">
                 <button type="button" class="btn btn-secondary" onclick="closeCourseAddAsgn()">Cancel</button>
-                <button type="button" class="btn btn-dark" onclick="confirmCourseAddAsgn()">Add Assignment →</button>
+                <button type="button" class="btn" style="background:#1a1a1a;color:#c8b830;border:none;" onclick="confirmCourseAddAsgn()">Add Assignment →</button>
             </div>
         </div>
     </div>
@@ -380,7 +380,7 @@
             <div class="metric-row"><input type="checkbox" id="caPlo1_3"><label for="caPlo1_3" id="caPlo1Metric3"> Metric 3...</label></div>
             <div class="metric-row"><input type="checkbox" id="caPlo1_4"><label for="caPlo1_4" id="caPlo1Metric4"> Metric 4...</label></div>
         </div>
-        <div class="mt-3 text-end"><button class="btn btn-dark" onclick="cmC('caMAsgnOverview1')">OK</button></div>
+        <div class="mt-3 text-end"><button class="btn" style="background:#1a1a1a;color:#c8b830;border:none;" onclick="cmC('caMAsgnOverview1')">OK</button></div>
     </div>
 </div>
 
@@ -395,7 +395,7 @@
             <div class="metric-row"><input type="checkbox" id="caPlo2_1"><label for="caPlo2_1" id="caPlo2Metric1"> Metric 1...</label></div>
             <div class="metric-row"><input type="checkbox" id="caPlo2_2"><label for="caPlo2_2" id="caPlo2Metric2"> Metric 2...</label></div>
         </div>
-        <div class="mt-3 text-end"><button class="btn btn-dark" onclick="cmC('caMAsgnOverview2')">OK</button></div>
+        <div class="mt-3 text-end"><button class="btn" style="background:#1a1a1a;color:#c8b830;border:none;" onclick="cmC('caMAsgnOverview2')">OK</button></div>
     </div>
 </div>
 
@@ -411,7 +411,7 @@
             <div class="metric-row"><input type="checkbox" id="caPlo3_2"><label for="caPlo3_2" id="caPlo3Metric2"> Metric 2...</label></div>
             <div class="metric-row"><input type="checkbox" id="caPlo3_3"><label for="caPlo3_3" id="caPlo3Metric3"> Metric 3...</label></div>
         </div>
-        <div class="mt-3 text-end"><button class="btn btn-dark" onclick="cmC('caMAsgnOverview3')">OK</button></div>
+        <div class="mt-3 text-end"><button class="btn" style="background:#1a1a1a;color:#c8b830;border:none;" onclick="cmC('caMAsgnOverview3')">OK</button></div>
     </div>
 </div>
 
@@ -425,7 +425,7 @@
             <h5 id="caPlo4Head">PLO 4</h5>
             <div class="metric-row"><input type="checkbox" id="caPlo4_1"><label for="caPlo4_1" id="caPlo4Metric1"> Metric 1...</label></div>
         </div>
-        <div class="mt-3 text-end"><button class="btn btn-dark" onclick="cmC('caMAsgnOverview4')">OK</button></div>
+        <div class="mt-3 text-end"><button class="btn" style="background:#1a1a1a;color:#c8b830;border:none;" onclick="cmC('caMAsgnOverview4')">OK</button></div>
     </div>
 </div>
 
@@ -434,7 +434,7 @@
 <div class="modal fade" id="courseStudentsModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header bg-dark text-white">
+            <div class="modal-header" style="background:#1a1a1a; color:white; border-bottom:1px solid #333;">
                 <h5 class="modal-title">Students Enrolled: <span id="courseStudentsCourseName"></span></h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -457,8 +457,8 @@
                     </table>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <div class="modal-footer" style="background:#1a1a1a; border-top:1px solid #333;">
+                <button type="button" class="btn" data-bs-dismiss="modal" style="background:#444;color:white;border:none;">Close</button>
             </div>
         </div>
     </div>
@@ -509,21 +509,14 @@
                             <td>${s.major || '--'}</td>
                             <td>${s.expectedGradYear || '--'}</td>
                             <td>
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" style="font-size:12px;">
-                                        Actions
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end" style="font-size:13px;">
-                                        <li><a class="dropdown-item" href="student.html?sid=${s.studentId}">
-                                            <i class="bi bi-person me-1"></i> View Student
-                                        </a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item text-danger" href="#"
-                                            onclick="removeStudentFromCourse('${s.studentId}', '${s.firstName} ${s.lastName}', '${courseId}', '${courseName.replace(/'/g,"\\'")}'); return false;">
-                                            <i class="bi bi-x-circle me-1"></i> Remove from Course
-                                        </a></li>
-                                    </ul>
-                                </div>
+                                <button class="btn btn-outline-secondary btn-sm me-1"
+                                    onclick="window.location.href='student.html?sid=${s.studentId}'">
+                                    View
+                                </button>
+                                <button class="btn btn-outline-danger btn-sm"
+                                    onclick="removeStudentFromCourse('${s.studentId}', '${s.firstName} ${s.lastName}', '${courseId}', '${courseName.replace(/'/g,"\\'")}')">
+                                    Remove
+                                </button>
                             </td>
                         </tr>
                     `);
