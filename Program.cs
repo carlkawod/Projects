@@ -299,20 +299,53 @@ app.MapPost("/add-assignment", async (HttpContext http) =>
     using var connection = new SqliteConnection("Data Source=AssesmentReportGenerator.db");
     connection.Open();
 
-    // 1. Insert into Assignment
+   // 1. Insert into Assignment
     var insertAssignment = connection.CreateCommand();
+    
+    // UPDATE: Added the 10 metric columns to the INSERT statement
     insertAssignment.CommandText = @"
-        INSERT INTO Assignment (AssignmentType, AssignmentName, PLO1, PLO2, PLO3, PLO4, Comments, CourseID)
-        VALUES (@type, @name, @plo1, @plo2, @plo3, @plo4, @comments, @courseId)";
+        INSERT INTO Assignment (
+            AssignmentType, AssignmentName, CourseID, Comments, 
+            PLO1, PLO2, PLO3, PLO4,
+            plo1_1, plo1_2, plo1_3, plo1_4,
+            plo2_1, plo2_2,
+            plo3_1, plo3_2, plo3_3,
+            plo4_1
+        )
+        VALUES (
+            @type, @name, @courseId, @comments, 
+            @plo1, @plo2, @plo3, @plo4,
+            @m1_1, @m1_2, @m1_3, @m1_4,
+            @m2_1, @m2_2,
+            @m3_1, @m3_2, @m3_3,
+            @m4_1
+        )";
     
     insertAssignment.Parameters.AddWithValue("@type", asgn.AssignmentType ?? "");
     insertAssignment.Parameters.AddWithValue("@name", asgn.AssignmentName);
+    insertAssignment.Parameters.AddWithValue("@courseId", asgn.CourseID);
+    insertAssignment.Parameters.AddWithValue("@comments", asgn.Comments ?? "");
+    
+    // Main PLOs
     insertAssignment.Parameters.AddWithValue("@plo1", asgn.PLO1 ? 1 : 0);
     insertAssignment.Parameters.AddWithValue("@plo2", asgn.PLO2 ? 1 : 0);
     insertAssignment.Parameters.AddWithValue("@plo3", asgn.PLO3 ? 1 : 0);
     insertAssignment.Parameters.AddWithValue("@plo4", asgn.PLO4 ? 1 : 0);
-    insertAssignment.Parameters.AddWithValue("@comments", asgn.Comments ?? "");
-    insertAssignment.Parameters.AddWithValue("@courseId", asgn.CourseID);
+
+    // ADDED: Bind the metric parameters
+    insertAssignment.Parameters.AddWithValue("@m1_1", asgn.plo1_1 ? 1 : 0);
+    insertAssignment.Parameters.AddWithValue("@m1_2", asgn.plo1_2 ? 1 : 0);
+    insertAssignment.Parameters.AddWithValue("@m1_3", asgn.plo1_3 ? 1 : 0);
+    insertAssignment.Parameters.AddWithValue("@m1_4", asgn.plo1_4 ? 1 : 0);
+    
+    insertAssignment.Parameters.AddWithValue("@m2_1", asgn.plo2_1 ? 1 : 0);
+    insertAssignment.Parameters.AddWithValue("@m2_2", asgn.plo2_2 ? 1 : 0);
+    
+    insertAssignment.Parameters.AddWithValue("@m3_1", asgn.plo3_1 ? 1 : 0);
+    insertAssignment.Parameters.AddWithValue("@m3_2", asgn.plo3_2 ? 1 : 0);
+    insertAssignment.Parameters.AddWithValue("@m3_3", asgn.plo3_3 ? 1 : 0);
+    
+    insertAssignment.Parameters.AddWithValue("@m4_1", asgn.plo4_1 ? 1 : 0);
 
     insertAssignment.ExecuteNonQuery();
 
@@ -386,6 +419,13 @@ public record AssignmentDto(
     bool PLO2, 
     bool PLO3, 
     bool PLO4, 
+    
+    // ADDED: The 10 metric variables matching the frontend IDs
+    bool plo1_1, bool plo1_2, bool plo1_3, bool plo1_4,
+    bool plo2_1, bool plo2_2,
+    bool plo3_1, bool plo3_2, bool plo3_3,
+    bool plo4_1,
+
     string Comments
 );
 
