@@ -113,11 +113,13 @@
                             <th style="background-color: #4da6ff;">PLO 2</th>
                             <th style="background-color: #4da6ff;">PLO 3</th>
                             <th style="background-color: #4da6ff;">PLO 4</th>
+                            <th style="background-color: #d3d3d3;">Grade (%)</th>
+                            <th style="background-color: #d3d3d3;">PLO Rating</th>
                         </tr>
                     </thead>
                     <tbody id="assignmentTableBody">
                     <tr>
-                        <td colspan="5">Select a course to see assignments.</td>
+                        <td colspan="7">Select a course to see assignments.</td>
                     </tr>
                     </tbody>
                 </table>
@@ -131,6 +133,30 @@
     </div>
 
     <footer style="padding: 20px"></footer>
+
+    <div id="mEnroll" style="display: none;">
+      <div class="modal">
+        <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+            <h2 class="m-0 fs-4">Enroll in Course</h2>
+            <button class="mx btn btn-sm border-0 fs-5" style="background: none;" onclick="closeEnroll()">✕</button>
+        </div>
+        <div class="mbdy">
+          <div style="margin-bottom: 12px;">
+            <label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Course:</label>
+            <select id="enrollCourseSelect" class="form-select form-select-sm" style="width: 70%;"></select>
+          </div>
+          <div style="margin-bottom: 16px;">
+            <label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Semester:</label>
+            <select id="enrollSemesterSelect" class="form-select form-select-sm" style="width: 70%;"></select>
+          </div>
+          <div class="d-flex justify-content-between mt-4">
+            <button class="btn-1" onclick="closeEnroll()">Cancel</button>
+            <button class="btn-1" onclick="confirmEnroll()">Enroll →</button>
+          </div>
+          <br/>
+        </div>
+      </div>
+    </div>
 
     <div id="mCreateCourse" style="display: none;">
       <div class="modal">
@@ -173,6 +199,10 @@
           <div style="margin-bottom:12px;">
             <label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Course:</label>
             <select id="asgnCourseSelect" class="form-select form-select-sm" style="width: 60%;"></select>
+          </div>
+          <div style="margin-bottom:12px;">
+            <label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Semester:</label>
+            <select id="asgnSemesterSelect" class="form-select form-select-sm" style="width: 60%;"></select>
           </div>
           <div style="margin-bottom:12px;">
             <label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Assignment type:</label>
@@ -372,6 +402,7 @@
                                 }
 
                             loadCourses(studentId);
+                            loadSemesters();
                         } else {
                             $('#displayName').text("Student Not Found");
                             alert("No student matches this ID.");
@@ -439,6 +470,91 @@
 
         // --- MODAL OPEN/CLOSE FUNCTIONS ---
 
+        // --- PLO RATING HELPER ---
+        function getPloRating(grade) {
+            if (grade === null || grade === undefined || grade === '') return '--';
+            const g = parseInt(grade);
+            if (g >= 90) return '<span style="color:#1a7a1a;font-weight:600;">4</span>';
+            if (g >= 80) return '<span style="color:#4a7a00;font-weight:600;">3</span>';
+            if (g >= 70) return '<span style="color:#b07a00;font-weight:600;">2</span>';
+            return '<span style="color:#c0392b;font-weight:600;">1</span>';
+        }
+
+        // Save grade on blur or Enter
+        $(document).on('change blur', '.grade-input', function () {
+            const said  = $(this).data('said');
+            const grade = $(this).val();
+            const cell  = $(this).closest('tr').find('.plo-rating-cell');
+
+            $.ajax({
+                url: '/update-grade',
+                method: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify({ StudentAssignmentID: said, Grade: grade === '' ? null : parseInt(grade) }),
+                success: function () {
+                    cell.html(getPloRating(grade));
+                },
+                error: function () { alert('Failed to save grade.'); }
+            });
+        });
+
+        // --- ENROLL FUNCTIONS ---
+        function openEnroll() {
+            let coursesLoaded = false, semestersLoaded = false;
+            function tryShow() { if (coursesLoaded && semestersLoaded) om('mEnroll'); }
+
+            $.ajax({
+                url: '/courses', method: 'GET',
+                success: function (courses) {
+                    const sel = $('#enrollCourseSelect');
+                    sel.empty();
+                    sel.append('<option value="">-- Select a course --</option>');
+                    courses.forEach(c => sel.append(`<option value="${c.courseId}">${c.courseName}</option>`));
+                    coursesLoaded = true; tryShow();
+                }
+            });
+            $.ajax({
+                url: '/semesters', method: 'GET',
+                success: function (semesters) {
+                    const sel = $('#enrollSemesterSelect');
+                    sel.empty();
+                    sel.append('<option value="">-- Select a semester --</option>');
+                    semesters.forEach(s => sel.append(`<option value="${s.semesterId}">${s.semesterName}</option>`));
+                    semestersLoaded = true; tryShow();
+                }
+            });
+        }
+
+        function closeEnroll() {
+            $('#enrollCourseSelect').val('');
+            $('#enrollSemesterSelect').val('');
+            cm('mEnroll');
+        }
+
+        function confirmEnroll() {
+            const urlParams  = new URLSearchParams(window.location.search);
+            const studentId  = urlParams.get('sid');
+            const courseId   = $('#enrollCourseSelect').val();
+            const semesterId = $('#enrollSemesterSelect').val();
+
+            if (!courseId) { alert('Please select a course.'); return; }
+
+            $.ajax({
+                url: '/enroll',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ StudentID: studentId, CourseID: courseId, SemesterID: semesterId || null }),
+                success: function () {
+                    alert('Enrolled successfully.');
+                    closeEnroll();
+                    loadCourses(studentId);
+                },
+                error: function (xhr) {
+                    alert(xhr.status === 409 ? 'Already enrolled in this course.' : 'Failed to enroll: ' + xhr.responseText);
+                }
+            });
+        }
+
         function openCreateCourse() {
             om('mCreateCourse');
         }
@@ -475,45 +591,45 @@
             });
         }
 
-        function openAddAsgnFromCourse() {
-            // Load all courses into the assignment modal's dropdown
+        function populateAsgnModals(callback) {
+            let coursesLoaded = false, semestersLoaded = false;
+            function tryOpen() { if (coursesLoaded && semestersLoaded) callback(); }
+
             $.ajax({
-                url: '/courses',
-                method: 'GET',
+                url: '/courses', method: 'GET',
                 success: function (courses) {
                     const sel = $('#asgnCourseSelect');
                     sel.empty();
                     sel.append('<option value="">-- Select a course --</option>');
-                    courses.forEach(function (c) {
-                        sel.append(`<option value="${c.courseId}">${c.courseName}</option>`);
-                    });
-                    cm('mCreateCourse');
-                    om('mAdd');
+                    courses.forEach(c => sel.append(`<option value="${c.courseId}">${c.courseName}</option>`));
+                    const current = $('#courseSelect').val();
+                    if (current) sel.val(current);
+                    coursesLoaded = true; tryOpen();
                 },
-                error: function () {
-                    alert('Failed to load courses.');
-                }
+                error: function () { coursesLoaded = true; tryOpen(); }
+            });
+
+            $.ajax({
+                url: '/semesters', method: 'GET',
+                success: function (semesters) {
+                    const sel = $('#asgnSemesterSelect');
+                    sel.empty();
+                    sel.append('<option value="">-- Select a semester --</option>');
+                    semesters.forEach(s => sel.append(`<option value="${s.semesterId}">${s.semesterName}</option>`));
+                    const current = $('#semesterSelect').val();
+                    if (current) sel.val(current);
+                    semestersLoaded = true; tryOpen();
+                },
+                error: function () { semestersLoaded = true; tryOpen(); }
             });
         }
 
+        function openAddAsgnFromCourse() {
+            populateAsgnModals(function () { cm('mCreateCourse'); om('mAdd'); });
+        }
+
         function openAddAsgn() {
-            $.ajax({
-                url: '/courses',
-                method: 'GET',
-                success: function (courses) {
-                    const sel = $('#asgnCourseSelect');
-                    sel.empty();
-                    sel.append('<option value="">-- Select a course --</option>');
-                    courses.forEach(function (c) {
-                        sel.append(`<option value="${c.courseId}">${c.courseName}</option>`);
-                    });
-                    // Pre-select if a course is already chosen in the main dropdown
-                    const currentCourse = $('#courseSelect').val();
-                    if (currentCourse) sel.val(currentCourse);
-                    om('mAdd');
-                },
-                error: function () { om('mAdd'); }
-            });
+            populateAsgnModals(function () { om('mAdd'); });
         }
 
         function closeMainAssignmentModal() {
@@ -534,6 +650,22 @@
         }
 
         // --- DATA LOADING & SAVING ---
+
+        function loadSemesters() {
+            $.ajax({
+                url: '/semesters',
+                method: 'GET',
+                success: function (semesters) {
+                    const sel = $('#semesterSelect');
+                    sel.empty();
+                    sel.append('<option value="">Select</option>');
+                    semesters.forEach(function (s) {
+                        sel.append(`<option value="${s.semesterId}">${s.semesterName}</option>`);
+                    });
+                },
+                error: function () { console.error('Failed to load semesters.'); }
+            });
+        }
 
         function loadCourses(studentId) {
             $.ajax({
@@ -562,30 +694,31 @@
             });
         }
 
-        $('#courseSelect').on('change', function () {
+        $('#courseSelect, #semesterSelect').on('change', function () {
             const urlParams = new URLSearchParams(window.location.search);
-            const studentId = urlParams.get('sid');
-            const courseId = $(this).val();
+            const studentId  = urlParams.get('sid');
+            const courseId   = $('#courseSelect').val();
+            const semesterId = $('#semesterSelect').val();
 
-            if (!courseId) {
+            if (!courseId && !semesterId) {
                 $('#assignmentTableBody').html('<tr><td colspan="5">Select a course to see assignments.</td></tr>');
                 return;
             }
 
-            loadAssignments(studentId, courseId);
+            loadAssignments(studentId, courseId, semesterId);
         });
 
-        function loadAssignments(studentId, courseId) {
+        function loadAssignments(studentId, courseId, semesterId) {
             $.ajax({
                 url: '/assignments',
                 method: 'GET',
-                data: { sid: studentId, courseId: courseId },
+                data: { sid: studentId, courseId: courseId, semesterId: semesterId },
                 success: function (assignments) {
                     const tbody = $('#assignmentTableBody');
                     tbody.empty();
 
                     if (assignments.length === 0) {
-                        tbody.append('<tr><td colspan="5">No assignments found for this course.</td></tr>');
+                        tbody.append('<tr><td colspan="7">No assignments found for this course.</td></tr>');
                         return;
                     }
 
@@ -594,6 +727,8 @@
                         const p2 = a.plo2 ? 'checked' : '';
                         const p3 = a.plo3 ? 'checked' : '';
                         const p4 = a.plo4 ? 'checked' : '';
+                        const gradeVal = a.grade !== null && a.grade !== undefined ? a.grade : '';
+                        const rating   = getPloRating(a.grade);
 
                         const row = `
                             <tr>
@@ -602,6 +737,14 @@
                                 <td><input type="checkbox" class="form-check-input" ${p2} disabled></td>
                                 <td><input type="checkbox" class="form-check-input" ${p3} disabled></td>
                                 <td><input type="checkbox" class="form-check-input" ${p4} disabled></td>
+                                <td>
+                                    <input type="number" class="form-control form-control-sm grade-input"
+                                        min="0" max="100" value="${gradeVal}"
+                                        data-said="${a.studentAssignmentId}"
+                                        style="width:70px;margin:auto;"
+                                        placeholder="0-100">
+                                </td>
+                                <td class="plo-rating-cell">${rating}</td>
                             </tr>
                         `;
                         tbody.append(row);
@@ -630,6 +773,7 @@
             const assignmentData = {
                 StudentID: studentId,
                 CourseID: courseId,
+                SemesterID: $('#asgnSemesterSelect').val() || $('#semesterSelect').val() || null,
                 AssignmentType: $('#asgnType').val(),
                 AssignmentName: $('#asgnName').val(),
                 PLO1: $('#p11').is(':checked'), 
