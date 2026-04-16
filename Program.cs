@@ -33,20 +33,6 @@ using (var connection = new SqliteConnection("Data Source=AssesmentReportGenerat
         alter.ExecuteNonQuery();
     }
 
-    // Add Semesters column to Course if missing
-    var checkSemesters = connection.CreateCommand();
-    checkSemesters.CommandText = "PRAGMA table_info(Course)";
-    bool hasSemestersCol = false;
-    using (var r = checkSemesters.ExecuteReader())
-        while (r.Read())
-            if (r["name"].ToString() == "Semesters") { hasSemestersCol = true; break; }
-    if (!hasSemestersCol)
-    {
-        var alter = connection.CreateCommand();
-        alter.CommandText = "ALTER TABLE Course ADD COLUMN Semesters TEXT";
-        alter.ExecuteNonQuery();
-    }
-
     // Add Major column to Course if missing
     var checkMajor = connection.CreateCommand();
     checkMajor.CommandText = "PRAGMA table_info(Course)";
@@ -113,7 +99,7 @@ app.MapPost("/api/login", (LoginRequest request) =>
 
 
 // ── Search ────────────────────────────────────────────────────────────────────
-app.MapGet("/search", (string? lastName, string? firstName, string? id) =>
+app.MapGet("/search", (string? lastName, string? firstName, string? id, string? major) =>
 {
     using var connection = new SqliteConnection("Data Source=AssesmentReportGenerator.db");
     connection.Open();
@@ -122,12 +108,14 @@ app.MapGet("/search", (string? lastName, string? firstName, string? id) =>
     if (!string.IsNullOrEmpty(lastName))  sql += " AND LastName LIKE @last";
     if (!string.IsNullOrEmpty(firstName)) sql += " AND FirstName LIKE @first";
     if (!string.IsNullOrEmpty(id))        sql += " AND StudentID LIKE @id";
+    if (!string.IsNullOrEmpty(major))     sql += " AND Major = @major";
 
     var command = connection.CreateCommand();
     command.CommandText = sql;
     if (!string.IsNullOrEmpty(lastName))  command.Parameters.AddWithValue("@last",  $"%{lastName}%");
     if (!string.IsNullOrEmpty(firstName)) command.Parameters.AddWithValue("@first", $"%{firstName}%");
     if (!string.IsNullOrEmpty(id))        command.Parameters.AddWithValue("@id",    $"%{id}%");
+    if (!string.IsNullOrEmpty(major))     command.Parameters.AddWithValue("@major", major);
 
     var results = new List<Dictionary<string, object>>();
     using var reader = command.ExecuteReader();
@@ -306,7 +294,7 @@ app.MapGet("/courses", () =>
     connection.Open();
 
     var command = connection.CreateCommand();
-    command.CommandText = "SELECT CourseID, CourseName, Credits, Major, Semesters FROM Course ORDER BY CourseName";
+    command.CommandText = "SELECT CourseID, CourseName, Credits, Major FROM Course ORDER BY CourseName";
 
     using var reader = command.ExecuteReader();
     var courses = new List<object>();
@@ -315,8 +303,7 @@ app.MapGet("/courses", () =>
             courseId   = reader["CourseID"]?.ToString()   ?? "",
             courseName = reader["CourseName"]?.ToString() ?? "",
             credits    = reader["Credits"]  != DBNull.Value ? (int?)Convert.ToInt32(reader["Credits"]) : null,
-            major      = reader["Major"]?.ToString()     ?? "",
-            semesters  = reader["Semesters"]?.ToString() ?? ""
+            major      = reader["Major"]?.ToString() ?? ""
         });
 
     return Results.Ok(courses);
@@ -353,12 +340,11 @@ app.MapPost("/create-course", async (HttpContext http) =>
     connection.Open();
 
     var command = connection.CreateCommand();
-    command.CommandText = "INSERT INTO Course (CourseID, CourseName, Credits, Major, Semesters) VALUES (@id, @name, @credits, @major, @semesters)";
-    command.Parameters.AddWithValue("@id",       course.CourseID);
-    command.Parameters.AddWithValue("@name",     course.CourseName);
-    command.Parameters.AddWithValue("@credits",  course.Credits ?? 3);
-    command.Parameters.AddWithValue("@major",    course.Major ?? "");
-    command.Parameters.AddWithValue("@semesters", course.Semesters ?? "");
+    command.CommandText = "INSERT INTO Course (CourseID, CourseName, Credits, Major) VALUES (@id, @name, @credits, @major)";
+    command.Parameters.AddWithValue("@id",      course.CourseID);
+    command.Parameters.AddWithValue("@name",    course.CourseName);
+    command.Parameters.AddWithValue("@credits", course.Credits ?? 3);
+    command.Parameters.AddWithValue("@major",   course.Major ?? "");
     command.ExecuteNonQuery();
 
     return Results.Ok("Course created.");
@@ -389,32 +375,6 @@ app.MapPost("/enroll", async (HttpContext http) =>
     cmd.Parameters.AddWithValue("@cid",   dto.CourseID);
     cmd.Parameters.AddWithValue("@semId", string.IsNullOrWhiteSpace(dto.SemesterID) ? DBNull.Value : (object)dto.SemesterID);
     cmd.ExecuteNonQuery();
-
-    // Auto-link all existing assignments for this course to the student
-    var getAssignments = connection.CreateCommand();
-    getAssignments.CommandText = "SELECT AssignmentID FROM Assignment WHERE CourseID = @cid";
-    getAssignments.Parameters.AddWithValue("@cid", dto.CourseID);
-
-    var assignmentIds = new List<int>();
-    using (var r = getAssignments.ExecuteReader())
-        while (r.Read())
-            assignmentIds.Add(Convert.ToInt32(r["AssignmentID"]));
-
-    foreach (var aid in assignmentIds)
-    {
-        // Only link if not already linked
-        var alreadyLinked = connection.CreateCommand();
-        alreadyLinked.CommandText = "SELECT COUNT(*) FROM StudentAssignment WHERE StudentID = @sid AND AssignmentID = @aid";
-        alreadyLinked.Parameters.AddWithValue("@sid", dto.StudentID);
-        alreadyLinked.Parameters.AddWithValue("@aid", aid);
-        if (Convert.ToInt32(alreadyLinked.ExecuteScalar()) > 0) continue;
-
-        var link = connection.CreateCommand();
-        link.CommandText = "INSERT INTO StudentAssignment (StudentID, AssignmentID) VALUES (@sid, @aid)";
-        link.Parameters.AddWithValue("@sid", dto.StudentID);
-        link.Parameters.AddWithValue("@aid", aid);
-        link.ExecuteNonQuery();
-    }
 
     return Results.Ok("Enrolled successfully.");
 });
@@ -577,163 +537,6 @@ app.MapPut("/update-grade", async (HttpContext http) =>
 });
 
 
-// ── Edit Course ───────────────────────────────────────────────────────────────
-app.MapPut("/edit-course", async (HttpContext http) =>
-{
-    var course = await http.Request.ReadFromJsonAsync<CourseDto>();
-
-    if (course == null || string.IsNullOrWhiteSpace(course.CourseID))
-        return Results.BadRequest("CourseID is required.");
-
-    using var connection = new SqliteConnection("Data Source=AssesmentReportGenerator.db");
-    connection.Open();
-
-    var command = connection.CreateCommand();
-    command.CommandText = @"
-        UPDATE Course SET CourseName = @name, Credits = @credits, Major = @major, Semesters = @semesters
-        WHERE CourseID = @id";
-    command.Parameters.AddWithValue("@id",        course.CourseID);
-    command.Parameters.AddWithValue("@name",      course.CourseName ?? "");
-    command.Parameters.AddWithValue("@credits",   course.Credits ?? 3);
-    command.Parameters.AddWithValue("@major",     course.Major ?? "");
-    command.Parameters.AddWithValue("@semesters", course.Semesters ?? "");
-
-    var rows = command.ExecuteNonQuery();
-    return rows == 0
-        ? Results.NotFound("Course not found.")
-        : Results.Ok("Course updated.");
-});
-
-
-// ── Delete Course ─────────────────────────────────────────────────────────────
-app.MapDelete("/delete-course", (string? id) =>
-{
-    if (string.IsNullOrWhiteSpace(id))
-        return Results.BadRequest("CourseID is required.");
-
-    using var connection = new SqliteConnection("Data Source=AssesmentReportGenerator.db");
-    connection.Open();
-
-    // Remove enrollments for this course
-    var delEnroll = connection.CreateCommand();
-    delEnroll.CommandText = "DELETE FROM Enrollment WHERE CourseID = @id";
-    delEnroll.Parameters.AddWithValue("@id", id);
-    delEnroll.ExecuteNonQuery();
-
-    var delCourse = connection.CreateCommand();
-    delCourse.CommandText = "DELETE FROM Course WHERE CourseID = @id";
-    delCourse.Parameters.AddWithValue("@id", id);
-    var rows = delCourse.ExecuteNonQuery();
-
-    return rows == 0
-        ? Results.NotFound("Course not found.")
-        : Results.Ok("Course deleted.");
-});
-
-
-// ── Get All Students ──────────────────────────────────────────────────────────
-app.MapGet("/students", () =>
-{
-    using var connection = new SqliteConnection("Data Source=AssesmentReportGenerator.db");
-    connection.Open();
-
-    var command = connection.CreateCommand();
-    command.CommandText = "SELECT StudentID, FirstName, LastName, Major FROM Student ORDER BY LastName, FirstName";
-
-    using var reader = command.ExecuteReader();
-    var students = new List<object>();
-    while (reader.Read())
-    {
-        students.Add(new {
-            studentId  = reader["StudentID"]?.ToString() ?? "",
-            firstName  = reader["FirstName"]?.ToString() ?? "",
-            lastName   = reader["LastName"]?.ToString()  ?? "",
-            major      = reader["Major"]?.ToString()     ?? ""
-        });
-    }
-    return Results.Ok(students);
-});
-
-
-// ── Add Assignment (Course level — no student required) ───────────────────────
-app.MapPost("/add-assignment-course", async (HttpContext http) =>
-{
-    var asgn = await http.Request.ReadFromJsonAsync<AssignmentDto>();
-
-    if (asgn == null || string.IsNullOrWhiteSpace(asgn.AssignmentName))
-        return Results.BadRequest("Assignment name is required.");
-    if (string.IsNullOrWhiteSpace(asgn.CourseID))
-        return Results.BadRequest("CourseID is required.");
-
-    using var connection = new SqliteConnection("Data Source=AssesmentReportGenerator.db");
-    connection.Open();
-
-    var insertAssignment = connection.CreateCommand();
-    insertAssignment.CommandText = @"
-        INSERT INTO Assignment (
-            AssignmentType, AssignmentName, CourseID, SemesterID, Comments,
-            PLO1, PLO2, PLO3, PLO4,
-            plo1_1, plo1_2, plo1_3, plo1_4,
-            plo2_1, plo2_2,
-            plo3_1, plo3_2, plo3_3,
-            plo4_1
-        )
-        VALUES (
-            @type, @name, @courseId, @semesterId, @comments,
-            @plo1, @plo2, @plo3, @plo4,
-            @m1_1, @m1_2, @m1_3, @m1_4,
-            @m2_1, @m2_2,
-            @m3_1, @m3_2, @m3_3,
-            @m4_1
-        )";
-
-    insertAssignment.Parameters.AddWithValue("@type",       asgn.AssignmentType ?? "");
-    insertAssignment.Parameters.AddWithValue("@name",       asgn.AssignmentName);
-    insertAssignment.Parameters.AddWithValue("@courseId",   asgn.CourseID);
-    insertAssignment.Parameters.AddWithValue("@semesterId", string.IsNullOrWhiteSpace(asgn.SemesterID) ? DBNull.Value : (object)asgn.SemesterID);
-    insertAssignment.Parameters.AddWithValue("@comments",   asgn.Comments ?? "");
-    insertAssignment.Parameters.AddWithValue("@plo1", asgn.PLO1 ? 1 : 0);
-    insertAssignment.Parameters.AddWithValue("@plo2", asgn.PLO2 ? 1 : 0);
-    insertAssignment.Parameters.AddWithValue("@plo3", asgn.PLO3 ? 1 : 0);
-    insertAssignment.Parameters.AddWithValue("@plo4", asgn.PLO4 ? 1 : 0);
-    insertAssignment.Parameters.AddWithValue("@m1_1", asgn.plo1_1 ? 1 : 0);
-    insertAssignment.Parameters.AddWithValue("@m1_2", asgn.plo1_2 ? 1 : 0);
-    insertAssignment.Parameters.AddWithValue("@m1_3", asgn.plo1_3 ? 1 : 0);
-    insertAssignment.Parameters.AddWithValue("@m1_4", asgn.plo1_4 ? 1 : 0);
-    insertAssignment.Parameters.AddWithValue("@m2_1", asgn.plo2_1 ? 1 : 0);
-    insertAssignment.Parameters.AddWithValue("@m2_2", asgn.plo2_2 ? 1 : 0);
-    insertAssignment.Parameters.AddWithValue("@m3_1", asgn.plo3_1 ? 1 : 0);
-    insertAssignment.Parameters.AddWithValue("@m3_2", asgn.plo3_2 ? 1 : 0);
-    insertAssignment.Parameters.AddWithValue("@m3_3", asgn.plo3_3 ? 1 : 0);
-    insertAssignment.Parameters.AddWithValue("@m4_1", asgn.plo4_1 ? 1 : 0);
-    insertAssignment.ExecuteNonQuery();
-
-    return Results.Ok("Assignment added.");
-});
-
-
-// ── Get Enrolled Students for a Course ───────────────────────────────────────
-app.MapGet("/course-enrollments", (string courseId) =>
-{
-    using var connection = new SqliteConnection("Data Source=AssesmentReportGenerator.db");
-    connection.Open();
-
-    var command = connection.CreateCommand();
-    command.CommandText = @"
-        SELECT DISTINCT e.StudentID
-        FROM Enrollment e
-        WHERE e.CourseID = @cid";
-    command.Parameters.AddWithValue("@cid", courseId);
-
-    using var reader = command.ExecuteReader();
-    var ids = new List<string>();
-    while (reader.Read())
-        ids.Add(reader["StudentID"]?.ToString() ?? "");
-
-    return Results.Ok(ids);
-});
-
-
 app.Run();
 
 
@@ -773,7 +576,6 @@ record CourseDto
     public string? CourseName { get; init; }
     public int?    Credits    { get; init; }
     public string? Major      { get; init; }
-    public string? Semesters  { get; init; }
 }
 
 record EnrollmentDto
