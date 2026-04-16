@@ -29,6 +29,9 @@
             <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
+            <a class="navbar-brand me-auto ms-3" style="color: rgb(171, 171, 16); font-size: 28px;" id="displayName">Loading...</a>
+            <button type="button" class="btn btn-light ms-3" onclick="openCreateCourse()">Create Course</button>
+            <button type="button" class="btn btn-light ms-3" onclick="openEnroll()">Enroll in Course</button>
             <div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="offcanvasDarkNavbar" aria-labelledby="offcanvasDarkNavbarLabel">
                 <div class="offcanvas-header">
                     <button type="button" class="navbar-toggler" data-bs-dismiss="offcanvas" aria-label="Close">
@@ -52,12 +55,7 @@
         </div>
     </nav>
 
-    <div class="container mt-5" style="padding-top: 50px; color: rgb(0, 0, 0);">
-        <h2><span id="displayName">Loading...</span></h2>
-        <hr>
-    </div>
-
-    <div class="container" style="border: 2px solid black; margin-top: 20px; padding: 20px;">
+    <div class="container" style="border: 2px solid black; margin-top: 90px; padding: 20px;">
         <div class="row align-items-start">
             <div class="col ps-5 text-center">
             
@@ -72,10 +70,10 @@
                 <h4> Email:</h4>
                 <h4> Expected Graduation Year:</h4>
             </div>
-            <div class="col">
-                <p><strong></strong> <span id="displayId"></span></p>
-                <p><strong></strong> <span id="displayEmail"></span></p>
-                <p><strong></strong> <span id="displayGrad"></span></p>
+            <div class="col" style="font-size: 20px; margin-bottom: 10px;">
+                <h4><span id="displayId"></span></h4>
+                <h4><span id="displayEmail"></span></h4>
+                <h4><span id="displayGrad"></span></h4>
             </div>
         </div>
 
@@ -83,8 +81,8 @@
             <div class="col text-end">
                 <h3> Major: </h3>
             </div>
-            <div class="col fw-bold" style="padding-right: 750px; font-size: 20px;">
-                <p><strong><span id="displayMajor"></span></strong></p>
+            <div class="col fw-bold" style="padding-right: 750px; font-size: 20px; margin-top: 3px;">
+                <h3><span id="displayMajor"></span></h3>
             </div>
         </div>
 
@@ -105,7 +103,7 @@
         
 
             <div style="max-height: 250px; overflow-y: scroll; border: 1px solid black; margin-top: 20px;">
-                <table class="table table-bordered text-center mb-0">
+                <table class="table table-bordered text-center mb-0" style="font-size: 14px;">
                     <thead>
                         <tr>
                             <th style="background-color: #d3d3d3;">Assignments</th>
@@ -125,15 +123,16 @@
                 </table>
             </div>
             <br/>
-            <div class="mt-2">
-                <button class="btn-1" onclick="openCreateCourse()">Create Course</button>
-                <button class="btn-1" style="margin-left: 8px;" onclick="openEnroll()">Enroll in Course</button>
-            </div>
-            <br/>
         </div>
     </div>
 
     <footer style="padding: 20px"></footer>
+
+    <!-- Fixed bottom action bar -->
+    <div class="fixed-bottom d-flex justify-content-center gap-3 pb-4">
+        <button type="button" class="btn btn-light" style="border: 2px solid #000;" onclick="openCreateCourse()">Create Course</button>
+        <button type="button" class="btn btn-light" style="border: 2px solid #000;" onclick="openEnroll()">Enroll in Course</button>
+    </div>
 
     <div id="mEnroll" style="display: none;">
       <div class="modal">
@@ -213,7 +212,7 @@
                 <option>Other</option>
             </select>
           </div>
-          <p style="font-size:12px;color:#555;font-weight:600;margin-bottom:6px;">Which PLOs does this assignment address?</p><br/>
+          <p style="font-size:16px;color:#555;font-weight:600;margin-bottom:6px;">Which PLOs does this assignment address?</p><br/>
           <table style="border:none; width:100%; text-align: center;">
             <thead style="text-align: center;">
                 <tr style="height: 30px;">
@@ -356,7 +355,7 @@
                         if (results && results.length > 0) {
                             const student = results[0]; 
                             
-                            $('#displayName').text(student.LastName + ", " + student.FirstName + " - [Active]");
+                            $('#displayName').text(student.LastName + ", " + student.FirstName);
                             $('#displayId').text(student.StudentID);
                             $('#displayYear').text(student.Year);
                             $('#displayGrad').text(student.ExpectedGradYear);
