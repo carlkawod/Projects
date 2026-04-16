@@ -256,6 +256,30 @@ td {
     background: #dbdbdb;
 }
 /* ---------- MODAL STYLES ---------- */
+#mCreateCourse {
+    display: none;
+    position: fixed;
+    z-index: 1050;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+}
+
+#mCreateCourse .modal {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #000;
+    width: 40%;
+    max-width: 95%;
+    height: auto;
+    position: relative;
+    display: block;
+}
+
 #mAdd {
     display: none; 
     position: fixed;
