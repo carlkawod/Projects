@@ -42,14 +42,15 @@
         #resultsTable thead tr { background: #1a1a1a !important; }
         #resultsTable thead th { color: #c8b830 !important; font-weight: 500; padding: 10px 14px; border: none !important; font-size: 13px; background: #1a1a1a !important; }
         #resultsTable tbody tr { border-bottom: 1px solid #f0ede3; }
-        #resultsTable tbody tr:hover { background: #fdf9ed; }
-        #resultsTable tbody td { padding: 10px 14px; color: #333; border: none; vertical-align: middle; }
+        #resultsTable tbody tr:hover td { background: #fdf9ed !important; }
+        #resultsTable tbody td { padding: 10px 14px !important; color: #333 !important; border: none !important; vertical-align: middle !important; height: auto !important; background: white !important; }
+        #resultsTable tbody tr:nth-child(even) td { background: #fafafa !important; }
         .major-badge { display: inline-block; font-size: 11px; padding: 3px 10px; border-radius: 4px; background: #f0f7ee; color: #2a6b2a; border: 1px solid #4caf50; font-weight: 500; }
         .major-badge-cis { background: #f0f7ee; color: #2a6b2a; border: 1px solid #4caf50; }
-        .action-btn { font-size: 11px; padding: 4px 10px; border-radius: 5px; cursor: pointer; border: 1px solid #ccc; background: white; color: #444; margin-right: 3px; }
-        .action-btn:hover { background: #f5f5f5; }
-        .action-btn-danger { border-color: #e74c3c; color: #e74c3c; }
-        .action-btn-danger:hover { background: #fff5f5; }
+        .action-btn { display: inline-block !important; font-size: 11px !important; padding: 4px 10px !important; border-radius: 5px !important; cursor: pointer; border: 1px solid #ccc !important; background: white !important; color: #444 !important; margin-right: 3px; height: auto !important; }
+        .action-btn:hover { background: #f5f5f5 !important; }
+        .action-btn-danger { border-color: #e74c3c !important; color: #e74c3c !important; }
+        .action-btn-danger:hover { background: #fff5f5 !important; }
 
         .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.97); border-top: 1px solid #e0ddd5; padding: 12px; display: flex; justify-content: center; }
         .bottom-search-btn { height: 38px; padding: 0 40px; background: #1a1a1a; color: #c8b830; border: none; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; }
@@ -324,9 +325,14 @@
                             '<td><span class="' + badgeClass + '">' + major + '</span></td>' +
                             '<td>' + (student.ExpectedGradYear || '') + '</td>' +
                             '<td>' +
-                                '<button class="action-btn view-student-btn" onclick="window.location.href=\'student.html?sid=' + sid + '\'">View</button>' +
-                                '<button class="action-btn edit-student-btn" data-id="' + sid + '" data-firstname="' + student.FirstName + '" data-lastname="' + student.LastName + '" data-grad="' + (student.ExpectedGradYear || '') + '" data-email="' + (student.Email || '') + '" data-major="' + major + '">Edit</button>' +
-                                '<button class="action-btn action-btn-danger remove-student-btn" data-id="' + sid + '" data-name="' + student.FirstName + ' ' + student.LastName + '">Remove</button>' +
+                                '<div class="dropdown">' +
+                                '<button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" style="font-size:11px;">Actions</button>' +
+                                '<ul class="dropdown-menu dropdown-menu-end" style="font-size:13px;">' +
+                                '<li><a class="dropdown-item" style="cursor:pointer;" onclick="window.location.href=\'student.html?sid=' + sid + '\'">View Student</a></li>' +
+                                '<li><a class="dropdown-item edit-student-btn" style="cursor:pointer;" data-id="' + sid + '" data-firstname="' + student.FirstName + '" data-lastname="' + student.LastName + '" data-grad="' + (student.ExpectedGradYear || '') + '" data-email="' + (student.Email || '') + '" data-major="' + major + '">Edit Student</a></li>' +
+                                '<li><hr class="dropdown-divider"></li>' +
+                                '<li><a class="dropdown-item text-danger remove-student-btn" style="cursor:pointer;" data-id="' + sid + '" data-name="' + student.FirstName + ' ' + student.LastName + '">Remove Student</a></li>' +
+                                '</ul></div>' +
                             '</td>' +
                             '</tr>'
                         );
