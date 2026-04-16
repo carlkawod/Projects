@@ -187,6 +187,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-outline-dark" onclick="openAddAsgnFromEdit()">Add Assignment</button>
                 <button type="button" class="btn btn-dark" onclick="confirmEditCourse()">Save Changes</button>
             </div>
         </div>
@@ -288,7 +289,7 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title">Add Assignment: <span id="courseAsgnCourseName"></span></h5>
+                <h5 class="modal-title">Add Assignment — <span id="courseAsgnCourseName"></span></h5>
                 <button type="button" class="btn-close btn-close-white" onclick="closeCourseAddAsgn()"></button>
             </div>
             <div class="modal-body">
@@ -429,6 +430,41 @@
 </div>
 
 
+<!-- ── COURSE STUDENTS MODAL ──────────────────────────────────────────────── -->
+<div class="modal fade" id="courseStudentsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title">Students Enrolled — <span id="courseStudentsCourseName"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div style="max-height: 450px; overflow-y: auto;">
+                    <table class="table table-bordered table-striped mb-0" style="font-size: 14px; text-align: center;">
+                        <thead class="table-dark" style="position: sticky; top: 0;">
+                            <tr>
+                                <th>Student ID</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Major</th>
+                                <th>Expected Grad Year</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="courseStudentsBody">
+                            <tr><td colspan="6">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <script>
     let allCourses = [];
     let allStudents = [];
@@ -446,6 +482,48 @@
             renderStudentList($('#studentSearchFilter').val());
         });
     });
+
+    // ── Course Students ───────────────────────────────────────────────────────
+
+    function openCourseStudents(courseId, courseName) {
+        $('#courseStudentsCourseName').text(courseName);
+        $('#courseStudentsBody').html('<tr><td colspan="6">Loading...</td></tr>');
+        new bootstrap.Modal(document.getElementById('courseStudentsModal')).show();
+
+        $.ajax({
+            url: '/course-students?courseId=' + encodeURIComponent(courseId),
+            method: 'GET',
+            success: function (students) {
+                const tbody = $('#courseStudentsBody');
+                tbody.empty();
+                if (students.length === 0) {
+                    tbody.html('<tr><td colspan="6">No students enrolled in this course.</td></tr>');
+                    return;
+                }
+                students.forEach(function (s) {
+                    tbody.append(`
+                        <tr>
+                            <td>${s.studentId}</td>
+                            <td>${s.firstName}</td>
+                            <td>${s.lastName}</td>
+                            <td>${s.major || '--'}</td>
+                            <td>${s.expectedGradYear || '--'}</td>
+                            <td>
+                                <button class="btn btn-outline-secondary btn-sm"
+                                    onclick="window.location.href='student.html?sid=${s.studentId}'">
+                                    View
+                                </button>
+                            </td>
+                        </tr>
+                    `);
+                });
+            },
+            error: function () {
+                $('#courseStudentsBody').html('<tr><td colspan="6">Failed to load students.</td></tr>');
+            }
+        });
+    }
+
 
     // ── Load & Render Courses ─────────────────────────────────────────────────
 
@@ -486,7 +564,12 @@
             tbody.append(`
                 <tr>
                     <td>${c.courseId}</td>
-                    <td>${c.courseName}</td>
+                    <td>
+                        <a href="#" style="color: inherit; text-decoration: underline dotted;"
+                            onclick="openCourseStudents('${c.courseId}', '${c.courseName.replace(/'/g,"\\'")}'); return false;">
+                            ${c.courseName}
+                        </a>
+                    </td>
                     <td>${c.credits ?? '--'}</td>
                     <td>${c.major || '--'}</td>
                     <td>${c.semesters || '--'}</td>
@@ -560,6 +643,13 @@
 
 
     // ── Edit Course ───────────────────────────────────────────────────────────
+
+    function openAddAsgnFromEdit() {
+        newCourseIdAfterCreate   = $('#editCourseId').val();
+        newCourseNameAfterCreate = $('#editCourseName').val();
+        bootstrap.Modal.getInstance(document.getElementById('editCourseModal')).hide();
+        openCourseAddAsgn();
+    }
 
     function openEditCourse(id, name, credits, major, semesters) {
         $('#editCourseId').val(id);
