@@ -327,11 +327,10 @@
                             '<td>' +
                                 '<div class="dropdown">' +
                                 '<button class="btn btn-sm btn-dark dropdown-toggle" type="button" data-bs-toggle="dropdown" style="font-size:11px; background:#1a1a1a; border-color:#1a1a1a; color:#c8b830;">Actions</button>' +
-                                '<ul class="dropdown-menu dropdown-menu-end" style="font-size:12px; min-width:140px; padding:4px 0; border:1px solid #ddd; box-shadow:0 4px 12px rgba(0,0,0,0.1);">' +
-                                '<li><a class="dropdown-item" style="cursor:pointer; padding:6px 14px;" onclick="window.location.href=\'student.html?sid=' + sid + '\'">View Student</a></li>' +
-                                '<li><a class="dropdown-item edit-student-btn" style="cursor:pointer; padding:6px 14px;" data-id="' + sid + '" data-firstname="' + student.FirstName + '" data-lastname="' + student.LastName + '" data-grad="' + (student.ExpectedGradYear || '') + '" data-email="' + (student.Email || '') + '" data-major="' + major + '">Edit Student</a></li>' +
-                                '<li><hr class="dropdown-divider" style="margin:4px 0;"></li>' +
-                                '<li><a class="dropdown-item text-danger remove-student-btn" style="cursor:pointer; padding:6px 14px;" data-id="' + sid + '" data-name="' + student.FirstName + ' ' + student.LastName + '">Remove</a></li>' +
+                                '<ul class="dropdown-menu dropdown-menu-end" style="font-size:12px; min-width:130px; padding:0; border-radius:6px; overflow:hidden; border:0.5px solid #ddd; box-shadow:0 4px 12px rgba(0,0,0,0.12);">' +
+                                '<li><a class="dropdown-item" style="cursor:pointer; padding:8px 14px; border-bottom:0.5px solid #eee;" onclick="window.location.href=\'student.html?sid=' + sid + '\'">View Student</a></li>' +
+                                '<li><a class="dropdown-item edit-student-btn" style="cursor:pointer; padding:8px 14px; border-bottom:0.5px solid #eee;" data-id="' + sid + '" data-firstname="' + student.FirstName + '" data-lastname="' + student.LastName + '" data-grad="' + (student.ExpectedGradYear || '') + '" data-email="' + (student.Email || '') + '" data-major="' + major + '">Edit Student</a></li>' +
+                                '<li><a class="dropdown-item text-danger remove-student-btn" style="cursor:pointer; padding:8px 14px;" data-id="' + sid + '" data-name="' + student.FirstName + ' ' + student.LastName + '">Remove</a></li>' +
                                 '</ul></div>' +
                             '</td>' +
                             '</tr>'
