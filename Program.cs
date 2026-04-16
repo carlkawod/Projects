@@ -113,7 +113,7 @@ app.MapPost("/api/login", (LoginRequest request) =>
 
 
 // ── Search ────────────────────────────────────────────────────────────────────
-app.MapGet("/search", (string? lastName, string? firstName, string? id) =>
+app.MapGet("/search", (string? lastName, string? firstName, string? id, string? major) =>
 {
     using var connection = new SqliteConnection("Data Source=AssesmentReportGenerator.db");
     connection.Open();
@@ -122,12 +122,14 @@ app.MapGet("/search", (string? lastName, string? firstName, string? id) =>
     if (!string.IsNullOrEmpty(lastName))  sql += " AND LastName LIKE @last";
     if (!string.IsNullOrEmpty(firstName)) sql += " AND FirstName LIKE @first";
     if (!string.IsNullOrEmpty(id))        sql += " AND StudentID LIKE @id";
+    if (!string.IsNullOrEmpty(major))     sql += " AND Major = @major";
 
     var command = connection.CreateCommand();
     command.CommandText = sql;
     if (!string.IsNullOrEmpty(lastName))  command.Parameters.AddWithValue("@last",  $"%{lastName}%");
     if (!string.IsNullOrEmpty(firstName)) command.Parameters.AddWithValue("@first", $"%{firstName}%");
     if (!string.IsNullOrEmpty(id))        command.Parameters.AddWithValue("@id",    $"%{id}%");
+    if (!string.IsNullOrEmpty(major))     command.Parameters.AddWithValue("@major", major);
 
     var results = new List<Dictionary<string, object>>();
     using var reader = command.ExecuteReader();
