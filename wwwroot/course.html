@@ -15,6 +15,8 @@
     <style>
         #tabCS, #tabIT, #tabAll { background-color: white !important; color: #1a1a1a !important; border: 1px solid #1a1a1a !important; border-radius: 6px !important; font-size: 14px !important; padding: 6px 14px !important; }
         #tabCS.active-tab, #tabIT.active-tab, #tabAll.active-tab { background-color: #1a1a1a !important; color: #c8b830 !important; border-color: #1a1a1a !important; }
+        #removeFromCourseModal { z-index: 1100 !important; }
+        #removeFromCourseModal .modal-dialog { z-index: 1101 !important; }
         #coursesTable thead th { background-color: #1a1a1a !important; color: #c8b830 !important; border: none !important; }
     </style>
 </head>
@@ -436,8 +438,8 @@
 
 
 <!-- ── REMOVE STUDENT FROM COURSE CONFIRM MODAL ──────────────────────────── -->
-<div class="modal fade" id="removeFromCourseModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+<div class="modal fade" id="removeFromCourseModal" tabindex="-1" aria-hidden="true" style="z-index: 1100;">
+    <div class="modal-dialog" style="z-index: 1101;">
         <div class="modal-content">
             <div class="modal-header" style="background:#1a1a1a;color:white;border-bottom:1px solid #333;">
                 <h5 class="modal-title">Remove Student</h5>
