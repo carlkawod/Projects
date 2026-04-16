@@ -456,7 +456,7 @@ app.MapPost("/enroll", async (HttpContext http) =>
 // ── Save Assignment Grades ────────────────────────────────────────────────────
 app.MapPost("/save-grades", async (HttpContext http) =>
 {
-    var dto = await http.Request.ReadFromJsonAsync<SaveGradesDto>();
+    var dto = await http.Request.ReadFromJsonAsync<GradeDto>();
 
     if (dto == null || dto.AssignmentID <= 0 || string.IsNullOrWhiteSpace(dto.StudentID))
         return Results.BadRequest("AssignmentID and StudentID are required.");
@@ -686,4 +686,17 @@ record CourseDto
     public string? CourseID   { get; init; }
     public string? CourseName { get; init; }
     public int?    Credits    { get; init; }
+}
+
+record EnrollmentDto
+{
+    public string? StudentID  { get; init; }
+    public string? CourseID   { get; init; }
+    public string? SemesterID { get; init; }
+}
+
+record GradeDto
+{
+    public int  StudentAssignmentID { get; init; }
+    public int? Grade               { get; init; }
 }
