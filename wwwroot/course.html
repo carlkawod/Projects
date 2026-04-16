@@ -259,15 +259,9 @@
             <div class="modal-body">
                 <div id="courseAsgnAlert" class="alert" style="display:none;"></div>
 
-                <div class="row mb-3">
-                    <div class="col">
-                        <label class="form-label fw-bold">Student:</label>
-                        <select id="courseAsgnStudentSelect" class="form-select"></select>
-                    </div>
-                    <div class="col">
-                        <label class="form-label fw-bold">Semester:</label>
-                        <select id="courseAsgnSemesterSelect" class="form-select"></select>
-                    </div>
+                <div class="mb-3" style="width: 250px;">
+                    <label class="form-label fw-bold">Semester:</label>
+                    <select id="courseAsgnSemesterSelect" class="form-select"></select>
                 </div>
 
                 <div class="mb-3">
@@ -287,29 +281,42 @@
                     <input type="text" id="courseAsgnName" class="form-control" placeholder="Assignment Name...">
                 </div>
 
-                <label class="form-label fw-bold">Which PLOs does this assignment address?</label>
-                <table class="table table-bordered text-center mt-2">
+                <p style="font-size:14px;color:#555;font-weight:600;margin-bottom:6px;">Which PLOs does this assignment address?</p>
+                <table style="border:none; width:100%; text-align:center;">
                     <thead>
-                        <tr>
-                            <th style="background:#fff; width:40%;"></th>
-                            <th style="background:#4da6ff;">PLO 1</th>
-                            <th style="background:#4da6ff;">PLO 2</th>
-                            <th style="background:#4da6ff;">PLO 3</th>
-                            <th style="background:#4da6ff;">PLO 4</th>
+                        <tr style="height:30px;">
+                            <th style="background:#fff; width:35%;"></th>
+                            <th colspan="4" style="background:#4da6ff; border:1px solid #b2b2b2;">PLOs</th>
+                        </tr>
+                        <tr style="height:40px;">
+                            <th>Assignment</th>
+                            <th style="background:#4da6ff; border:1px solid #b2b2b2;">PLO 1</th>
+                            <th style="background:#4da6ff; border:1px solid #b2b2b2;">PLO 2</th>
+                            <th style="background:#4da6ff; border:1px solid #b2b2b2;">PLO 3</th>
+                            <th style="background:#4da6ff; border:1px solid #b2b2b2;">PLO 4</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>Assignment addresses PLO?</td>
-                            <td><input type="checkbox" id="caPlo1"></td>
-                            <td><input type="checkbox" id="caPlo2"></td>
-                            <td><input type="checkbox" id="caPlo3"></td>
-                            <td><input type="checkbox" id="caPlo4"></td>
+                        <tr style="height:40px;">
+                            <td style="background:#fff; border:1px solid #b2b2b2;">
+                                <input type="text" id="courseAsgnName2" class="form-control form-control-sm" placeholder="Assignment Name.." style="display:none;">
+                            </td>
+                            <td style="background:#fff; border:1px solid #b2b2b2;"><input type="checkbox" id="caPlo1"/></td>
+                            <td style="background:#fff; border:1px solid #b2b2b2;"><input type="checkbox" id="caPlo2"/></td>
+                            <td style="background:#fff; border:1px solid #b2b2b2;"><input type="checkbox" id="caPlo3"/></td>
+                            <td style="background:#fff; border:1px solid #b2b2b2;"><input type="checkbox" id="caPlo4"/></td>
+                        </tr>
+                        <tr style="height:40px;">
+                            <td style="background:#fff; border:1px solid #b2b2b2;"></td>
+                            <td style="background:#fff; border:1px solid #b2b2b2;"><button class="btn-2" onclick="omC('caMAsgnOverview1')">go</button></td>
+                            <td style="background:#fff; border:1px solid #b2b2b2;"><button class="btn-2" onclick="omC('caMAsgnOverview2')">go</button></td>
+                            <td style="background:#fff; border:1px solid #b2b2b2;"><button class="btn-2" onclick="omC('caMAsgnOverview3')">go</button></td>
+                            <td style="background:#fff; border:1px solid #b2b2b2;"><button class="btn-2" onclick="omC('caMAsgnOverview4')">go</button></td>
                         </tr>
                     </tbody>
                 </table>
 
-                <div class="mb-3">
+                <div class="mb-3 mt-3">
                     <label class="form-label fw-bold">Comments:</label>
                     <textarea id="courseAsgnComments" class="form-control" placeholder="Any comments..."></textarea>
                 </div>
@@ -321,6 +328,71 @@
         </div>
     </div>
 </div>
+
+
+<!-- ── PLO METRIC MODALS ──────────────────────────────────────────────────── -->
+<div id="caMAsgnOverview1" style="display:none; position:fixed; z-index:1100; left:0; top:0; width:100%; height:100%; overflow:auto; background-color:rgba(0,0,0,0.5);">
+    <div class="modal" style="background:#fefefe; margin:15% auto; padding:20px; border:1px solid #000; width:40%; max-width:95%; position:relative; display:block;">
+        <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+            <h2 class="m-0 fs-4">Select the metrics this assignment covers</h2>
+            <button class="btn btn-sm border-0 fs-5" style="background:none;" onclick="cmC('caMAsgnOverview1')">✕</button>
+        </div>
+        <div>
+            <h5 id="caPlo1Head">PLO 1</h5>
+            <div><input type="checkbox" id="caPlo1_1"><label for="caPlo1_1" id="caPlo1Metric1"> Metric 1...</label></div>
+            <div><input type="checkbox" id="caPlo1_2"><label for="caPlo1_2" id="caPlo1Metric2"> Metric 2...</label></div>
+            <div><input type="checkbox" id="caPlo1_3"><label for="caPlo1_3" id="caPlo1Metric3"> Metric 3...</label></div>
+            <div><input type="checkbox" id="caPlo1_4"><label for="caPlo1_4" id="caPlo1Metric4"> Metric 4...</label></div>
+            <div class="mt-3 text-end"><button class="btn btn-dark" onclick="cmC('caMAsgnOverview1')">OK</button></div>
+        </div>
+    </div>
+</div>
+
+<div id="caMAsgnOverview2" style="display:none; position:fixed; z-index:1100; left:0; top:0; width:100%; height:100%; overflow:auto; background-color:rgba(0,0,0,0.5);">
+    <div class="modal" style="background:#fefefe; margin:15% auto; padding:20px; border:1px solid #000; width:40%; max-width:95%; position:relative; display:block;">
+        <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+            <h2 class="m-0 fs-4">Select the metrics this assignment covers</h2>
+            <button class="btn btn-sm border-0 fs-5" style="background:none;" onclick="cmC('caMAsgnOverview2')">✕</button>
+        </div>
+        <div>
+            <h5 id="caPlo2Head">PLO 2</h5>
+            <div><input type="checkbox" id="caPlo2_1"><label for="caPlo2_1" id="caPlo2Metric1"> Metric 1...</label></div>
+            <div><input type="checkbox" id="caPlo2_2"><label for="caPlo2_2" id="caPlo2Metric2"> Metric 2...</label></div>
+            <div class="mt-3 text-end"><button class="btn btn-dark" onclick="cmC('caMAsgnOverview2')">OK</button></div>
+        </div>
+    </div>
+</div>
+
+<div id="caMAsgnOverview3" style="display:none; position:fixed; z-index:1100; left:0; top:0; width:100%; height:100%; overflow:auto; background-color:rgba(0,0,0,0.5);">
+    <div class="modal" style="background:#fefefe; margin:15% auto; padding:20px; border:1px solid #000; width:40%; max-width:95%; position:relative; display:block;">
+        <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+            <h2 class="m-0 fs-4">Select the metrics this assignment covers</h2>
+            <button class="btn btn-sm border-0 fs-5" style="background:none;" onclick="cmC('caMAsgnOverview3')">✕</button>
+        </div>
+        <div>
+            <h5 id="caPlo3Head">PLO 3</h5>
+            <div><input type="checkbox" id="caPlo3_1"><label for="caPlo3_1" id="caPlo3Metric1"> Metric 1...</label></div>
+            <div><input type="checkbox" id="caPlo3_2"><label for="caPlo3_2" id="caPlo3Metric2"> Metric 2...</label></div>
+            <div><input type="checkbox" id="caPlo3_3"><label for="caPlo3_3" id="caPlo3Metric3"> Metric 3...</label></div>
+            <div class="mt-3 text-end"><button class="btn btn-dark" onclick="cmC('caMAsgnOverview3')">OK</button></div>
+        </div>
+    </div>
+</div>
+
+<div id="caMAsgnOverview4" style="display:none; position:fixed; z-index:1100; left:0; top:0; width:100%; height:100%; overflow:auto; background-color:rgba(0,0,0,0.5);">
+    <div class="modal" style="background:#fefefe; margin:15% auto; padding:20px; border:1px solid #000; width:40%; max-width:95%; position:relative; display:block;">
+        <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+            <h2 class="m-0 fs-4">Select the metrics this assignment covers</h2>
+            <button class="btn btn-sm border-0 fs-5" style="background:none;" onclick="cmC('caMAsgnOverview4')">✕</button>
+        </div>
+        <div>
+            <h5 id="caPlo4Head">PLO 4</h5>
+            <div><input type="checkbox" id="caPlo4_1"><label for="caPlo4_1" id="caPlo4Metric1"> Metric 1...</label></div>
+            <div class="mt-3 text-end"><button class="btn btn-dark" onclick="cmC('caMAsgnOverview4')">OK</button></div>
+        </div>
+    </div>
+</div>
+
 
 <script>
     let allCourses = [];
@@ -634,23 +706,10 @@
         $('#courseAsgnName').val('');
         $('#courseAsgnComments').val('');
         $('#caPlo1, #caPlo2, #caPlo3, #caPlo4').prop('checked', false);
-
-        let studentsLoaded = false, semestersLoaded = false;
-        function tryOpen() {
-            if (studentsLoaded && semestersLoaded)
-                new bootstrap.Modal(document.getElementById('courseAddAsgnModal')).show();
-        }
-
-        $.ajax({
-            url: '/students', method: 'GET',
-            success: function (students) {
-                const sel = $('#courseAsgnStudentSelect');
-                sel.empty();
-                sel.append('<option value="">-- Select a student --</option>');
-                students.forEach(s => sel.append(`<option value="${s.studentId}">${s.lastName}, ${s.firstName} (${s.studentId})</option>`));
-                studentsLoaded = true; tryOpen();
-            }
-        });
+        $('#caPlo1_1, #caPlo1_2, #caPlo1_3, #caPlo1_4').prop('checked', false);
+        $('#caPlo2_1, #caPlo2_2').prop('checked', false);
+        $('#caPlo3_1, #caPlo3_2, #caPlo3_3').prop('checked', false);
+        $('#caPlo4_1').prop('checked', false);
 
         $.ajax({
             url: '/semesters', method: 'GET',
@@ -659,7 +718,7 @@
                 sel.empty();
                 sel.append('<option value="">-- No semester --</option>');
                 semesters.forEach(s => sel.append(`<option value="${s.semesterId}">${s.semesterName}</option>`));
-                semestersLoaded = true; tryOpen();
+                new bootstrap.Modal(document.getElementById('courseAddAsgnModal')).show();
             }
         });
     }
@@ -668,15 +727,15 @@
         bootstrap.Modal.getInstance(document.getElementById('courseAddAsgnModal')).hide();
     }
 
-    function confirmCourseAddAsgn() {
-        const studentId = $('#courseAsgnStudentSelect').val();
-        const name      = $('#courseAsgnName').val().trim();
+    function omC(id) { document.getElementById(id).style.display = 'block'; }
+    function cmC(id) { document.getElementById(id).style.display = 'none'; }
 
-        if (!studentId) { showAlert('#courseAsgnAlert', 'danger', 'Please select a student.'); return; }
-        if (!name)      { showAlert('#courseAsgnAlert', 'danger', 'Please enter an assignment name.'); return; }
+    function confirmCourseAddAsgn() {
+        const name = $('#courseAsgnName').val().trim();
+        if (!name) { showAlert('#courseAsgnAlert', 'danger', 'Please enter an assignment name.'); return; }
 
         const payload = {
-            StudentID:      studentId,
+            StudentID:      null,
             CourseID:       newCourseIdAfterCreate,
             SemesterID:     $('#courseAsgnSemesterSelect').val() || null,
             AssignmentType: $('#courseAsgnType').val(),
@@ -685,15 +744,21 @@
             PLO2: $('#caPlo2').is(':checked'),
             PLO3: $('#caPlo3').is(':checked'),
             PLO4: $('#caPlo4').is(':checked'),
-            plo1_1: false, plo1_2: false, plo1_3: false, plo1_4: false,
-            plo2_1: false, plo2_2: false,
-            plo3_1: false, plo3_2: false, plo3_3: false,
-            plo4_1: false,
+            plo1_1: $('#caPlo1_1').is(':checked'),
+            plo1_2: $('#caPlo1_2').is(':checked'),
+            plo1_3: $('#caPlo1_3').is(':checked'),
+            plo1_4: $('#caPlo1_4').is(':checked'),
+            plo2_1: $('#caPlo2_1').is(':checked'),
+            plo2_2: $('#caPlo2_2').is(':checked'),
+            plo3_1: $('#caPlo3_1').is(':checked'),
+            plo3_2: $('#caPlo3_2').is(':checked'),
+            plo3_3: $('#caPlo3_3').is(':checked'),
+            plo4_1: $('#caPlo4_1').is(':checked'),
             Comments: $('#courseAsgnComments').val()
         };
 
         $.ajax({
-            url: '/add-assignment', method: 'POST',
+            url: '/add-assignment-course', method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(payload),
             success: function () {
@@ -701,6 +766,7 @@
                 $('#courseAsgnName').val('');
                 $('#courseAsgnComments').val('');
                 $('#caPlo1, #caPlo2, #caPlo3, #caPlo4').prop('checked', false);
+                $('#caPlo1_1, #caPlo1_2, #caPlo1_3, #caPlo1_4, #caPlo2_1, #caPlo2_2, #caPlo3_1, #caPlo3_2, #caPlo3_3, #caPlo4_1').prop('checked', false);
             },
             error: function (xhr) {
                 showAlert('#courseAsgnAlert', 'danger', xhr.responseText || 'Failed to add assignment.');
