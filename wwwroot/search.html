@@ -28,6 +28,10 @@
         <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasDarkNavbar">
             <span class="navbar-toggler-icon"></span>
         </button>
+            <a class="navbar-brand me-auto ms-3" style="color: rgb(171, 171, 16); font-size: 28px;">Search Student</a>
+            <button type="button" class="btn btn-light ms-3" id="searchBtn">Search</button>
+            <button type="button" class="btn btn-light ms-3" data-bs-toggle="modal" data-bs-target="#createStudentModal">Add Student</button>
+            <button type="button" class="btn btn-light ms-3" data-bs-toggle="modal" data-bs-target="#importStudentModal">Import Student</button>
     </div>
     <div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="offcanvasDarkNavbar">
         <div class="offcanvas-header">
@@ -45,11 +49,11 @@
     </div>
 </nav>
 
-<div class="container mt-5" style="padding-top: 60px; color: rgb(171, 171, 16);">
+<!-- <div class="container mt-5" style="padding-top: 60px; color: rgb(171, 171, 16);">
     <h2><span id="displayName">Search Student</span></h2>
-</div>
+</div> -->
 
-<div class="container-fluid text-center" style="margin-top: 60px; border: 2px solid #555555; background-color: rgb(199, 196, 196);">
+<div class="container text-center" style="margin-top: 60px; border: 2px solid #555555; background-color: rgb(199, 196, 196);">
     <div class="row">
         <div class="col border-end border-dark">Last Name</div>
         <div class="col border-end border-dark">First Name</div>
@@ -91,7 +95,7 @@
 
 <!-- Results Table -->
 <div class="container-fluid" style="margin-top: 30px; margin-bottom: 120px;">
-    <table class="table table-bordered table-striped" id="resultsTable" style="display:none; text-align: center;">
+    <table class="table table-bordered table-striped" id="resultsTable" style="display:none; text-align: center; font-size: 16px;">
         <thead class="table-dark">
             <tr>
                 <th>Student ID</th>
@@ -109,9 +113,9 @@
 
 <!-- Bottom Action Buttons -->
 <div class="fixed-bottom d-flex justify-content-center gap-3 pb-4">
-    <button type="button" class="btn btn-outline-secondary" id="searchBtn">Search</button>
-    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#createStudentModal">Create Student</button>
-    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#importStudentModal">Import Student</button>
+    <button type="button" class="btn btn-light" style="border: 2px solid #000;" id="searchBtn">Search</button>
+    <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#createStudentModal" style="border: 2px solid #000;">Add Student</button>
+    <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#importStudentModal" style="border: 2px solid #000;">Import Student</button>
 </div>
 
 
