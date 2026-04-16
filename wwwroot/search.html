@@ -142,7 +142,7 @@
                 <div class="mb-3">
                     <label for="createMajor" class="form-label">Major <span class="text-danger">*</span></label>
                     <select class="form-select" id="createMajor" required>
-                        <option value="">-- Select a Major --</option>
+                        <option value="">Select a Major</option>
                         <option value="Computer Science">Computer Science</option>
                         <option value="Computer Information Systems">Computer Information Systems</option>
                     </select>
@@ -199,16 +199,12 @@
                     <input type="text" class="form-control" id="editStudentID" readonly>
                 </div>
                 <div class="mb-3">
-                    <label for="editFirstName" class="form-label">First Name</label>
+                    <label for="editFirstName" class="form-label">First Name <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="editFirstName">
                 </div>
                 <div class="mb-3">
-                    <label for="editLastName" class="form-label">Last Name</label>
+                    <label for="editLastName" class="form-label">Last Name <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="editLastName">
-                </div>
-                <div class="mb-3">
-                    <label for="editYear" class="form-label">Year</label>
-                    <input type="text" class="form-control" id="editYear">
                 </div>
                 <div class="mb-3">
                     <label for="editExpectedGradYear" class="form-label">Expected Graduation Year</label>
@@ -221,7 +217,7 @@
                 <div class="mb-3">
                     <label for="editMajor" class="form-label">Major <span class="text-danger">*</span></label>
                     <select class="form-select" id="editMajor" required>
-                        <option value="">-- Select a Major --</option>
+                        <option value="">Select a Major</option>
                         <option value="Computer Science">Computer Science</option>
                         <option value="Computer Information Systems">Computer Information Systems</option>
                         <option value="Cyber Security">Cyber Security (legacy)</option>
@@ -366,7 +362,6 @@
         $('#editStudentID').val(btn.data('id'));
         $('#editFirstName').val(btn.data('firstname'));
         $('#editLastName').val(btn.data('lastname'));
-        $('#editYear').val(btn.data('year'));
         $('#editExpectedGradYear').val(btn.data('grad'));
         $('#editEmail').val(btn.data('email'));
         $('#editMajor').val(btn.data('major') || '');
@@ -381,14 +376,14 @@
             studentID:          $('#editStudentID').val().trim(),
             firstName:          $('#editFirstName').val().trim(),
             lastName:           $('#editLastName').val().trim(),
-            year:               $('#editYear').val().trim(),
+            year:               '',
             expectedGradYear:   $('#editExpectedGradYear').val().trim(),
             email:              $('#editEmail').val().trim(),
             major:              $('#editMajor').val().trim()
         };
 
-        if (!student.firstName || !student.lastName || !student.expectedGradYear || !student.major) {
-            showAlert('#editAlert', 'danger', 'All required fields must be filled.');
+        if (!student.firstName || !student.lastName || !student.major) {
+            showAlert('#editAlert', 'danger', 'First Name, Last Name, and Major are required.');
             return;
         }
 
