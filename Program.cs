@@ -17,6 +17,61 @@ app.UseStaticFiles();
 // EPPlus license context (required for v5+; NonCommercial is free for academic/personal use)
 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
+// ── DB Migrations ─────────────────────────────────────────────────────────────
+using (var connection = new SqliteConnection("Data Source=AssesmentReportGenerator.db"))
+{
+    connection.Open();
+
+    // Add SemesterID column to Assignment if it doesn't exist yet
+    var checkCol = connection.CreateCommand();
+    checkCol.CommandText = "PRAGMA table_info(Assignment)";
+    bool hasSemester = false;
+    using (var r = checkCol.ExecuteReader())
+        while (r.Read())
+            if (r["name"].ToString() == "SemesterID") { hasSemester = true; break; }
+
+    if (!hasSemester)
+    {
+        var alter = connection.CreateCommand();
+        alter.CommandText = "ALTER TABLE Assignment ADD COLUMN SemesterID INTEGER";
+        alter.ExecuteNonQuery();
+    }
+
+    // Seed default semesters if table is empty
+    var countCmd = connection.CreateCommand();
+    countCmd.CommandText = "SELECT COUNT(*) FROM Semester";
+    var count = Convert.ToInt32(countCmd.ExecuteScalar());
+    if (count == 0)
+    {
+        var seeds = new[] {
+            "Fall 2023", "Spring 2024", "Summer 2024",
+            "Fall 2024", "Spring 2025", "Summer 2025",
+            "Fall 2025", "Spring 2026"
+        };
+        foreach (var name in seeds)
+        {
+            var ins = connection.CreateCommand();
+            ins.CommandText = "INSERT INTO Semester (SemesterName) VALUES (@name)";
+            ins.Parameters.AddWithValue("@name", name);
+            ins.ExecuteNonQuery();
+        }
+    }
+
+    // Create AssignmentGrade table if it doesn't exist
+    var createGrade = connection.CreateCommand();
+    createGrade.CommandText = @"
+        CREATE TABLE IF NOT EXISTS AssignmentGrade (
+            GradeID      INTEGER PRIMARY KEY AUTOINCREMENT,
+            AssignmentID INTEGER NOT NULL,
+            StudentID    TEXT    NOT NULL,
+            PLO          INTEGER NOT NULL,
+            RawScore     REAL    NOT NULL,
+            GradeLevel   INTEGER NOT NULL
+        )";
+    createGrade.ExecuteNonQuery();
+}
+
+
 app.MapGet("/", () => Results.Redirect("/index.html"));
 
 
@@ -275,6 +330,30 @@ app.MapGet("/courses", () =>
     return Results.Ok(courses);
 });
 
+// ── Get All Semesters ─────────────────────────────────────────────────────────
+app.MapGet("/semesters", () =>
+{
+    using var connection = new SqliteConnection("Data Source=AssesmentReportGenerator.db");
+    connection.Open();
+
+    var command = connection.CreateCommand();
+    command.CommandText = "SELECT SemesterID, SemesterName FROM Semester ORDER BY SemesterID";
+
+    using var reader = command.ExecuteReader();
+    var semesters = new List<object>();
+
+    while (reader.Read())
+    {
+        semesters.Add(new
+        {
+            semesterId   = reader["SemesterID"]?.ToString()   ?? "",
+            semesterName = reader["SemesterName"]?.ToString() ?? ""
+        });
+    }
+
+    return Results.Ok(semesters);
+});
+
 // ── Create Course ─────────────────────────────────────────────────────────────
 app.MapPost("/create-course", async (HttpContext http) =>
 {
@@ -310,12 +389,17 @@ app.MapGet("/student-courses", (string sid) =>
 
     var command = connection.CreateCommand();
     command.CommandText = @"
+        SELECT c.CourseID, c.CourseName
+        FROM Enrollment e
+        INNER JOIN Course c ON e.CourseID = c.CourseID
+        WHERE e.StudentID = @sid
+        UNION
         SELECT DISTINCT c.CourseID, c.CourseName
         FROM StudentAssignment sa
         INNER JOIN Assignment a ON sa.AssignmentID = a.AssignmentID
         INNER JOIN Course c ON a.CourseID = c.CourseID
         WHERE sa.StudentID = @sid
-        ORDER BY c.CourseName";
+        ORDER BY CourseName";
     command.Parameters.AddWithValue("@sid", sid);
 
     using var reader = command.ExecuteReader();
@@ -325,12 +409,116 @@ app.MapGet("/student-courses", (string sid) =>
     {
         courses.Add(new
         {
-            courseId = reader["CourseID"]?.ToString() ?? "",
+            courseId   = reader["CourseID"]?.ToString()   ?? "",
             courseName = reader["CourseName"]?.ToString() ?? ""
         });
     }
 
     return Results.Ok(courses);
+});
+
+// ── Enroll Student in Course ──────────────────────────────────────────────────
+app.MapPost("/enroll", async (HttpContext http) =>
+{
+    var dto = await http.Request.ReadFromJsonAsync<EnrollmentDto>();
+
+    if (dto == null || string.IsNullOrWhiteSpace(dto.StudentID) || string.IsNullOrWhiteSpace(dto.CourseID))
+        return Results.BadRequest("StudentID and CourseID are required.");
+
+    using var connection = new SqliteConnection("Data Source=AssesmentReportGenerator.db");
+    connection.Open();
+
+    // Prevent duplicate enrollment
+    var check = connection.CreateCommand();
+    check.CommandText = @"
+        SELECT COUNT(*) FROM Enrollment
+        WHERE StudentID = @sid AND CourseID = @cid
+          AND (@semId IS NULL OR SemesterID = @semId)";
+    check.Parameters.AddWithValue("@sid",   dto.StudentID);
+    check.Parameters.AddWithValue("@cid",   dto.CourseID);
+    check.Parameters.AddWithValue("@semId", string.IsNullOrWhiteSpace(dto.SemesterID) ? DBNull.Value : (object)dto.SemesterID);
+
+    if (Convert.ToInt32(check.ExecuteScalar()) > 0)
+        return Results.Conflict("Student is already enrolled in this course.");
+
+    var cmd = connection.CreateCommand();
+    cmd.CommandText = @"
+        INSERT INTO Enrollment (StudentID, CourseID, SemesterID)
+        VALUES (@sid, @cid, @semId)";
+    cmd.Parameters.AddWithValue("@sid",   dto.StudentID);
+    cmd.Parameters.AddWithValue("@cid",   dto.CourseID);
+    cmd.Parameters.AddWithValue("@semId", string.IsNullOrWhiteSpace(dto.SemesterID) ? DBNull.Value : (object)dto.SemesterID);
+    cmd.ExecuteNonQuery();
+
+    return Results.Ok("Enrolled successfully.");
+});
+
+// ── Save Assignment Grades ────────────────────────────────────────────────────
+app.MapPost("/save-grades", async (HttpContext http) =>
+{
+    var dto = await http.Request.ReadFromJsonAsync<SaveGradesDto>();
+
+    if (dto == null || dto.AssignmentID <= 0 || string.IsNullOrWhiteSpace(dto.StudentID))
+        return Results.BadRequest("AssignmentID and StudentID are required.");
+
+    using var connection = new SqliteConnection("Data Source=AssesmentReportGenerator.db");
+    connection.Open();
+
+    foreach (var grade in dto.Grades)
+    {
+        int level = grade.RawScore >= 90 ? 4 :
+                    grade.RawScore >= 80 ? 3 :
+                    grade.RawScore >= 70 ? 2 : 1;
+
+        // Upsert — delete existing then insert
+        var del = connection.CreateCommand();
+        del.CommandText = "DELETE FROM AssignmentGrade WHERE AssignmentID=@aid AND StudentID=@sid AND PLO=@plo";
+        del.Parameters.AddWithValue("@aid", dto.AssignmentID);
+        del.Parameters.AddWithValue("@sid", dto.StudentID);
+        del.Parameters.AddWithValue("@plo", grade.PLO);
+        del.ExecuteNonQuery();
+
+        var ins = connection.CreateCommand();
+        ins.CommandText = @"
+            INSERT INTO AssignmentGrade (AssignmentID, StudentID, PLO, RawScore, GradeLevel)
+            VALUES (@aid, @sid, @plo, @raw, @lvl)";
+        ins.Parameters.AddWithValue("@aid", dto.AssignmentID);
+        ins.Parameters.AddWithValue("@sid", dto.StudentID);
+        ins.Parameters.AddWithValue("@plo", grade.PLO);
+        ins.Parameters.AddWithValue("@raw", grade.RawScore);
+        ins.Parameters.AddWithValue("@lvl", level);
+        ins.ExecuteNonQuery();
+    }
+
+    return Results.Ok("Grades saved.");
+});
+
+// ── Get Grades for an Assignment ──────────────────────────────────────────────
+app.MapGet("/assignment-grades", (int assignmentId, string sid) =>
+{
+    using var connection = new SqliteConnection("Data Source=AssesmentReportGenerator.db");
+    connection.Open();
+
+    var cmd = connection.CreateCommand();
+    cmd.CommandText = @"
+        SELECT PLO, RawScore, GradeLevel
+        FROM AssignmentGrade
+        WHERE AssignmentID = @aid AND StudentID = @sid";
+    cmd.Parameters.AddWithValue("@aid", assignmentId);
+    cmd.Parameters.AddWithValue("@sid", sid);
+
+    using var reader = cmd.ExecuteReader();
+    var grades = new List<object>();
+    while (reader.Read())
+    {
+        grades.Add(new {
+            plo        = Convert.ToInt32(reader["PLO"]),
+            rawScore   = Convert.ToDouble(reader["RawScore"]),
+            gradeLevel = Convert.ToInt32(reader["GradeLevel"])
+        });
+    }
+
+    return Results.Ok(grades);
 });
 
 // ── Add Assignment ────────────────────────────────────────────────────────────
@@ -356,7 +544,7 @@ app.MapPost("/add-assignment", async (HttpContext http) =>
     // UPDATE: Added the 10 metric columns to the INSERT statement
     insertAssignment.CommandText = @"
         INSERT INTO Assignment (
-            AssignmentType, AssignmentName, CourseID, Comments, 
+            AssignmentType, AssignmentName, CourseID, SemesterID, Comments, 
             PLO1, PLO2, PLO3, PLO4,
             plo1_1, plo1_2, plo1_3, plo1_4,
             plo2_1, plo2_2,
@@ -364,7 +552,7 @@ app.MapPost("/add-assignment", async (HttpContext http) =>
             plo4_1
         )
         VALUES (
-            @type, @name, @courseId, @comments, 
+            @type, @name, @courseId, @semesterId, @comments, 
             @plo1, @plo2, @plo3, @plo4,
             @m1_1, @m1_2, @m1_3, @m1_4,
             @m2_1, @m2_2,
@@ -375,6 +563,7 @@ app.MapPost("/add-assignment", async (HttpContext http) =>
     insertAssignment.Parameters.AddWithValue("@type", asgn.AssignmentType ?? "");
     insertAssignment.Parameters.AddWithValue("@name", asgn.AssignmentName);
     insertAssignment.Parameters.AddWithValue("@courseId", asgn.CourseID);
+    insertAssignment.Parameters.AddWithValue("@semesterId", string.IsNullOrWhiteSpace(asgn.SemesterID) ? DBNull.Value : (object)asgn.SemesterID);
     insertAssignment.Parameters.AddWithValue("@comments", asgn.Comments ?? "");
     
     // Main PLOs
@@ -418,21 +607,23 @@ app.MapPost("/add-assignment", async (HttpContext http) =>
 });
 
 // ── Get Assignments for a Student and Course ────────────────────────────────
-app.MapGet("/assignments", (string sid, string? courseId) =>
+app.MapGet("/assignments", (string sid, string? courseId, string? semesterId) =>
 {
     using var connection = new SqliteConnection("Data Source=AssesmentReportGenerator.db");
     connection.Open();
 
     var command = connection.CreateCommand();
     command.CommandText = @"
-        SELECT a.AssignmentName, a.PLO1, a.PLO2, a.PLO3, a.PLO4
+        SELECT a.AssignmentID, a.AssignmentName, a.PLO1, a.PLO2, a.PLO3, a.PLO4
         FROM StudentAssignment sa
         INNER JOIN Assignment a ON sa.AssignmentID = a.AssignmentID
         WHERE sa.StudentID = @sid
           AND (@courseId IS NULL OR @courseId = '' OR a.CourseID = @courseId)
+          AND (@semesterId IS NULL OR @semesterId = '' OR a.SemesterID = @semesterId)
         ORDER BY a.AssignmentName";
     command.Parameters.AddWithValue("@sid", sid);
     command.Parameters.AddWithValue("@courseId", courseId ?? "");
+    command.Parameters.AddWithValue("@semesterId", semesterId ?? "");
 
     using var reader = command.ExecuteReader();
     var assignments = new List<object>();
@@ -464,6 +655,7 @@ public class LoginRequest
 public record AssignmentDto(
     string StudentID, 
     string CourseID,
+    string? SemesterID,
     string AssignmentType, 
     string AssignmentName, 
     bool PLO1, 
