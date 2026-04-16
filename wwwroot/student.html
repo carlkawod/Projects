@@ -92,7 +92,7 @@
         </div>
 
         <div class="row">
-            <div class="col-6">
+            <div class="col">
                 <h3> Course: </h3> 
                 <select id="courseSelect" class="form-select" aria-label="Course select">
                     <option selected value="">Select</option>
@@ -100,27 +100,28 @@
             </div>
         </div>
         
-        <div style="max-height: 250px; overflow-y: scroll; border: 1px solid black; margin-top: 20px;">
-            <table class="table table-bordered text-center mb-0" style="font-size: 14px;">
-                <thead>
+
+            <div style="max-height: 250px; overflow-y: scroll; border: 1px solid black; margin-top: 20px;">
+                <table class="table table-bordered text-center mb-0" style="font-size: 14px;">
+                    <thead>
+                        <tr>
+                            <th style="background-color: #d3d3d3;">Assignments</th>
+                            <th style="background-color: #4da6ff;">PLO 1</th>
+                            <th style="background-color: #4da6ff;">PLO 2</th>
+                            <th style="background-color: #4da6ff;">PLO 3</th>
+                            <th style="background-color: #4da6ff;">PLO 4</th>
+                            <th style="background-color: #d3d3d3;">Grade (%)</th>
+                            <th style="background-color: #d3d3d3;">PLO Rating</th>
+                        </tr>
+                    </thead>
+                    <tbody id="assignmentTableBody">
                     <tr>
-                        <th style="background-color: #d3d3d3;">Assignments</th>
-                        <th style="background-color: #4da6ff;">PLO 1</th>
-                        <th style="background-color: #4da6ff;">PLO 2</th>
-                        <th style="background-color: #4da6ff;">PLO 3</th>
-                        <th style="background-color: #4da6ff;">PLO 4</th>
-                        <th style="background-color: #d3d3d3;">Grade (%)</th>
-                        <th style="background-color: #d3d3d3;">PLO Rating</th>
+                        <td colspan="7">Select a course to see assignments.</td>
                     </tr>
-                </thead>
-                <tbody id="assignmentTableBody">
-                <tr>
-                    <td colspan="7">Select a course to see assignments.</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-        <br/>
+                    </tbody>
+                </table>
+            </div>
+            <br/>
         </div>
     </div>
 
@@ -413,44 +414,57 @@
             }
         });
 
+        // --- METRICS STAGING & RESET LOGIC ---
+
         function saveMetricsAndClose(btnElement) {
-            stagedMetrics = [];
+            stagedMetrics = []; // Clear the old waiting room
             
+            // Grab EVERY checkbox that starts with "plo" across all modals
             const allCheckboxes = document.querySelectorAll('input[type="checkbox"][id^="plo"]');
             
+            // Save the IDs of the checked ones
             allCheckboxes.forEach(function(box) {
                 if (box.checked) {
                     stagedMetrics.push(box.id); 
                 }
             });
 
+            // Find which modal we are inside, and close it
             const parentModalId = btnElement.closest('div[id^="mAsgnOverview"]').id;
             cm(parentModalId); 
         }
 
         function closeMetricsModal(btnElement) {
+            // Revert all checkboxes back to whatever is saved in stagedMetrics
             const allCheckboxes = document.querySelectorAll('input[type="checkbox"][id^="plo"]');
             allCheckboxes.forEach(function(box) {
                 box.checked = stagedMetrics.includes(box.id);
             });
 
+            // Find which modal we are inside, and close it
             const parentModalId = btnElement.closest('div[id^="mAsgnOverview"]').id;
             cm(parentModalId); 
         }
 
         function resetAssignmentData() {
+            // 1. Clear the staging array in memory
             stagedMetrics = [];
 
+            // 2. Uncheck every metric checkbox 
             const allCheckboxes = document.querySelectorAll('input[type="checkbox"][id^="plo"]');
             allCheckboxes.forEach(function(box) {
                 box.checked = false;
             });
 
+            // 3. Uncheck the main PLO checkboxes and clear text inputs
             $('#asgnName').val('');
             $('#asgnComments').val('');
             $('#p11, #p12, #p13, #p14').prop('checked', false);
         }
 
+        // --- MODAL OPEN/CLOSE FUNCTIONS ---
+
+        // --- PLO RATING HELPER ---
         function getPloRating(grade) {
             if (grade === null || grade === undefined || grade === '') return '--';
             const g = parseInt(grade);
@@ -460,6 +474,7 @@
             return '<span style="color:#c0392b;font-weight:600;">1</span>';
         }
 
+        // Save grade on blur or Enter
         $(document).on('change blur', '.grade-input', function () {
             const said  = $(this).data('said');
             const grade = $(this).val();
@@ -477,6 +492,7 @@
             });
         });
 
+        // --- ENROLL FUNCTIONS ---
         function openEnroll() {
             let coursesLoaded = false, semestersLoaded = false;
             function tryShow() { if (coursesLoaded && semestersLoaded) om('mEnroll'); }
@@ -562,6 +578,7 @@
                     loadCourses(urlParams.get('sid'));
                     closeCreateCourse();
 
+                    // Load assignment modal and pre-select the newly created course
                     populateAsgnModals(function () {
                         $('#asgnCourseSelect').val(courseId);
                         om('mAdd');
@@ -574,6 +591,9 @@
         }
 
         function populateAsgnModals(callback) {
+            let coursesLoaded = false, semestersLoaded = false;
+            function tryOpen() { if (coursesLoaded && semestersLoaded) callback(); }
+
             $.ajax({
                 url: '/courses', method: 'GET',
                 success: function (courses) {
@@ -583,9 +603,23 @@
                     courses.forEach(c => sel.append(`<option value="${c.courseId}">${c.courseName}</option>`));
                     const current = $('#courseSelect').val();
                     if (current) sel.val(current);
-                    callback();
+                    coursesLoaded = true; tryOpen();
                 },
-                error: function () { callback(); }
+                error: function () { coursesLoaded = true; tryOpen(); }
+            });
+
+            $.ajax({
+                url: '/semesters', method: 'GET',
+                success: function (semesters) {
+                    const sel = $('#asgnSemesterSelect');
+                    sel.empty();
+                    sel.append('<option value="">-- Select a semester --</option>');
+                    semesters.forEach(s => sel.append(`<option value="${s.semesterId}">${s.semesterName}</option>`));
+                    const current = $('#semesterSelect').val();
+                    if (current) sel.val(current);
+                    semestersLoaded = true; tryOpen();
+                },
+                error: function () { semestersLoaded = true; tryOpen(); }
             });
         }
 
@@ -598,8 +632,8 @@
         }
 
         function closeMainAssignmentModal() {
-            cm('mAdd');
-            resetAssignmentData();
+            cm('mAdd'); // Hides the main modal
+            resetAssignmentData(); // Wipes the main PLOs AND the hidden metrics clean!
         }
 
         function openAsgnOverview() { om('mAsgnOverview'); }
@@ -614,6 +648,24 @@
             document.getElementById(id).style.display = 'none';
         }
 
+        // --- DATA LOADING & SAVING ---
+
+        function loadSemesters() {
+            $.ajax({
+                url: '/semesters',
+                method: 'GET',
+                success: function (semesters) {
+                    const sel = $('#semesterSelect');
+                    sel.empty();
+                    sel.append('<option value="">Select</option>');
+                    semesters.forEach(function (s) {
+                        sel.append(`<option value="${s.semesterId}">${s.semesterName}</option>`);
+                    });
+                },
+                error: function () { console.error('Failed to load semesters.'); }
+            });
+        }
+
         function loadCourses(studentId) {
             $.ajax({
                 url: '/student-courses',
@@ -623,9 +675,10 @@
                     const courseSelect = $('#courseSelect');
                     courseSelect.empty();
                     courseSelect.append('<option value="">Select</option>');
+                    courseSelect.append('<option value="all">View All</option>');
 
                     if (!courses || courses.length === 0) {
-                        $('#assignmentTableBody').html('<tr><td colspan="7">No courses found for this student.</td></tr>');
+                        $('#assignmentTableBody').html('<tr><td colspan="5">No courses found for this student.</td></tr>');
                         return;
                     }
 
@@ -643,22 +696,22 @@
 
         $('#courseSelect').on('change', function () {
             const urlParams = new URLSearchParams(window.location.search);
-            const studentId  = urlParams.get('sid');
-            const courseId   = $('#courseSelect').val();
+            const studentId = urlParams.get('sid');
+            const courseId  = $('#courseSelect').val();
 
             if (!courseId) {
                 $('#assignmentTableBody').html('<tr><td colspan="7">Select a course to see assignments.</td></tr>');
                 return;
             }
 
-            loadAssignments(studentId, courseId);
+            loadAssignments(studentId, courseId === 'all' ? '' : courseId, '');
         });
 
-        function loadAssignments(studentId, courseId) {
+        function loadAssignments(studentId, courseId, semesterId) {
             $.ajax({
                 url: '/assignments',
                 method: 'GET',
-                data: { sid: studentId, courseId: courseId, semesterId: '' },
+                data: { sid: studentId, courseId: courseId, semesterId: semesterId },
                 success: function (assignments) {
                     const tbody = $('#assignmentTableBody');
                     tbody.empty();
@@ -715,10 +768,11 @@
                 return;
             }
 
+            // 1. Build the base object with main PLOs
             const assignmentData = {
                 StudentID: studentId,
                 CourseID: courseId,
-                SemesterID: null,
+                SemesterID: $('#asgnSemesterSelect').val() || $('#semesterSelect').val() || null,
                 AssignmentType: $('#asgnType').val(),
                 AssignmentName: $('#asgnName').val(),
                 PLO1: $('#p11').is(':checked'), 
@@ -728,11 +782,14 @@
                 Comments: $('#asgnComments').val()
             };
 
+            // 2. Loop through every metric checkbox and add it to the object as a boolean
+            // This creates assignmentData.plo1_1, assignmentData.plo2_1, etc.
             const allCheckboxes = document.querySelectorAll('input[type="checkbox"][id^="plo"]');
             allCheckboxes.forEach(function(box) {
                 assignmentData[box.id] = stagedMetrics.includes(box.id);
             });
 
+            // Sanity check to see exactly what is being sent to your C# backend
             console.log("Sending to database:", assignmentData);
 
             $.ajax({
