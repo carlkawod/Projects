@@ -39,8 +39,8 @@
 
         .results-area { padding: 20px 24px 100px; }
         #resultsTable { font-size: 14px; text-align: center; border-collapse: collapse; width: 100%; }
-        #resultsTable thead tr { background: #1a1a1a; }
-        #resultsTable thead th { color: #c8b830; font-weight: 500; padding: 10px 14px; border: none; font-size: 13px; }
+        #resultsTable thead tr { background: #f5f3eb; }
+        #resultsTable thead th { color: #1a1a1a; font-weight: 600; padding: 10px 14px; border: none; font-size: 13px; border-bottom: 2px solid #c8b830; }
         #resultsTable tbody tr { border-bottom: 1px solid #f0ede3; }
         #resultsTable tbody tr:hover { background: #fdf9ed; }
         #resultsTable tbody td { padding: 10px 14px; color: #333; border: none; vertical-align: middle; }
@@ -68,8 +68,6 @@
         <span class="top-nav-title">Search Student</span>
     </div>
     <div class="top-nav-right">
-        <button class="top-nav-btn" data-bs-toggle="modal" data-bs-target="#createStudentModal">Add Student</button>
-        <button class="top-nav-btn" data-bs-toggle="modal" data-bs-target="#importStudentModal">Import Student</button>
     </div>
 </div>
 
@@ -101,6 +99,10 @@
     <div class="stat-block">
         <div class="stat-num" id="statCIS">—</div>
         <div class="stat-label">Computer Information Systems</div>
+    </div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+        <button class="top-nav-btn" data-bs-toggle="modal" data-bs-target="#createStudentModal">Add Student</button>
+        <button class="top-nav-btn" data-bs-toggle="modal" data-bs-target="#importStudentModal">Import Student</button>
     </div>
 </div>
 
