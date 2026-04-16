@@ -483,6 +483,9 @@
     $(document).ready(function () {
         loadCourses();
         $('#tabCS').addClass('active-tab');
+        document.getElementById('tabCS').setAttribute('style', 'background-color:#1a1a1a !important;color:#c8b830 !important;border:1px solid #1a1a1a !important;border-radius:6px;font-size:14px;padding:6px 14px;');
+        document.getElementById('tabIT').setAttribute('style', 'background-color:white !important;color:#1a1a1a !important;border:1px solid #1a1a1a !important;border-radius:6px;font-size:14px;padding:6px 14px;');
+        document.getElementById('tabAll').setAttribute('style', 'background-color:white !important;color:#1a1a1a !important;border:1px solid #1a1a1a !important;border-radius:6px;font-size:14px;padding:6px 14px;');
 
         $('#studentSearchFilter').on('input', function () {
             renderStudentList($('#studentSearchFilter').val());
@@ -569,10 +572,12 @@
 
     function filterMajor(major) {
         currentMajorFilter = major;
-        $('#tabCS, #tabIT, #tabAll').removeClass('active-tab');
-        if (major === 'Computer Science')       { $('#tabCS').addClass('active-tab'); }
-        else if (major === 'Computer Information Systems') { $('#tabIT').addClass('active-tab'); }
-        else                                    { $('#tabAll').addClass('active-tab'); }
+        $('#tabCS, #tabIT, #tabAll').each(function() {
+            $(this).attr('style', 'background-color:white !important;color:#1a1a1a !important;border:1px solid #1a1a1a !important;border-radius:6px;font-size:14px;padding:6px 14px;');
+        });
+        if (major === 'Computer Science')       { document.getElementById('tabCS').setAttribute('style', 'background-color:#1a1a1a !important;color:#c8b830 !important;border:1px solid #1a1a1a !important;border-radius:6px;font-size:14px;padding:6px 14px;'); }
+        else if (major === 'Computer Information Systems') { document.getElementById('tabIT').setAttribute('style', 'background-color:#1a1a1a !important;color:#c8b830 !important;border:1px solid #1a1a1a !important;border-radius:6px;font-size:14px;padding:6px 14px;'); }
+        else                                    { document.getElementById('tabAll').setAttribute('style', 'background-color:#1a1a1a !important;color:#c8b830 !important;border:1px solid #1a1a1a !important;border-radius:6px;font-size:14px;padding:6px 14px;'); }
         renderCourses(major);
     }
 
