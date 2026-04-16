@@ -44,21 +44,21 @@
 
     <!-- Major Filter Tabs -->
     <div class="d-flex gap-2 mb-4">
-        <button class="btn" id="tabCS" style="background:#1a1a1a;color:#c8b830;border:none;" onclick="filterMajor('Computer Science')">Computer Science</button>
-        <button class="btn" style="background:transparent;color:#1a1a1a;border:1px solid #1a1a1a;" id="tabIT" onclick="filterMajor('Computer Information Systems')">Computer Information Systems</button>
-        <button class="btn" style="background:transparent;color:#1a1a1a;border:1px solid #1a1a1a;" id="tabAll" onclick="filterMajor('')">All</button>
+        <button class="btn" id="tabCS" style="background:#1a1a1a !important;color:#c8b830 !important;border:none !important;" onclick="filterMajor('Computer Science')">Computer Science</button>
+        <button class="btn" style="background:white !important;color:#1a1a1a !important;border:1px solid #1a1a1a !important;" id="tabIT" onclick="filterMajor('Computer Information Systems')">Computer Information Systems</button>
+        <button class="btn" style="background:white !important;color:#1a1a1a !important;border:1px solid #1a1a1a !important;" id="tabAll" onclick="filterMajor('')">All</button>
     </div>
 
     <!-- Courses Table -->
     <table class="table table-bordered table-striped" id="coursesTable" style="font-size: 15px; text-align: center;">
-        <thead class="table-dark">
+        <thead style="background:#1a1a1a !important;">
             <tr>
-                <th>Course ID</th>
-                <th>Course Name</th>
-                <th>Credits</th>
-                <th>Major</th>
-                <th>Semesters</th>
-                <th style="width: 25%;">Actions</th>
+                <th style="color:#c8b830 !important;background:#1a1a1a !important;">Course ID</th>
+                <th style="color:#c8b830 !important;background:#1a1a1a !important;">Course Name</th>
+                <th style="color:#c8b830 !important;background:#1a1a1a !important;">Credits</th>
+                <th style="color:#c8b830 !important;background:#1a1a1a !important;">Major</th>
+                <th style="color:#c8b830 !important;background:#1a1a1a !important;">Semesters</th>
+                <th style="width:25%;color:#c8b830 !important;background:#1a1a1a !important;">Actions</th>
             </tr>
         </thead>
         <tbody id="coursesBody">
@@ -244,7 +244,7 @@
                                 <th>Student ID</th>
                                 <th>First Name</th>
                                 <th>Last Name</th>
-                                <th>Major</th>
+                                <th style="color:#c8b830 !important;background:#1a1a1a !important;">Major</th>
                             </tr>
                         </thead>
                         <tbody id="enrollStudentsBody"></tbody>
@@ -446,7 +446,7 @@
                                 <th>Student ID</th>
                                 <th>First Name</th>
                                 <th>Last Name</th>
-                                <th>Major</th>
+                                <th style="color:#c8b830 !important;background:#1a1a1a !important;">Major</th>
                                 <th>Grad Year</th>
                                 <th style="width: 130px;">Actions</th>
                             </tr>
@@ -563,10 +563,10 @@
 
     function filterMajor(major) {
         currentMajorFilter = major;
-        $('#tabCS, #tabIT, #tabAll').css({'background':'white','color':'#1a1a1a','border':'1px solid #1a1a1a'});
-        if (major === 'Computer Science')       { $('#tabCS').css({'background':'#1a1a1a','color':'#c8b830','border':'none'}); }
-        else if (major === 'Computer Information Systems') { $('#tabIT').css({'background':'#1a1a1a','color':'#c8b830','border':'none'}); }
-        else                                    { $('#tabAll').css({'background':'#1a1a1a','color':'#c8b830','border':'none'}); }
+        $('#tabCS, #tabIT, #tabAll').attr('style', 'background:white !important;color:#1a1a1a !important;border:1px solid #1a1a1a !important;');
+        if (major === 'Computer Science')       { $('#tabCS').attr('style', 'background:#1a1a1a !important;color:#c8b830 !important;border:none !important;'); }
+        else if (major === 'Computer Information Systems') { $('#tabIT').attr('style', 'background:#1a1a1a !important;color:#c8b830 !important;border:none !important;'); }
+        else                                    { $('#tabAll').attr('style', 'background:#1a1a1a !important;color:#c8b830 !important;border:none !important;'); }
         renderCourses(major);
     }
 
