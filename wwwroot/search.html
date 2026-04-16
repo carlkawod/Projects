@@ -149,32 +149,32 @@
                 <h5 class="modal-title" style="color:white;">Create New Student</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body" style="background:#1a1a1a; color:white;">
+            <div class="modal-body">
                 <div id="createAlert" class="alert" style="display:none;"></div>
                 <div class="mb-3">
-                    <label class="form-label" style="color:white;">Student ID <span class="text-danger">*</span></label>
+                    <label class="form-label">Student ID <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="createStudentID" placeholder="e.g. A00123456"
                         oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '')">
-                    <small style="color:#aaa;">Letters and numbers only, no special characters.</small>
+                    <small class="text-muted">Letters and numbers only, no special characters.</small>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label" style="color:white;">First Name <span class="text-danger">*</span></label>
+                    <label class="form-label">First Name <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="createFirstName">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label" style="color:white;">Last Name <span class="text-danger">*</span></label>
+                    <label class="form-label">Last Name <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="createLastName">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label" style="color:white;">Expected Graduation Year</label>
+                    <label class="form-label">Expected Graduation Year</label>
                     <input type="text" class="form-control" id="createExpectedGradYear" placeholder="e.g. 2027">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label" style="color:white;">Email</label>
+                    <label class="form-label">Email</label>
                     <input type="text" class="form-control" id="createEmail" placeholder="e.g. student@lindenwood.edu">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label" style="color:white;">Major <span class="text-danger">*</span></label>
+                    <label class="form-label">Major <span class="text-danger">*</span></label>
                     <select class="form-select" id="createMajor" required>
                         <option value="">Select a Major</option>
                         <option value="Computer Science">Computer Science</option>
@@ -182,7 +182,7 @@
                     </select>
                 </div>
             </div>
-            <div class="modal-footer" style="background:#1a1a1a; border-top:1px solid #333;">
+            <div class="modal-footer">
                 <button type="button" class="btn" data-bs-dismiss="modal" style="background:#444;color:white;border:none;">Cancel</button>
                 <button type="button" class="btn" id="saveStudentBtn" style="background:#1a1a1a;color:#c8b830;border:none;">Save Student</button>
             </div>
@@ -198,16 +198,16 @@
                 <h5 class="modal-title" style="color:white;">Import Students</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body" style="background:#1a1a1a; color:white;">
+            <div class="modal-body">
                 <div id="importAlert" class="alert" style="display:none;"></div>
-                <p style="color:#aaa;">Upload a <strong>.csv</strong> or <strong>.xlsx</strong> file with columns:</p>
-                <p><code style="background:#333; color:#c8b830; padding:2px 6px; border-radius:3px;">StudentID, FirstName, LastName, Year, ExpectedGradYear, Email, Major</code></p>
+                <p class="text-muted">Upload a <strong>.csv</strong> or <strong>.xlsx</strong> file with columns:</p>
+                <p><code>StudentID, FirstName, LastName, Year, ExpectedGradYear, Email, Major</code></p>
                 <div class="mb-3">
-                    <label class="form-label" style="color:white;">Choose File</label>
+                    <label class="form-label">Choose File</label>
                     <input type="file" class="form-control" id="importFileInput" accept=".csv,.xlsx">
                 </div>
             </div>
-            <div class="modal-footer" style="background:#1a1a1a; border-top:1px solid #333;">
+            <div class="modal-footer">
                 <button type="button" class="btn" data-bs-dismiss="modal" style="background:#444;color:white;border:none;">Cancel</button>
                 <button type="button" class="btn" id="uploadFileBtn" style="background:#1a1a1a;color:#c8b830;border:none;">Upload</button>
             </div>
@@ -223,30 +223,30 @@
                 <h5 class="modal-title" style="color:white;">Edit Student</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body" style="background:#1a1a1a; color:white;">
+            <div class="modal-body">
                 <div id="editAlert" class="alert" style="display:none;"></div>
                 <div class="mb-3">
-                    <label class="form-label" style="color:white;">Student ID</label>
+                    <label class="form-label">Student ID</label>
                     <input type="text" class="form-control" id="editStudentID" readonly>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label" style="color:white;">First Name <span class="text-danger">*</span></label>
+                    <label class="form-label">First Name <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="editFirstName">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label" style="color:white;">Last Name <span class="text-danger">*</span></label>
+                    <label class="form-label">Last Name <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="editLastName">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label" style="color:white;">Expected Graduation Year</label>
+                    <label class="form-label">Expected Graduation Year</label>
                     <input type="text" class="form-control" id="editExpectedGradYear">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label" style="color:white;">Email</label>
+                    <label class="form-label">Email</label>
                     <input type="text" class="form-control" id="editEmail">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label" style="color:white;">Major <span class="text-danger">*</span></label>
+                    <label class="form-label">Major <span class="text-danger">*</span></label>
                     <select class="form-select" id="editMajor" required>
                         <option value="">Select a Major</option>
                         <option value="Computer Science">Computer Science</option>
@@ -255,7 +255,7 @@
                     </select>
                 </div>
             </div>
-            <div class="modal-footer" style="background:#1a1a1a; border-top:1px solid #333;">
+            <div class="modal-footer">
                 <button type="button" class="btn" data-bs-dismiss="modal" style="background:#444;color:white;border:none;">Cancel</button>
                 <button type="button" class="btn" id="saveEditBtn" style="background:#1a1a1a;color:#c8b830;border:none;">Save Changes</button>
             </div>
@@ -271,12 +271,12 @@
                 <h5 class="modal-title" style="color:white;">Remove Student</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body" style="background:#1a1a1a; color:white;">
+            <div class="modal-body">
                 <div id="removeAlert" class="alert" style="display:none;"></div>
                 <p>Are you sure you want to remove <strong id="removeStudentName"></strong>? This cannot be undone.</p>
                 <input type="hidden" id="removeStudentID">
             </div>
-            <div class="modal-footer" style="background:#1a1a1a; border-top:1px solid #333;">
+            <div class="modal-footer">
                 <button type="button" class="btn" data-bs-dismiss="modal" style="background:#444;color:white;border:none;">Cancel</button>
                 <button type="button" class="btn" id="confirmRemoveBtn" style="background:#c0392b;color:white;border:none;">Remove</button>
             </div>
