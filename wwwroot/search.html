@@ -2,17 +2,9 @@
 <html lang="en">
 <head>
     <script>
-//
-        // 1. Check if the user is logged in
         const isLoggedIn = sessionStorage.getItem("isLoggedIn");
-
-        // 2. If they are NOT logged in, kick them back to the login page
-        if (isLoggedIn !== "true") 
-        {
-            window.location.href = "index.html";
-        }
+        if (isLoggedIn !== "true") window.location.href = "index.html";
     </script>
-    
     <meta charset="UTF-8">
     <title>Student Search Page</title>
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -20,127 +12,166 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        body { background: #fff; margin: 0; padding: 0; }
+
+        .top-nav { background: #1a1a1a; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; position: fixed; top: 0; left: 0; right: 0; z-index: 1000; height: 56px; }
+        .top-nav-title { color: #c8b830; font-size: 22px; font-weight: 500; }
+        .top-nav-right { display: flex; gap: 8px; align-items: center; }
+        .top-nav-btn { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); color: white; font-size: 13px; padding: 5px 14px; border-radius: 6px; cursor: pointer; }
+        .top-nav-btn:hover { background: rgba(255,255,255,0.2); color: white; }
+        .hamburger-btn { background: none; border: none; padding: 4px; cursor: pointer; display: flex; flex-direction: column; gap: 5px; }
+        .hamburger-btn span { display: block; width: 22px; height: 2px; background: white; border-radius: 2px; }
+
+        .stats-header { background: #1a1a1a; padding: 12px 24px 16px; display: flex; gap: 0; margin-top: 56px; }
+        .stat-block { text-align: center; padding: 4px 28px; border-right: 1px solid rgba(255,255,255,0.15); }
+        .stat-block:last-child { border-right: none; }
+        .stat-num { font-size: 26px; font-weight: 500; color: #c8b830; line-height: 1; }
+        .stat-label { font-size: 11px; color: #888; margin-top: 3px; }
+
+        .search-strip { background: #f5f3eb; padding: 12px 24px; display: flex; gap: 10px; align-items: center; border-bottom: 3px solid #c8b830; }
+        .search-strip input, .search-strip select { height: 38px; border: 1px solid #d0cdc0; border-radius: 6px; padding: 0 12px; font-size: 13px; background: white; color: #333; outline: none; }
+        .search-strip input:focus, .search-strip select:focus { border-color: #c8b830; box-shadow: 0 0 0 2px rgba(200,184,48,0.2); }
+        .search-strip input { flex: 1; }
+        .search-strip select { width: 220px; }
+        .search-strip .search-btn { height: 38px; padding: 0 22px; background: #1a1a1a; color: #c8b830; border-radius: 6px; font-size: 13px; font-weight: 500; border: none; cursor: pointer; white-space: nowrap; }
+        .search-strip .search-btn:hover { background: #2a2a2a; }
+
+        .results-area { padding: 20px 24px 100px; }
+        #resultsTable { font-size: 14px; text-align: center; border-collapse: collapse; width: 100%; }
+        #resultsTable thead tr { background: #1a1a1a; }
+        #resultsTable thead th { color: #c8b830; font-weight: 500; padding: 10px 14px; border: none; font-size: 13px; }
+        #resultsTable tbody tr { border-bottom: 1px solid #f0ede3; }
+        #resultsTable tbody tr:hover { background: #fdf9ed; }
+        #resultsTable tbody td { padding: 10px 14px; color: #333; border: none; vertical-align: middle; }
+        .major-badge { display: inline-block; font-size: 11px; padding: 3px 10px; border-radius: 4px; background: #1a1a1a; color: #c8b830; font-weight: 500; }
+        .major-badge-cis { background: #f0f7ee; color: #2a6b2a; border: 1px solid #4caf50; }
+        .action-btn { font-size: 11px; padding: 4px 10px; border-radius: 5px; cursor: pointer; border: 1px solid #ccc; background: white; color: #444; margin-right: 3px; }
+        .action-btn:hover { background: #f5f5f5; }
+        .action-btn-danger { border-color: #e74c3c; color: #e74c3c; }
+        .action-btn-danger:hover { background: #fff5f5; }
+
+        .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.97); border-top: 1px solid #e0ddd5; padding: 12px; display: flex; justify-content: center; }
+        .bottom-search-btn { height: 38px; padding: 0 40px; background: #1a1a1a; color: #c8b830; border: none; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; }
+        .bottom-search-btn:hover { background: #2a2a2a; }
+
+        #noResults { text-align: center; color: #888; margin-top: 40px; font-size: 15px; }
+    </style>
 </head>
 <body>
 
-<nav class="navbar navbar-dark bg-dark fixed-top">
-    <div class="container-fluid">
-        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasDarkNavbar">
+<div class="top-nav">
+    <div style="display:flex;align-items:center;gap:14px;">
+        <button class="hamburger-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasDarkNavbar">
+            <span></span><span></span><span></span>
+        </button>
+        <span class="top-nav-title">Search Student</span>
+    </div>
+    <div class="top-nav-right">
+        <button class="top-nav-btn" data-bs-toggle="modal" data-bs-target="#createStudentModal">Add Student</button>
+        <button class="top-nav-btn" data-bs-toggle="modal" data-bs-target="#importStudentModal">Import Student</button>
+    </div>
+</div>
+
+<div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="offcanvasDarkNavbar">
+    <div class="offcanvas-header">
+        <button type="button" class="navbar-toggler" data-bs-dismiss="offcanvas">
             <span class="navbar-toggler-icon"></span>
         </button>
-            <a class="navbar-brand me-auto ms-3" style="color: rgb(171, 171, 16); font-size: 28px;">Search Student</a>
-            <button type="button" class="btn btn-light ms-3" data-bs-toggle="modal" data-bs-target="#createStudentModal">Add Student</button>
-            <button type="button" class="btn btn-light ms-3" data-bs-toggle="modal" data-bs-target="#importStudentModal">Import Student</button>
     </div>
-    <div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="offcanvasDarkNavbar">
-        <div class="offcanvas-header">
-            <button type="button" class="navbar-toggler" data-bs-dismiss="offcanvas">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-        </div>
-        <div class="offcanvas-body">
-            <ul class="navbar-nav justify-content-end flex-grow-1">
-                <li class="nav-item"><a class="nav-link active" href="#">Search Student</a></li>
-                <li class="nav-item"><a class="nav-link" href="course.html">Courses</a></li>
-                <li class="nav-item"><a class="nav-link" href="searchstudreport.html">Make Reports</a></li>
-                <li class="nav-item"><a class="nav-link" onclick="logOut()">Log Out</a></li>
-            </ul>
-        </div>
-    </div>
-</nav>
-
-<!-- <div class="container mt-5" style="padding-top: 60px; color: rgb(171, 171, 16);">
-    <h2><span id="displayName">Search Student</span></h2>
-</div> -->
-
-<div class="container text-center" style="margin-top: 60px; border: 2px solid #555555; background-color: rgb(199, 196, 196);">
-    <div class="row">
-        <div class="col border-end border-dark">Last Name</div>
-        <div class="col border-end border-dark">First Name</div>
-        <div class="col border-end border-dark">ID</div>
-        <div class="col border-end border-dark">Major</div>
+    <div class="offcanvas-body">
+        <ul class="navbar-nav justify-content-end flex-grow-1">
+            <li class="nav-item"><a class="nav-link active" href="#">Search Student</a></li>
+            <li class="nav-item"><a class="nav-link" href="course.html">Courses</a></li>
+            <li class="nav-item"><a class="nav-link" href="searchstudreport.html">Make Reports</a></li>
+            <li class="nav-item"><a class="nav-link" style="cursor:pointer;" onclick="logOut()">Log Out</a></li>
+        </ul>
     </div>
 </div>
 
-<div class="container-fluid text-center" style="margin-top: 5px;">
-    <div class="row">
-        <div class="col">
-            <input id="lastNameInput" class="form-control form-control-lg border-dark border-2" type="text">
-        </div>
-        <div class="col">
-            <input id="firstNameInput" class="form-control form-control-lg border-dark border-2" type="text">
-        </div>
-        <div class="col">
-            <input id="idInput" class="form-control form-control-lg border-dark border-2" type="text">
-        </div>
-        <div class="col">
-            <select id="majorInput" class="form-select form-select-lg border-dark border-2">
-                <option value="">All</option>
-                <option value="Computer Science">Computer Science</option>
-                <option value="Computer Information Systems">Computer Information Systems</option>
-            </select>
-        </div>
+<div class="stats-header">
+    <div class="stat-block">
+        <div class="stat-num" id="statTotal">—</div>
+        <div class="stat-label">Total Students</div>
+    </div>
+    <div class="stat-block">
+        <div class="stat-num" id="statCS">—</div>
+        <div class="stat-label">Computer Science</div>
+    </div>
+    <div class="stat-block">
+        <div class="stat-num" id="statCIS">—</div>
+        <div class="stat-label">Computer Information Systems</div>
     </div>
 </div>
 
-<!-- Results Table -->
-<div class="container-fluid" style="margin-top: 30px; margin-bottom: 120px;">
-    <table class="table table-bordered table-striped" id="resultsTable" style="display:none; text-align: center; font-size: 16px;">
-        <thead class="table-dark">
+<div class="search-strip">
+    <input id="lastNameInput" type="text" placeholder="Last name...">
+    <input id="firstNameInput" type="text" placeholder="First name...">
+    <input id="idInput" type="text" placeholder="Student ID...">
+    <select id="majorInput">
+        <option value="">All Majors</option>
+        <option value="Computer Science">Computer Science</option>
+        <option value="Computer Information Systems">Computer Information Systems</option>
+    </select>
+    <button class="search-btn" id="searchBtn">Search</button>
+</div>
+
+<div class="results-area">
+    <table id="resultsTable" style="display:none;">
+        <thead>
             <tr>
                 <th>Student ID</th>
                 <th>First Name</th>
                 <th>Last Name</th>
                 <th>Major</th>
                 <th>Expected Grad Year</th>
-                <th style="width: 25%;">Actions</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody id="resultsBody"></tbody>
     </table>
-    <p id="noResults" style="display:none; text-align:center; margin-top:20px;">No students found.</p>
+    <p id="noResults" style="display:none;">No students found.</p>
 </div>
 
-<!-- Bottom Action Buttons -->
-<div class="fixed-bottom d-flex justify-content-center gap-3 pb-4">
-    <button type="button" class="btn btn-light" style="border: 2px solid #000;" id="searchBtnBottom">Search</button>
+<div class="bottom-bar">
+    <button class="bottom-search-btn" id="searchBtnBottom">Search</button>
 </div>
 
 
-<!-- ===================== CREATE STUDENT MODAL ===================== -->
-<div class="modal fade" id="createStudentModal" tabindex="-1" aria-labelledby="createStudentModalLabel" aria-hidden="true">
+<!-- CREATE STUDENT MODAL -->
+<div class="modal fade" id="createStudentModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title" id="createStudentModalLabel">Create New Student</h5>
+                <h5 class="modal-title">Create New Student</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div id="createAlert" class="alert" style="display:none;"></div>
                 <div class="mb-3">
-                    <label for="createStudentID" class="form-label">Student ID <span class="text-danger">*</span></label>
+                    <label class="form-label">Student ID <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="createStudentID" placeholder="e.g. A00123456"
                         oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '')">
-                    <small class="text-muted">Letters and numbers only — no special characters.</small>
+                    <small class="text-muted">Letters and numbers only, no special characters.</small>
                 </div>
                 <div class="mb-3">
-                    <label for="createFirstName" class="form-label">First Name <span class="text-danger">*</span></label>
+                    <label class="form-label">First Name <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="createFirstName">
                 </div>
                 <div class="mb-3">
-                    <label for="createLastName" class="form-label">Last Name <span class="text-danger">*</span></label>
+                    <label class="form-label">Last Name <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="createLastName">
                 </div>
                 <div class="mb-3">
-                    <label for="createExpectedGradYear" class="form-label">Expected Graduation Year</label>
+                    <label class="form-label">Expected Graduation Year</label>
                     <input type="text" class="form-control" id="createExpectedGradYear" placeholder="e.g. 2027">
                 </div>
                 <div class="mb-3">
-                    <label for="createEmail" class="form-label">Email</label>
+                    <label class="form-label">Email</label>
                     <input type="text" class="form-control" id="createEmail" placeholder="e.g. student@lindenwood.edu">
                 </div>
                 <div class="mb-3">
-                    <label for="createMajor" class="form-label">Major <span class="text-danger">*</span></label>
+                    <label class="form-label">Major <span class="text-danger">*</span></label>
                     <select class="form-select" id="createMajor" required>
                         <option value="">Select a Major</option>
                         <option value="Computer Science">Computer Science</option>
@@ -150,72 +181,69 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-outline-secondary" id="saveStudentBtn">Save Student</button>
+                <button type="button" class="btn btn-dark" id="saveStudentBtn">Save Student</button>
             </div>
         </div>
     </div>
 </div>
 
-
-<!-- ===================== IMPORT STUDENT MODAL ===================== -->
-<div class="modal fade" id="importStudentModal" tabindex="-1" aria-labelledby="importStudentModalLabel" aria-hidden="true">
+<!-- IMPORT STUDENT MODAL -->
+<div class="modal fade" id="importStudentModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title" id="importStudentModalLabel">Import Students</h5>
+                <h5 class="modal-title">Import Students</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div id="importAlert" class="alert" style="display:none;"></div>
-                <p class="text-muted">Upload a <strong>.csv</strong> or <strong>.xlsx</strong> file. The file must have these columns in order:</p>
+                <p class="text-muted">Upload a <strong>.csv</strong> or <strong>.xlsx</strong> file with columns:</p>
                 <p><code>StudentID, FirstName, LastName, Year, ExpectedGradYear, Email, Major</code></p>
                 <div class="mb-3">
-                    <label for="importFileInput" class="form-label">Choose File</label>
+                    <label class="form-label">Choose File</label>
                     <input type="file" class="form-control" id="importFileInput" accept=".csv,.xlsx">
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-outline-secondary" id="uploadFileBtn">Upload</button>
+                <button type="button" class="btn btn-dark" id="uploadFileBtn">Upload</button>
             </div>
         </div>
     </div>
 </div>
 
-
-<!-- ===================== EDIT STUDENT MODAL ===================== -->
-<div class="modal fade" id="editStudentModal" tabindex="-1" aria-labelledby="editStudentModalLabel" aria-hidden="true">
+<!-- EDIT STUDENT MODAL -->
+<div class="modal fade" id="editStudentModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title" id="editStudentModalLabel">Edit Student</h5>
+                <h5 class="modal-title">Edit Student</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div id="editAlert" class="alert" style="display:none;"></div>
-                <!-- StudentID is read-only — it's the key used to identify which record to update -->
                 <div class="mb-3">
-                    <label for="editStudentID" class="form-label">Student ID</label>
+                    <label class="form-label">Student ID</label>
                     <input type="text" class="form-control" id="editStudentID" readonly>
                 </div>
                 <div class="mb-3">
-                    <label for="editFirstName" class="form-label">First Name <span class="text-danger">*</span></label>
+                    <label class="form-label">First Name <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="editFirstName">
                 </div>
                 <div class="mb-3">
-                    <label for="editLastName" class="form-label">Last Name <span class="text-danger">*</span></label>
+                    <label class="form-label">Last Name <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="editLastName">
                 </div>
                 <div class="mb-3">
-                    <label for="editExpectedGradYear" class="form-label">Expected Graduation Year</label>
+                    <label class="form-label">Expected Graduation Year</label>
                     <input type="text" class="form-control" id="editExpectedGradYear">
                 </div>
                 <div class="mb-3">
-                    <label for="editEmail" class="form-label">Email</label>
+                    <label class="form-label">Email</label>
                     <input type="text" class="form-control" id="editEmail">
                 </div>
                 <div class="mb-3">
-                    <label for="editMajor" class="form-label">Major <span class="text-danger">*</span></label>
+                    <label class="form-label">Major <span class="text-danger">*</span></label>
                     <select class="form-select" id="editMajor" required>
                         <option value="">Select a Major</option>
                         <option value="Computer Science">Computer Science</option>
@@ -226,51 +254,54 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-outline-secondary" id="saveEditBtn">Save Changes</button>
+                <button type="button" class="btn btn-dark" id="saveEditBtn">Save Changes</button>
             </div>
         </div>
     </div>
 </div>
 
-
-<!-- ===================== REMOVE STUDENT MODAL ===================== -->
-<div class="modal fade" id="removeStudentModal" tabindex="-1" aria-labelledby="removeStudentModalLabel" aria-hidden="true">
+<!-- REMOVE STUDENT MODAL -->
+<div class="modal fade" id="removeStudentModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title" id="removeStudentModalLabel">Remove Student</h5>
+                <h5 class="modal-title">Remove Student</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div id="removeAlert" class="alert" style="display:none;"></div>
-                <!-- Name is filled in by JavaScript when the button is clicked -->
                 <p>Are you sure you want to remove <strong id="removeStudentName"></strong>? This cannot be undone.</p>
-                <!-- Hidden field to carry the ID through to the delete request -->
                 <input type="hidden" id="removeStudentID">
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-outline-secondary" id="confirmRemoveBtn">Remove</button>
+                <button type="button" class="btn btn-danger" id="confirmRemoveBtn">Remove</button>
             </div>
         </div>
     </div>
 </div>
 
 
-
 <script>
+    $(document).ready(function () { loadStats(); });
 
-    // ── Search ──────────────────────────────────────────────────────────────
-    $('#searchBtn, #searchBtnBottom').on('click', function () {
+    function loadStats() {
         $.ajax({
-            url: '/search',
-            method: 'GET',
-            data: {
-                lastName:  $('#lastNameInput').val(),
-                firstName: $('#firstNameInput').val(),
-                id:        $('#idInput').val(),
-                major:     $('#majorInput').val()
-            },
+            url: '/search', method: 'GET', data: {},
+            success: function (results) {
+                var cs  = results.filter(function(s){ return s.Major === 'Computer Science'; }).length;
+                var cis = results.filter(function(s){ return s.Major === 'Computer Information Systems'; }).length;
+                $('#statTotal').text(results.length);
+                $('#statCS').text(cs);
+                $('#statCIS').text(cis);
+            }
+        });
+    }
+
+    function runSearch() {
+        $.ajax({
+            url: '/search', method: 'GET',
+            data: { lastName: $('#lastNameInput').val(), firstName: $('#firstNameInput').val(), id: $('#idInput').val(), major: $('#majorInput').val() },
             success: function (results) {
                 $('#resultsBody').empty();
                 if (results.length === 0) {
@@ -280,83 +311,54 @@
                     $('#noResults').hide();
                     $('#resultsTable').show();
                     results.forEach(function (student) {
-                        // Convert StudentID to string in case SQLite returns it as a number
                         var sid = String(student.StudentID);
+                        var major = student.Major || '';
+                        var badgeClass = major === 'Computer Information Systems' ? 'major-badge major-badge-cis' : 'major-badge';
                         $('#resultsBody').append(
                             '<tr>' +
                             '<td>' + sid + '</td>' +
                             '<td>' + student.FirstName + '</td>' +
                             '<td>' + student.LastName + '</td>' +
-                            '<td>' + (student.Major ?? '') + '</td>' +
-                            '<td>' + student.ExpectedGradYear + '</td>' +
+                            '<td><span class="' + badgeClass + '">' + major + '</span></td>' +
+                            '<td>' + (student.ExpectedGradYear || '') + '</td>' +
                             '<td>' +
-                                '<button class="btn btn-outline-secondary btn-sm view-student-btn me-2" onclick="window.location.href=\'student.html?sid=' + student.StudentID + '\'"">View Student</button>' +
-                                '<button class="btn btn-outline-secondary btn-sm edit-student-btn me-2" ' +
-                                    'data-id="'        + sid                      + '" ' +
-                                    'data-firstname="' + student.FirstName        + '" ' +
-                                    'data-lastname="'  + student.LastName         + '" ' +
-                                    'data-year="'      + student.Year             + '" ' +
-                                    'data-grad="'      + student.ExpectedGradYear + '" ' +
-                                    'data-email="'     + (student.Email ?? '')    + '" ' +
-                                    'data-major="'     + (student.Major ?? '')    + '">' +
-                                'Edit Student' +
-                                '</button>' +
-                                '<button class="btn btn-outline-secondary btn-sm remove-student-btn" ' +
-                                    'data-id="'   + sid + '" ' +
-                                    'data-name="' + student.FirstName + ' ' + student.LastName + '">' +
-                                'Remove Student' +
-                                '</button>' +
+                                '<button class="action-btn view-student-btn" onclick="window.location.href=\'student.html?sid=' + sid + '\'">View</button>' +
+                                '<button class="action-btn edit-student-btn" data-id="' + sid + '" data-firstname="' + student.FirstName + '" data-lastname="' + student.LastName + '" data-grad="' + (student.ExpectedGradYear || '') + '" data-email="' + (student.Email || '') + '" data-major="' + major + '">Edit</button>' +
+                                '<button class="action-btn action-btn-danger remove-student-btn" data-id="' + sid + '" data-name="' + student.FirstName + ' ' + student.LastName + '">Remove</button>' +
                             '</td>' +
                             '</tr>'
                         );
                     });
                 }
             },
-            error: function () {
-                alert('Something went wrong. Make sure the server is running.');
-            }
+            error: function () { alert('Something went wrong. Make sure the server is running.'); }
         });
-    });
+    }
 
-    // Placeholder for View Student
-    $(document).on('click', '.view-student-btn', function () {
-        // No functionality yet — will be wired up in a future sprint
-    });
+    $('#searchBtn, #searchBtnBottom').on('click', runSearch);
 
-    // Open Remove confirmation modal and fill in the student's name and ID
     $(document).on('click', '.remove-student-btn', function () {
         var btn = $(this);
         $('#removeStudentID').val(btn.data('id'));
         $('#removeStudentName').text(btn.data('name'));
         $('#removeAlert').hide();
-        var modal = new bootstrap.Modal(document.getElementById('removeStudentModal'));
-        modal.show();
+        new bootstrap.Modal(document.getElementById('removeStudentModal')).show();
     });
 
-    // Confirmed remove — DELETE to /delete with the student ID
     $('#confirmRemoveBtn').on('click', function () {
         var id = $('#removeStudentID').val();
-
         $.ajax({
-            url: '/delete?id=' + encodeURIComponent(id),
-            method: 'DELETE',
+            url: '/delete?id=' + encodeURIComponent(id), method: 'DELETE',
             success: function () {
-                // Close the modal and re-run search so the row disappears
                 bootstrap.Modal.getInstance(document.getElementById('removeStudentModal')).hide();
-                $('#searchBtn').trigger('click');
+                loadStats(); runSearch();
             },
-            error: function (xhr) {
-                var msg = xhr.responseText || 'Failed to remove student.';
-                showAlert('#removeAlert', 'danger', msg);
-            }
+            error: function (xhr) { showAlert('#removeAlert', 'danger', xhr.responseText || 'Failed to remove student.'); }
         });
     });
 
-    $('#removeStudentModal').on('hidden.bs.modal', function () {
-        $('#removeAlert').hide();
-    });
+    $('#removeStudentModal').on('hidden.bs.modal', function () { $('#removeAlert').hide(); });
 
-    // Open Edit modal and pre-fill fields with the student's current data
     $(document).on('click', '.edit-student-btn', function () {
         var btn = $(this);
         $('#editStudentID').val(btn.data('id'));
@@ -366,153 +368,57 @@
         $('#editEmail').val(btn.data('email'));
         $('#editMajor').val(btn.data('major') || '');
         $('#editAlert').hide();
-        var modal = new bootstrap.Modal(document.getElementById('editStudentModal'));
-        modal.show();
+        new bootstrap.Modal(document.getElementById('editStudentModal')).show();
     });
 
-    // Save edits — POST to /edit with the updated fields
     $('#saveEditBtn').on('click', function () {
-        var student = {
-            studentID:          $('#editStudentID').val().trim(),
-            firstName:          $('#editFirstName').val().trim(),
-            lastName:           $('#editLastName').val().trim(),
-            year:               '',
-            expectedGradYear:   $('#editExpectedGradYear').val().trim(),
-            email:              $('#editEmail').val().trim(),
-            major:              $('#editMajor').val().trim()
-        };
-
-        if (!student.firstName || !student.lastName || !student.major) {
-            showAlert('#editAlert', 'danger', 'First Name, Last Name, and Major are required.');
-            return;
-        }
-
+        var student = { studentID: $('#editStudentID').val().trim(), firstName: $('#editFirstName').val().trim(), lastName: $('#editLastName').val().trim(), year: '', expectedGradYear: $('#editExpectedGradYear').val().trim(), email: $('#editEmail').val().trim(), major: $('#editMajor').val().trim() };
+        if (!student.firstName || !student.lastName || !student.major) { showAlert('#editAlert', 'danger', 'First Name, Last Name, and Major are required.'); return; }
         $.ajax({
-            url: '/edit',
-            method: 'PUT',
-            contentType: 'application/json',
-            data: JSON.stringify(student),
-            success: function () {
-                showAlert('#editAlert', 'success', 'Student updated successfully!');
-                // Re-run the search so the table reflects the changes
-                $('#searchBtn').trigger('click');
-            },
-            error: function (xhr) {
-                var msg = xhr.responseText || 'Failed to update student.';
-                showAlert('#editAlert', 'danger', msg);
-            }
+            url: '/edit', method: 'PUT', contentType: 'application/json', data: JSON.stringify(student),
+            success: function () { showAlert('#editAlert', 'success', 'Student updated successfully!'); loadStats(); runSearch(); },
+            error: function (xhr) { showAlert('#editAlert', 'danger', xhr.responseText || 'Failed to update student.'); }
         });
     });
 
-    $('#editStudentModal').on('hidden.bs.modal', function () {
-        $('#editAlert').hide();
-    });
+    $('#editStudentModal').on('hidden.bs.modal', function () { $('#editAlert').hide(); });
 
-
-    // ── Create Student ───────────────────────────────────────────────────────
     $('#saveStudentBtn').on('click', function () {
-        var student = {
-            studentID:          $('#createStudentID').val().trim(),
-            firstName:          $('#createFirstName').val().trim(),
-            lastName:           $('#createLastName').val().trim(),
-            year:               '',
-            expectedGradYear:   $('#createExpectedGradYear').val().trim(),
-            email:              $('#createEmail').val().trim(),
-            major:              $('#createMajor').val().trim()
-        };
-
-        if (!student.studentID || !student.firstName || !student.lastName || !student.major) {
-            showAlert('#createAlert', 'danger', 'Student ID, First Name, Last Name, and Major are required.');
-            return;
-        }
-
+        var student = { studentID: $('#createStudentID').val().trim(), firstName: $('#createFirstName').val().trim(), lastName: $('#createLastName').val().trim(), year: '', expectedGradYear: $('#createExpectedGradYear').val().trim(), email: $('#createEmail').val().trim(), major: $('#createMajor').val().trim() };
+        if (!student.studentID || !student.firstName || !student.lastName || !student.major) { showAlert('#createAlert', 'danger', 'Student ID, First Name, Last Name, and Major are required.'); return; }
         $.ajax({
-            url: '/create',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(student),
-            success: function () {
-                showAlert('#createAlert', 'success', 'Student created successfully!');
-                $('#createStudentID, #createFirstName, #createLastName, #createExpectedGradYear, #createEmail').val('');
-                $('#createMajor').val('');
-            },
-            error: function (xhr) {
-                var msg = xhr.responseText || 'Failed to create student.';
-                showAlert('#createAlert', 'danger', msg);
-            }
+            url: '/create', method: 'POST', contentType: 'application/json', data: JSON.stringify(student),
+            success: function () { showAlert('#createAlert', 'success', 'Student created successfully!'); $('#createStudentID, #createFirstName, #createLastName, #createExpectedGradYear, #createEmail').val(''); $('#createMajor').val(''); loadStats(); },
+            error: function (xhr) { showAlert('#createAlert', 'danger', xhr.responseText || 'Failed to create student.'); }
         });
     });
 
-    $('#createStudentModal').on('hidden.bs.modal', function () {
-        $('#createAlert').hide();
-    });
+    $('#createStudentModal').on('hidden.bs.modal', function () { $('#createAlert').hide(); });
 
-
-    // ── Import Students ──────────────────────────────────────────────────────
     $('#uploadFileBtn').on('click', function () {
         var fileInput = document.getElementById('importFileInput');
-
-        if (!fileInput.files || fileInput.files.length === 0) {
-            showAlert('#importAlert', 'danger', 'Please select a file first.');
-            return;
-        }
-
+        if (!fileInput.files || fileInput.files.length === 0) { showAlert('#importAlert', 'danger', 'Please select a file first.'); return; }
         var file = fileInput.files[0];
-        var ext  = file.name.split('.').pop().toLowerCase();
-
-        if (ext !== 'csv' && ext !== 'xlsx') {
-            showAlert('#importAlert', 'danger', 'Only .csv and .xlsx files are supported.');
-            return;
-        }
-
+        var ext = file.name.split('.').pop().toLowerCase();
+        if (ext !== 'csv' && ext !== 'xlsx') { showAlert('#importAlert', 'danger', 'Only .csv and .xlsx files are supported.'); return; }
         var formData = new FormData();
         formData.append('file', file);
-
         $.ajax({
-            url: '/import',
-            method: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function (response) {
-                showAlert('#importAlert', 'success', response.message || 'Import successful!');
-                fileInput.value = '';
-            },
-            error: function (xhr) {
-                var msg = xhr.responseText || 'Import failed.';
-                showAlert('#importAlert', 'danger', msg);
-            }
+            url: '/import', method: 'POST', data: formData, processData: false, contentType: false,
+            success: function (response) { showAlert('#importAlert', 'success', response.message || 'Import successful!'); fileInput.value = ''; loadStats(); },
+            error: function (xhr) { showAlert('#importAlert', 'danger', xhr.responseText || 'Import failed.'); }
         });
     });
 
-    $('#importStudentModal').on('hidden.bs.modal', function () {
-        $('#importAlert').hide();
-        $('#importFileInput').val('');
-    });
+    $('#importStudentModal').on('hidden.bs.modal', function () { $('#importAlert').hide(); $('#importFileInput').val(''); });
 
-
-    // ── Helper ───────────────────────────────────────────────────────────────
     function showAlert(selector, type, message) {
-        $(selector)
-            .removeClass('alert-success alert-danger')
-            .addClass('alert-' + type)
-            .text(message)
-            .show();
+        $(selector).removeClass('alert-success alert-danger').addClass('alert-' + type).text(message).show();
     }
 
     function logOut() {
-    // 1. Ask the user for confirmation
-    const isSure = confirm("Are you sure you want to log out?");
-    
-    // 2. If they click "OK" (true), run the logout steps
-    if (isSure) {
-      sessionStorage.removeItem("isLoggedIn");
-      window.location.replace("index.html");
+        if (confirm("Are you sure you want to log out?")) { sessionStorage.removeItem("isLoggedIn"); window.location.replace("index.html"); }
     }
-    // If they click "Cancel", nothing happens and they stay on the page.
-  }
-
 </script>
-
 </body>
 </html>
