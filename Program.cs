@@ -19,6 +19,7 @@ using (var connection = new SqliteConnection("Data Source=AssesmentReportGenerat
 {
     connection.Open();
 
+    // Add SemesterID to Assignment if missing
     var checkSem = connection.CreateCommand();
     checkSem.CommandText = "PRAGMA table_info(Assignment)";
     bool hasSemesterCol = false;
@@ -32,6 +33,26 @@ using (var connection = new SqliteConnection("Data Source=AssesmentReportGenerat
         alter.ExecuteNonQuery();
     }
 
+    // Add Major column to Course if missing
+    var checkMajor = connection.CreateCommand();
+    checkMajor.CommandText = "PRAGMA table_info(Course)";
+    bool hasMajorCol = false;
+    using (var r = checkMajor.ExecuteReader())
+        while (r.Read())
+            if (r["name"].ToString() == "Major") { hasMajorCol = true; break; }
+    if (!hasMajorCol)
+    {
+        var alter = connection.CreateCommand();
+        alter.CommandText = "ALTER TABLE Course ADD COLUMN Major TEXT";
+        alter.ExecuteNonQuery();
+
+        // Default existing CSC courses to Computer Science
+        var update = connection.CreateCommand();
+        update.CommandText = "UPDATE Course SET Major = 'Computer Science' WHERE CourseID LIKE 'CSC%'";
+        update.ExecuteNonQuery();
+    }
+
+    // Add Grade to StudentAssignment if missing
     var checkGrade = connection.CreateCommand();
     checkGrade.CommandText = "PRAGMA table_info(StudentAssignment)";
     bool hasGradeCol = false;
@@ -45,6 +66,7 @@ using (var connection = new SqliteConnection("Data Source=AssesmentReportGenerat
         alter.ExecuteNonQuery();
     }
 
+    // Seed semesters if empty
     var countCmd = connection.CreateCommand();
     countCmd.CommandText = "SELECT COUNT(*) FROM Semester";
     if (Convert.ToInt32(countCmd.ExecuteScalar()) == 0)
@@ -77,7 +99,7 @@ app.MapPost("/api/login", (LoginRequest request) =>
 
 
 // ── Search ────────────────────────────────────────────────────────────────────
-app.MapGet("/search", (string? lastName, string? firstName, string? id, string? major) =>
+app.MapGet("/search", (string? lastName, string? firstName, string? id) =>
 {
     using var connection = new SqliteConnection("Data Source=AssesmentReportGenerator.db");
     connection.Open();
@@ -86,14 +108,12 @@ app.MapGet("/search", (string? lastName, string? firstName, string? id, string? 
     if (!string.IsNullOrEmpty(lastName))  sql += " AND LastName LIKE @last";
     if (!string.IsNullOrEmpty(firstName)) sql += " AND FirstName LIKE @first";
     if (!string.IsNullOrEmpty(id))        sql += " AND StudentID LIKE @id";
-    if (!string.IsNullOrEmpty(major))     sql += " AND Major = @major";
 
     var command = connection.CreateCommand();
     command.CommandText = sql;
     if (!string.IsNullOrEmpty(lastName))  command.Parameters.AddWithValue("@last",  $"%{lastName}%");
     if (!string.IsNullOrEmpty(firstName)) command.Parameters.AddWithValue("@first", $"%{firstName}%");
     if (!string.IsNullOrEmpty(id))        command.Parameters.AddWithValue("@id",    $"%{id}%");
-    if (!string.IsNullOrEmpty(major))     command.Parameters.AddWithValue("@major", major);
 
     var results = new List<Dictionary<string, object>>();
     using var reader = command.ExecuteReader();
@@ -152,7 +172,7 @@ app.MapPost("/import", async (IFormFile file) =>
     if (ext == ".csv")
     {
         using var reader = new StreamReader(file.OpenReadStream());
-        await reader.ReadLineAsync();
+        await reader.ReadLineAsync(); // skip header
         string? line;
         while ((line = await reader.ReadLineAsync()) != null)
         {
@@ -272,12 +292,17 @@ app.MapGet("/courses", () =>
     connection.Open();
 
     var command = connection.CreateCommand();
-    command.CommandText = "SELECT CourseID, CourseName FROM Course ORDER BY CourseName";
+    command.CommandText = "SELECT CourseID, CourseName, Credits, Major FROM Course ORDER BY CourseName";
 
     using var reader = command.ExecuteReader();
     var courses = new List<object>();
     while (reader.Read())
-        courses.Add(new { courseId = reader["CourseID"]?.ToString() ?? "", courseName = reader["CourseName"]?.ToString() ?? "" });
+        courses.Add(new {
+            courseId   = reader["CourseID"]?.ToString()   ?? "",
+            courseName = reader["CourseName"]?.ToString() ?? "",
+            credits    = reader["Credits"]  != DBNull.Value ? (int?)Convert.ToInt32(reader["Credits"]) : null,
+            major      = reader["Major"]?.ToString() ?? ""
+        });
 
     return Results.Ok(courses);
 });
@@ -313,10 +338,11 @@ app.MapPost("/create-course", async (HttpContext http) =>
     connection.Open();
 
     var command = connection.CreateCommand();
-    command.CommandText = "INSERT INTO Course (CourseID, CourseName, Credits) VALUES (@id, @name, @credits)";
+    command.CommandText = "INSERT INTO Course (CourseID, CourseName, Credits, Major) VALUES (@id, @name, @credits, @major)";
     command.Parameters.AddWithValue("@id",      course.CourseID);
     command.Parameters.AddWithValue("@name",    course.CourseName);
     command.Parameters.AddWithValue("@credits", course.Credits ?? 3);
+    command.Parameters.AddWithValue("@major",   course.Major ?? "");
     command.ExecuteNonQuery();
 
     return Results.Ok("Course created.");
@@ -509,6 +535,105 @@ app.MapPut("/update-grade", async (HttpContext http) =>
 });
 
 
+// ── Edit Course ───────────────────────────────────────────────────────────────
+app.MapPut("/edit-course", async (HttpContext http) =>
+{
+    var course = await http.Request.ReadFromJsonAsync<CourseDto>();
+
+    if (course == null || string.IsNullOrWhiteSpace(course.CourseID))
+        return Results.BadRequest("CourseID is required.");
+
+    using var connection = new SqliteConnection("Data Source=AssesmentReportGenerator.db");
+    connection.Open();
+
+    var command = connection.CreateCommand();
+    command.CommandText = @"
+        UPDATE Course SET CourseName = @name, Credits = @credits, Major = @major
+        WHERE CourseID = @id";
+    command.Parameters.AddWithValue("@id",      course.CourseID);
+    command.Parameters.AddWithValue("@name",    course.CourseName ?? "");
+    command.Parameters.AddWithValue("@credits", course.Credits ?? 3);
+    command.Parameters.AddWithValue("@major",   course.Major ?? "");
+
+    var rows = command.ExecuteNonQuery();
+    return rows == 0
+        ? Results.NotFound("Course not found.")
+        : Results.Ok("Course updated.");
+});
+
+
+// ── Delete Course ─────────────────────────────────────────────────────────────
+app.MapDelete("/delete-course", (string? id) =>
+{
+    if (string.IsNullOrWhiteSpace(id))
+        return Results.BadRequest("CourseID is required.");
+
+    using var connection = new SqliteConnection("Data Source=AssesmentReportGenerator.db");
+    connection.Open();
+
+    // Remove enrollments for this course
+    var delEnroll = connection.CreateCommand();
+    delEnroll.CommandText = "DELETE FROM Enrollment WHERE CourseID = @id";
+    delEnroll.Parameters.AddWithValue("@id", id);
+    delEnroll.ExecuteNonQuery();
+
+    var delCourse = connection.CreateCommand();
+    delCourse.CommandText = "DELETE FROM Course WHERE CourseID = @id";
+    delCourse.Parameters.AddWithValue("@id", id);
+    var rows = delCourse.ExecuteNonQuery();
+
+    return rows == 0
+        ? Results.NotFound("Course not found.")
+        : Results.Ok("Course deleted.");
+});
+
+
+// ── Get All Students ──────────────────────────────────────────────────────────
+app.MapGet("/students", () =>
+{
+    using var connection = new SqliteConnection("Data Source=AssesmentReportGenerator.db");
+    connection.Open();
+
+    var command = connection.CreateCommand();
+    command.CommandText = "SELECT StudentID, FirstName, LastName, Major FROM Student ORDER BY LastName, FirstName";
+
+    using var reader = command.ExecuteReader();
+    var students = new List<object>();
+    while (reader.Read())
+    {
+        students.Add(new {
+            studentId  = reader["StudentID"]?.ToString() ?? "",
+            firstName  = reader["FirstName"]?.ToString() ?? "",
+            lastName   = reader["LastName"]?.ToString()  ?? "",
+            major      = reader["Major"]?.ToString()     ?? ""
+        });
+    }
+    return Results.Ok(students);
+});
+
+
+// ── Get Enrolled Students for a Course ───────────────────────────────────────
+app.MapGet("/course-enrollments", (string courseId) =>
+{
+    using var connection = new SqliteConnection("Data Source=AssesmentReportGenerator.db");
+    connection.Open();
+
+    var command = connection.CreateCommand();
+    command.CommandText = @"
+        SELECT DISTINCT e.StudentID
+        FROM Enrollment e
+        WHERE e.CourseID = @cid";
+    command.Parameters.AddWithValue("@cid", courseId);
+
+    using var reader = command.ExecuteReader();
+    var ids = new List<string>();
+    while (reader.Read())
+        ids.Add(reader["StudentID"]?.ToString() ?? "");
+
+    return Results.Ok(ids);
+});
+
+
 app.Run();
 
 
@@ -547,6 +672,7 @@ record CourseDto
     public string? CourseID   { get; init; }
     public string? CourseName { get; init; }
     public int?    Credits    { get; init; }
+    public string? Major      { get; init; }
 }
 
 record EnrollmentDto
