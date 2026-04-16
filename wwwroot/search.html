@@ -288,6 +288,7 @@
 <script>
     $(document).ready(function () {
         loadStats();
+        runSearch();
 
         $('#lastNameInput, #firstNameInput, #idInput, #majorInput').on('keydown', function(e) {
             if (e.key === 'Enter') runSearch();
