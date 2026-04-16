@@ -21,7 +21,7 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <a class="navbar-brand me-auto ms-3" style="color: rgb(171, 171, 16); font-size: 28px;">Courses</a>
-        <button type="button" class="btn btn-light ms-3" onclick="openCreateCourse()">Create Course</button>
+        <button type="button" class="btn ms-3" onclick="openCreateCourse()" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);color:white;font-size:13px;padding:5px 14px;border-radius:6px;">Create Course</button>
     </div>
     <div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="offcanvasNav">
         <div class="offcanvas-header">
@@ -44,7 +44,7 @@
 
     <!-- Major Filter Tabs -->
     <div class="d-flex gap-2 mb-4">
-        <button class="btn btn-dark active" id="tabCS" onclick="filterMajor('Computer Science')">Computer Science</button>
+        <button class="btn" id="tabCS" style="background:#1a1a1a;color:#c8b830;border:none;" onclick="filterMajor('Computer Science')">Computer Science</button>
         <button class="btn" style="background:transparent;color:#1a1a1a;border:1px solid #1a1a1a;" id="tabIT" onclick="filterMajor('Computer Information Systems')">Computer Information Systems</button>
         <button class="btn" style="background:transparent;color:#1a1a1a;border:1px solid #1a1a1a;" id="tabAll" onclick="filterMajor('')">All</button>
     </div>
@@ -563,10 +563,10 @@
 
     function filterMajor(major) {
         currentMajorFilter = major;
-        $('#tabCS, #tabIT, #tabAll').removeClass('btn-dark active').addClass('btn-outline-dark');
-        if (major === 'Computer Science')       { $('#tabCS').removeClass('btn-outline-dark').addClass('btn-dark active'); }
-        else if (major === 'Computer Information Systems') { $('#tabIT').removeClass('btn-outline-dark').addClass('btn-dark active'); }
-        else                                    { $('#tabAll').removeClass('btn-outline-dark').addClass('btn-dark active'); }
+        $('#tabCS, #tabIT, #tabAll').css({'background':'white','color':'#1a1a1a','border':'1px solid #1a1a1a'});
+        if (major === 'Computer Science')       { $('#tabCS').css({'background':'#1a1a1a','color':'#c8b830','border':'none'}); }
+        else if (major === 'Computer Information Systems') { $('#tabIT').css({'background':'#1a1a1a','color':'#c8b830','border':'none'}); }
+        else                                    { $('#tabAll').css({'background':'#1a1a1a','color':'#c8b830','border':'none'}); }
         renderCourses(major);
     }
 
@@ -597,18 +597,18 @@
                     <td>${c.major || '--'}</td>
                     <td>${c.semesters || '--'}</td>
                     <td>
-                        <button class="btn btn-outline-secondary btn-sm me-1"
-                            onclick="openEditCourse('${c.courseId}', '${c.courseName.replace(/'/g,"\\'")}', ${c.credits ?? 3}, '${c.major || ''}', '${c.semesters || ''}')">
-                            Edit
-                        </button>
-                        <button class="btn btn-outline-secondary btn-sm me-1"
-                            onclick="openEnrollStudents('${c.courseId}', '${c.courseName.replace(/'/g,"\\'")}')">
-                            Enroll Students
-                        </button>
-                        <button class="btn btn-outline-danger btn-sm"
-                            onclick="openRemoveCourse('${c.courseId}', '${c.courseName.replace(/'/g,"\\'")}')">
-                            Remove
-                        </button>
+                        <div class="dropdown">
+                            <button class="btn btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                                style="background:#1a1a1a;color:#c8b830;border:none;font-size:12px;">Actions</button>
+                            <ul class="dropdown-menu dropdown-menu-end" style="font-size:12px;min-width:140px;padding:0;border-radius:6px;overflow:hidden;border:0.5px solid #ddd;box-shadow:0 4px 12px rgba(0,0,0,0.12);">
+                                <li><a class="dropdown-item" style="cursor:pointer;padding:8px 14px;border-bottom:0.5px solid #eee;"
+                                    onclick="openEditCourse('${c.courseId}', '${c.courseName.replace(/'/g,"\\'")}', ${c.credits ?? 3}, '${c.major || ''}', '${c.semesters || ''}')">Edit</a></li>
+                                <li><a class="dropdown-item" style="cursor:pointer;padding:8px 14px;border-bottom:0.5px solid #eee;"
+                                    onclick="openEnrollStudents('${c.courseId}', '${c.courseName.replace(/'/g,"\\'")}')">Enroll Students</a></li>
+                                <li><a class="dropdown-item text-danger" style="cursor:pointer;padding:8px 14px;"
+                                    onclick="openRemoveCourse('${c.courseId}', '${c.courseName.replace(/'/g,"\\'")}')">Remove</a></li>
+                            </ul>
+                        </div>
                     </td>
                 </tr>
             `);

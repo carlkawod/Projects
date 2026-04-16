@@ -29,6 +29,7 @@
             <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
+            <span class="navbar-brand ms-2" style="color:#c8b830;font-size:22px;font-weight:500;" id="displayName">Loading...</span>
             <div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="offcanvasDarkNavbar" aria-labelledby="offcanvasDarkNavbarLabel">
                 <div class="offcanvas-header">
                     <button type="button" class="navbar-toggler" data-bs-dismiss="offcanvas" aria-label="Close">
@@ -55,12 +56,7 @@
         </div>
     </nav>
 
-    <div class="container" style="padding-top: 90px; color: rgb(0, 0, 0);">
-        <h2><span id="displayName">Loading...</span></h2>
-        <hr>
-    </div>
-
-    <div class="container" style="border: 2px solid black; margin-top: 5px; padding: 20px;">
+    <div class="container" style="border: 2px solid black; margin-top: 80px; padding: 20px;">
         <div class="row align-items-start">
             <div class="col ps-5 text-center">
             
@@ -105,13 +101,13 @@
                 <table class="table table-bordered text-center mb-0" style="font-size: 14px;">
                     <thead>
                         <tr>
-                            <th style="background-color: #d3d3d3;">Assignments</th>
-                            <th style="background-color: #4da6ff;">PLO 1</th>
-                            <th style="background-color: #4da6ff;">PLO 2</th>
-                            <th style="background-color: #4da6ff;">PLO 3</th>
-                            <th style="background-color: #4da6ff;">PLO 4</th>
-                            <th style="background-color: #d3d3d3;">Grade (%)</th>
-                            <th style="background-color: #d3d3d3;">PLO Rating</th>
+                            <th style="background-color: #f5f3eb; color:#333;">Assignments</th>
+                            <th style="background-color: #1a1a1a; color:#c8b830;">PLO 1</th>
+                            <th style="background-color: #1a1a1a; color:#c8b830;">PLO 2</th>
+                            <th style="background-color: #1a1a1a; color:#c8b830;">PLO 3</th>
+                            <th style="background-color: #1a1a1a; color:#c8b830;">PLO 4</th>
+                            <th style="background-color: #f5f3eb; color:#333;">Grade (%)</th>
+                            <th style="background-color: #f5f3eb; color:#333;">PLO Rating</th>
                         </tr>
                     </thead>
                     <tbody id="assignmentTableBody">
@@ -129,7 +125,7 @@
 
     <!-- Fixed bottom action bar -->
     <div class="fixed-bottom d-flex justify-content-center gap-3 pb-4" style="background-color: rgba(255,255,255,0.95); padding-top: 12px; border-top: 1px solid #ddd;">
-        <button type="button" class="btn btn-light" style="border: 2px solid #000;" onclick="openEnroll()">Enroll in Course</button>
+        <button type="button" class="btn" onclick="openEnroll()" style="background:#1a1a1a;color:#c8b830;border:none;padding:8px 24px;font-size:14px;border-radius:6px;">Enroll in Course</button>
     </div>
 
     <div id="mEnroll" style="display: none;">
