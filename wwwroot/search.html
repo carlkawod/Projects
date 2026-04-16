@@ -286,7 +286,13 @@
 
 
 <script>
-    $(document).ready(function () { loadStats(); });
+    $(document).ready(function () {
+        loadStats();
+
+        $('#lastNameInput, #firstNameInput, #idInput, #majorInput').on('keydown', function(e) {
+            if (e.key === 'Enter') runSearch();
+        });
+    });
 
     function loadStats() {
         $.ajax({
