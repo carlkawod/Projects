@@ -113,7 +113,7 @@
 
 <!-- Bottom Action Buttons -->
 <div class="fixed-bottom d-flex justify-content-center gap-3 pb-4">
-    <button type="button" class="btn btn-light" style="border: 2px solid #000;" id="searchBtn">Search</button>
+    <button type="button" class="btn btn-light" style="border: 2px solid #000;" id="searchBtnBottom">Search</button>
     <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#createStudentModal" style="border: 2px solid #000;">Add Student</button>
     <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#importStudentModal" style="border: 2px solid #000;">Import Student</button>
 </div>
@@ -270,7 +270,7 @@
 <script>
 
     // ── Search ──────────────────────────────────────────────────────────────
-    $('#searchBtn').on('click', function () {
+    $('#searchBtn, #searchBtnBottom').on('click', function () {
         $.ajax({
             url: '/search',
             method: 'GET',
