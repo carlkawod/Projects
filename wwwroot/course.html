@@ -434,21 +434,21 @@
 <div class="modal fade" id="courseStudentsModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title">Students Enrolled — <span id="courseStudentsCourseName"></span></h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Students Enrolled — <span id="courseStudentsCourseName"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body p-0">
                 <div style="max-height: 450px; overflow-y: auto;">
-                    <table class="table table-bordered table-striped mb-0" style="font-size: 14px; text-align: center;">
-                        <thead class="table-dark" style="position: sticky; top: 0;">
+                    <table class="table table-hover mb-0" style="font-size: 14px; text-align: center;">
+                        <thead style="position: sticky; top: 0; background: #f8f9fa;">
                             <tr>
                                 <th>Student ID</th>
                                 <th>First Name</th>
                                 <th>Last Name</th>
                                 <th>Major</th>
-                                <th>Expected Grad Year</th>
-                                <th></th>
+                                <th>Grad Year</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="courseStudentsBody">
@@ -509,14 +509,19 @@
                             <td>${s.major || '--'}</td>
                             <td>${s.expectedGradYear || '--'}</td>
                             <td>
-                                <button class="btn btn-outline-secondary btn-sm me-1"
-                                    onclick="window.location.href='student.html?sid=${s.studentId}'">
-                                    View
-                                </button>
-                                <button class="btn btn-outline-danger btn-sm"
-                                    onclick="removeStudentFromCourse('${s.studentId}', '${s.firstName} ${s.lastName}', '${courseId}', '${courseName.replace(/'/g,"\\'")}')">
-                                    Remove
-                                </button>
+                                <div class="dropdown">
+                                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        Actions
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="student.html?sid=${s.studentId}">View Student</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item text-danger" href="#"
+                                            onclick="removeStudentFromCourse('${s.studentId}', '${s.firstName} ${s.lastName}', '${courseId}', '${courseName.replace(/'/g,"\\'")}'); return false;">
+                                            Remove from Course
+                                        </a></li>
+                                    </ul>
+                                </div>
                             </td>
                         </tr>
                     `);
