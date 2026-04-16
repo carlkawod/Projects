@@ -742,6 +742,37 @@ app.MapPost("/add-assignment-course", async (HttpContext http) =>
 });
 
 
+// ── Get Students Enrolled in a Course ────────────────────────────────────────
+app.MapGet("/course-students", (string courseId) =>
+{
+    using var connection = new SqliteConnection("Data Source=AssesmentReportGenerator.db");
+    connection.Open();
+
+    var command = connection.CreateCommand();
+    command.CommandText = @"
+        SELECT s.StudentID, s.FirstName, s.LastName, s.Major, s.ExpectedGradYear
+        FROM Enrollment e
+        INNER JOIN Student s ON e.StudentID = s.StudentID
+        WHERE e.CourseID = @cid
+        ORDER BY s.LastName, s.FirstName";
+    command.Parameters.AddWithValue("@cid", courseId);
+
+    using var reader = command.ExecuteReader();
+    var students = new List<object>();
+    while (reader.Read())
+    {
+        students.Add(new {
+            studentId       = reader["StudentID"]?.ToString()       ?? "",
+            firstName       = reader["FirstName"]?.ToString()       ?? "",
+            lastName        = reader["LastName"]?.ToString()        ?? "",
+            major           = reader["Major"]?.ToString()           ?? "",
+            expectedGradYear = reader["ExpectedGradYear"]?.ToString() ?? ""
+        });
+    }
+    return Results.Ok(students);
+});
+
+
 // ── Get Enrolled Students for a Course ───────────────────────────────────────
 app.MapGet("/course-enrollments", (string courseId) =>
 {
