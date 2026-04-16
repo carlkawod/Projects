@@ -453,44 +453,26 @@ app.MapPost("/enroll", async (HttpContext http) =>
     return Results.Ok("Enrolled successfully.");
 });
 
-// ── Save Assignment Grades ────────────────────────────────────────────────────
-app.MapPost("/save-grades", async (HttpContext http) =>
+// ── Update Assignment Grade ───────────────────────────────────────────────────
+app.MapPut("/update-grade", async (HttpContext http) =>
 {
     var dto = await http.Request.ReadFromJsonAsync<GradeDto>();
 
-    if (dto == null || dto.AssignmentID <= 0 || string.IsNullOrWhiteSpace(dto.StudentID))
-        return Results.BadRequest("AssignmentID and StudentID are required.");
+    if (dto == null || dto.StudentAssignmentID <= 0)
+        return Results.BadRequest("StudentAssignmentID is required.");
 
     using var connection = new SqliteConnection("Data Source=AssesmentReportGenerator.db");
     connection.Open();
 
-    foreach (var grade in dto.Grades)
-    {
-        int level = grade.RawScore >= 90 ? 4 :
-                    grade.RawScore >= 80 ? 3 :
-                    grade.RawScore >= 70 ? 2 : 1;
+    var command = connection.CreateCommand();
+    command.CommandText = @"
+        UPDATE StudentAssignment SET Grade = @grade
+        WHERE StudentAssignmentID = @id";
+    command.Parameters.AddWithValue("@grade", dto.Grade.HasValue ? (object)dto.Grade.Value : DBNull.Value);
+    command.Parameters.AddWithValue("@id", dto.StudentAssignmentID);
+    command.ExecuteNonQuery();
 
-        // Upsert — delete existing then insert
-        var del = connection.CreateCommand();
-        del.CommandText = "DELETE FROM AssignmentGrade WHERE AssignmentID=@aid AND StudentID=@sid AND PLO=@plo";
-        del.Parameters.AddWithValue("@aid", dto.AssignmentID);
-        del.Parameters.AddWithValue("@sid", dto.StudentID);
-        del.Parameters.AddWithValue("@plo", grade.PLO);
-        del.ExecuteNonQuery();
-
-        var ins = connection.CreateCommand();
-        ins.CommandText = @"
-            INSERT INTO AssignmentGrade (AssignmentID, StudentID, PLO, RawScore, GradeLevel)
-            VALUES (@aid, @sid, @plo, @raw, @lvl)";
-        ins.Parameters.AddWithValue("@aid", dto.AssignmentID);
-        ins.Parameters.AddWithValue("@sid", dto.StudentID);
-        ins.Parameters.AddWithValue("@plo", grade.PLO);
-        ins.Parameters.AddWithValue("@raw", grade.RawScore);
-        ins.Parameters.AddWithValue("@lvl", level);
-        ins.ExecuteNonQuery();
-    }
-
-    return Results.Ok("Grades saved.");
+    return Results.Ok("Grade updated.");
 });
 
 // ── Get Grades for an Assignment ──────────────────────────────────────────────
