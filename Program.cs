@@ -275,6 +275,33 @@ app.MapGet("/courses", () =>
     return Results.Ok(courses);
 });
 
+// ── Create Course ─────────────────────────────────────────────────────────────
+app.MapPost("/create-course", async (HttpContext http) =>
+{
+    var course = await http.Request.ReadFromJsonAsync<CourseDto>();
+
+    if (course == null ||
+        string.IsNullOrWhiteSpace(course.CourseID) ||
+        string.IsNullOrWhiteSpace(course.CourseName))
+    {
+        return Results.BadRequest("CourseID and CourseName are required.");
+    }
+
+    using var connection = new SqliteConnection("Data Source=AssesmentReportGenerator.db");
+    connection.Open();
+
+    var command = connection.CreateCommand();
+    command.CommandText = @"
+        INSERT INTO Course (CourseID, CourseName, Credits)
+        VALUES (@id, @name, @credits)";
+    command.Parameters.AddWithValue("@id",      course.CourseID);
+    command.Parameters.AddWithValue("@name",    course.CourseName);
+    command.Parameters.AddWithValue("@credits", course.Credits ?? 3);
+
+    command.ExecuteNonQuery();
+    return Results.Ok("Course created.");
+});
+
 // ── Get Courses for a Student ────────────────────────────────────────────────
 app.MapGet("/student-courses", (string sid) =>
 {
@@ -460,4 +487,11 @@ record StudentDto
     public string? LastName         { get; init; }
     public string? Year             { get; init; }
     public string? ExpectedGradYear { get; init; }
+}
+
+record CourseDto
+{
+    public string? CourseID   { get; init; }
+    public string? CourseName { get; init; }
+    public int?    Credits    { get; init; }
 }
