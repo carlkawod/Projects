@@ -45,7 +45,7 @@
     <!-- Major Filter Tabs -->
     <div class="d-flex gap-2 mb-4">
         <button class="btn btn-dark active" id="tabCS" onclick="filterMajor('Computer Science')">Computer Science</button>
-        <button class="btn btn-outline-dark" id="tabIT" onclick="filterMajor('Information Technology')">Information Technology</button>
+        <button class="btn btn-outline-dark" id="tabIT" onclick="filterMajor('Computer Information Systems')">Computer Information Systems</button>
         <button class="btn btn-outline-dark" id="tabAll" onclick="filterMajor('')">All</button>
     </div>
 
@@ -99,8 +99,8 @@
                             <label class="form-check-label" for="createMajorCS">Computer Science</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="createMajorIT" value="Information Technology">
-                            <label class="form-check-label" for="createMajorIT">Information Technology</label>
+                            <input class="form-check-input" type="checkbox" id="createMajorIT" value="Computer Information Systems">
+                            <label class="form-check-label" for="createMajorIT">Computer Information Systems</label>
                         </div>
                     </div>
                 </div>
@@ -144,8 +144,8 @@
                             <label class="form-check-label" for="editMajorCS">Computer Science</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="editMajorIT" value="Information Technology">
-                            <label class="form-check-label" for="editMajorIT">Information Technology</label>
+                            <input class="form-check-input" type="checkbox" id="editMajorIT" value="Computer Information Systems">
+                            <label class="form-check-label" for="editMajorIT">Computer Information Systems</label>
                         </div>
                     </div>
                 </div>
@@ -332,64 +332,64 @@
 
 <!-- ── PLO METRIC MODALS ──────────────────────────────────────────────────── -->
 <div id="caMAsgnOverview1" style="display:none; position:fixed; z-index:1100; left:0; top:0; width:100%; height:100%; overflow:auto; background-color:rgba(0,0,0,0.5);">
-    <div class="modal" style="background:#fefefe; margin:15% auto; padding:20px; border:1px solid #000; width:40%; max-width:95%; position:relative; display:block;">
+    <div class="modal" style="background:#fefefe; margin:10% auto; padding:20px; border:1px solid #000; width:50%; max-width:95%; position:relative; display:block; overflow-y:auto; max-height:80vh;">
         <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
             <h2 class="m-0 fs-4">Select the metrics this assignment covers</h2>
             <button class="btn btn-sm border-0 fs-5" style="background:none;" onclick="cmC('caMAsgnOverview1')">✕</button>
         </div>
-        <div>
+        <div class="overview-con">
             <h5 id="caPlo1Head">PLO 1</h5>
-            <div><input type="checkbox" id="caPlo1_1"><label for="caPlo1_1" id="caPlo1Metric1"> Metric 1...</label></div>
-            <div><input type="checkbox" id="caPlo1_2"><label for="caPlo1_2" id="caPlo1Metric2"> Metric 2...</label></div>
-            <div><input type="checkbox" id="caPlo1_3"><label for="caPlo1_3" id="caPlo1Metric3"> Metric 3...</label></div>
-            <div><input type="checkbox" id="caPlo1_4"><label for="caPlo1_4" id="caPlo1Metric4"> Metric 4...</label></div>
-            <div class="mt-3 text-end"><button class="btn btn-dark" onclick="cmC('caMAsgnOverview1')">OK</button></div>
+            <div class="metric-row"><input type="checkbox" id="caPlo1_1"><label for="caPlo1_1" id="caPlo1Metric1"> Metric 1...</label></div>
+            <div class="metric-row"><input type="checkbox" id="caPlo1_2"><label for="caPlo1_2" id="caPlo1Metric2"> Metric 2...</label></div>
+            <div class="metric-row"><input type="checkbox" id="caPlo1_3"><label for="caPlo1_3" id="caPlo1Metric3"> Metric 3...</label></div>
+            <div class="metric-row"><input type="checkbox" id="caPlo1_4"><label for="caPlo1_4" id="caPlo1Metric4"> Metric 4...</label></div>
         </div>
+        <div class="mt-3 text-end"><button class="btn btn-dark" onclick="cmC('caMAsgnOverview1')">OK</button></div>
     </div>
 </div>
 
 <div id="caMAsgnOverview2" style="display:none; position:fixed; z-index:1100; left:0; top:0; width:100%; height:100%; overflow:auto; background-color:rgba(0,0,0,0.5);">
-    <div class="modal" style="background:#fefefe; margin:15% auto; padding:20px; border:1px solid #000; width:40%; max-width:95%; position:relative; display:block;">
+    <div class="modal" style="background:#fefefe; margin:10% auto; padding:20px; border:1px solid #000; width:50%; max-width:95%; position:relative; display:block; overflow-y:auto; max-height:80vh;">
         <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
             <h2 class="m-0 fs-4">Select the metrics this assignment covers</h2>
             <button class="btn btn-sm border-0 fs-5" style="background:none;" onclick="cmC('caMAsgnOverview2')">✕</button>
         </div>
-        <div>
+        <div class="overview-con">
             <h5 id="caPlo2Head">PLO 2</h5>
-            <div><input type="checkbox" id="caPlo2_1"><label for="caPlo2_1" id="caPlo2Metric1"> Metric 1...</label></div>
-            <div><input type="checkbox" id="caPlo2_2"><label for="caPlo2_2" id="caPlo2Metric2"> Metric 2...</label></div>
-            <div class="mt-3 text-end"><button class="btn btn-dark" onclick="cmC('caMAsgnOverview2')">OK</button></div>
+            <div class="metric-row"><input type="checkbox" id="caPlo2_1"><label for="caPlo2_1" id="caPlo2Metric1"> Metric 1...</label></div>
+            <div class="metric-row"><input type="checkbox" id="caPlo2_2"><label for="caPlo2_2" id="caPlo2Metric2"> Metric 2...</label></div>
         </div>
+        <div class="mt-3 text-end"><button class="btn btn-dark" onclick="cmC('caMAsgnOverview2')">OK</button></div>
     </div>
 </div>
 
 <div id="caMAsgnOverview3" style="display:none; position:fixed; z-index:1100; left:0; top:0; width:100%; height:100%; overflow:auto; background-color:rgba(0,0,0,0.5);">
-    <div class="modal" style="background:#fefefe; margin:15% auto; padding:20px; border:1px solid #000; width:40%; max-width:95%; position:relative; display:block;">
+    <div class="modal" style="background:#fefefe; margin:10% auto; padding:20px; border:1px solid #000; width:50%; max-width:95%; position:relative; display:block; overflow-y:auto; max-height:80vh;">
         <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
             <h2 class="m-0 fs-4">Select the metrics this assignment covers</h2>
             <button class="btn btn-sm border-0 fs-5" style="background:none;" onclick="cmC('caMAsgnOverview3')">✕</button>
         </div>
-        <div>
+        <div class="overview-con">
             <h5 id="caPlo3Head">PLO 3</h5>
-            <div><input type="checkbox" id="caPlo3_1"><label for="caPlo3_1" id="caPlo3Metric1"> Metric 1...</label></div>
-            <div><input type="checkbox" id="caPlo3_2"><label for="caPlo3_2" id="caPlo3Metric2"> Metric 2...</label></div>
-            <div><input type="checkbox" id="caPlo3_3"><label for="caPlo3_3" id="caPlo3Metric3"> Metric 3...</label></div>
-            <div class="mt-3 text-end"><button class="btn btn-dark" onclick="cmC('caMAsgnOverview3')">OK</button></div>
+            <div class="metric-row"><input type="checkbox" id="caPlo3_1"><label for="caPlo3_1" id="caPlo3Metric1"> Metric 1...</label></div>
+            <div class="metric-row"><input type="checkbox" id="caPlo3_2"><label for="caPlo3_2" id="caPlo3Metric2"> Metric 2...</label></div>
+            <div class="metric-row"><input type="checkbox" id="caPlo3_3"><label for="caPlo3_3" id="caPlo3Metric3"> Metric 3...</label></div>
         </div>
+        <div class="mt-3 text-end"><button class="btn btn-dark" onclick="cmC('caMAsgnOverview3')">OK</button></div>
     </div>
 </div>
 
 <div id="caMAsgnOverview4" style="display:none; position:fixed; z-index:1100; left:0; top:0; width:100%; height:100%; overflow:auto; background-color:rgba(0,0,0,0.5);">
-    <div class="modal" style="background:#fefefe; margin:15% auto; padding:20px; border:1px solid #000; width:40%; max-width:95%; position:relative; display:block;">
+    <div class="modal" style="background:#fefefe; margin:10% auto; padding:20px; border:1px solid #000; width:50%; max-width:95%; position:relative; display:block; overflow-y:auto; max-height:80vh;">
         <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
             <h2 class="m-0 fs-4">Select the metrics this assignment covers</h2>
             <button class="btn btn-sm border-0 fs-5" style="background:none;" onclick="cmC('caMAsgnOverview4')">✕</button>
         </div>
-        <div>
+        <div class="overview-con">
             <h5 id="caPlo4Head">PLO 4</h5>
-            <div><input type="checkbox" id="caPlo4_1"><label for="caPlo4_1" id="caPlo4Metric1"> Metric 1...</label></div>
-            <div class="mt-3 text-end"><button class="btn btn-dark" onclick="cmC('caMAsgnOverview4')">OK</button></div>
+            <div class="metric-row"><input type="checkbox" id="caPlo4_1"><label for="caPlo4_1" id="caPlo4Metric1"> Metric 1...</label></div>
         </div>
+        <div class="mt-3 text-end"><button class="btn btn-dark" onclick="cmC('caMAsgnOverview4')">OK</button></div>
     </div>
 </div>
 
@@ -429,7 +429,7 @@
         currentMajorFilter = major;
         $('#tabCS, #tabIT, #tabAll').removeClass('btn-dark active').addClass('btn-outline-dark');
         if (major === 'Computer Science')       { $('#tabCS').removeClass('btn-outline-dark').addClass('btn-dark active'); }
-        else if (major === 'Information Technology') { $('#tabIT').removeClass('btn-outline-dark').addClass('btn-dark active'); }
+        else if (major === 'Computer Information Systems') { $('#tabIT').removeClass('btn-outline-dark').addClass('btn-dark active'); }
         else                                    { $('#tabAll').removeClass('btn-outline-dark').addClass('btn-dark active'); }
         renderCourses(major);
     }
@@ -496,7 +496,7 @@
 
         const majors = [];
         if ($('#createMajorCS').is(':checked')) majors.push('Computer Science');
-        if ($('#createMajorIT').is(':checked')) majors.push('Information Technology');
+        if ($('#createMajorIT').is(':checked')) majors.push('Computer Information Systems');
         if (majors.length === 0) { showAlert('#createCourseAlert', 'danger', 'Please select at least one major.'); return; }
         const major = majors.join(',');
 
@@ -524,7 +524,7 @@
         $('#editCourseName').val(name);
         $('#editCourseCredits').val(credits);
         $('#editMajorCS').prop('checked', major.includes('Computer Science'));
-        $('#editMajorIT').prop('checked', major.includes('Information Technology'));
+        $('#editMajorIT').prop('checked', major.includes('Computer Information Systems'));
         $('#editCourseAlert').hide();
         new bootstrap.Modal(document.getElementById('editCourseModal')).show();
     }
@@ -536,7 +536,7 @@
 
         const majors = [];
         if ($('#editMajorCS').is(':checked')) majors.push('Computer Science');
-        if ($('#editMajorIT').is(':checked')) majors.push('Information Technology');
+        if ($('#editMajorIT').is(':checked')) majors.push('Computer Information Systems');
         if (majors.length === 0) { showAlert('#editCourseAlert', 'danger', 'Please select at least one major.'); return; }
         const major = majors.join(',');
 
@@ -711,6 +711,11 @@
         $('#caPlo3_1, #caPlo3_2, #caPlo3_3').prop('checked', false);
         $('#caPlo4_1').prop('checked', false);
 
+        // Find the course's major and populate metric labels
+        const course = allCourses.find(c => c.courseId === newCourseIdAfterCreate);
+        const major  = course ? course.major : 'Computer Science';
+        populateCourseMetrics(major);
+
         $.ajax({
             url: '/semesters', method: 'GET',
             success: function (semesters) {
@@ -721,6 +726,35 @@
                 new bootstrap.Modal(document.getElementById('courseAddAsgnModal')).show();
             }
         });
+    }
+
+    function populateCourseMetrics(major) {
+        if (major && major.includes('Computer Science')) {
+            $('#caPlo1Head').text('PLO 1: Graduates demonstrate an ability to develop quality computer software');
+            $('#caPlo1Metric1').text('Metric 1: Graduates demonstrate extensive programming ability in at least two programming languages');
+            $('#caPlo1Metric2').text('Metric 2: Graduates demonstrate an ability to apply software engineering principles in the development of computer software');
+            $('#caPlo1Metric3').text('Metric 3: Graduates demonstrate an ability to develop and analyze algorithms');
+            $('#caPlo1Metric4').text('Metric 4: Graduates demonstrate an ability to design and implement appropriate user interfaces');
+            $('#caPlo2Head').text('PLO 2: Graduates are able to evaluate the functional relationship between operational components of computer systems');
+            $('#caPlo2Metric1').text('Metric 1: Graduates have extensive knowledge of operating systems concepts and their functional implementation');
+            $('#caPlo2Metric2').text('Metric 2: Graduates have extensive knowledge of the architecture and organization of computer systems');
+        } else if (major && major.includes('Computer Information Systems')) {
+            $('#caPlo1Head').text('PLO 1: Graduates demonstrate an ability to develop quality computer software');
+            $('#caPlo1Metric1').text('Metric 1: Graduates demonstrate extensive programming ability in at least two programming languages');
+            $('#caPlo1Metric2').text('Metric 2: Graduates demonstrate an ability to apply software engineering principles in the development of computer software');
+            $('#caPlo1Metric3').text('Metric 3: Graduates demonstrate an ability to develop and analyze algorithms');
+            $('#caPlo1Metric4').text('Metric 4: Graduates demonstrate an ability to design and implement appropriate user interfaces');
+            $('#caPlo2Head').text('PLO 2: Graduates have broadened their knowledge of basic Business concepts, and either Computer Science or Computer Information Systems concepts');
+            $('#caPlo2Metric1').text('Metric 1: Graduates have broadened their knowledge of basic Business concepts');
+            $('#caPlo2Metric2').text('Metric 2: Graduates have broadened their knowledge of Computer Science or Computer Information Systems concepts');
+        }
+        // PLO 3 and 4 are the same for both majors
+        $('#caPlo3Head').text('PLO 3: Graduates will exhibit professional conduct and behavior consistent with contemporary professional standards');
+        $('#caPlo3Metric1').text('Metric 1: Graduates exhibit good oral communications skills');
+        $('#caPlo3Metric2').text('Metric 2: Graduates exhibit good written communications skills');
+        $('#caPlo3Metric3').text('Metric 3: Graduates exhibit ethical codes of conduct');
+        $('#caPlo4Head').text('PLO 4: Graduates are able to identify the interrelationship between computer science and other disciplines');
+        $('#caPlo4Metric1').text('Metric 1: Graduates are able to apply skills learned in Computer Science to real world applications');
     }
 
     function closeCourseAddAsgn() {
