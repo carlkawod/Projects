@@ -581,10 +581,15 @@
                 contentType: 'application/json',
                 data: JSON.stringify({ CourseID: courseId, CourseName: courseName, Credits: credits }),
                 success: function () {
-                    alert('Course created successfully.');
-                    closeCreateCourse();
                     const urlParams = new URLSearchParams(window.location.search);
                     loadCourses(urlParams.get('sid'));
+                    closeCreateCourse();
+
+                    // Load assignment modal and pre-select the newly created course
+                    populateAsgnModals(function () {
+                        $('#asgnCourseSelect').val(courseId);
+                        om('mAdd');
+                    });
                 },
                 error: function (xhr) {
                     alert('Failed to create course: ' + xhr.responseText);
