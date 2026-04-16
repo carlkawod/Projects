@@ -374,6 +374,32 @@ app.MapPost("/enroll", async (HttpContext http) =>
     cmd.Parameters.AddWithValue("@semId", string.IsNullOrWhiteSpace(dto.SemesterID) ? DBNull.Value : (object)dto.SemesterID);
     cmd.ExecuteNonQuery();
 
+    // Auto-link all existing assignments for this course to the student
+    var getAssignments = connection.CreateCommand();
+    getAssignments.CommandText = "SELECT AssignmentID FROM Assignment WHERE CourseID = @cid";
+    getAssignments.Parameters.AddWithValue("@cid", dto.CourseID);
+
+    var assignmentIds = new List<int>();
+    using (var r = getAssignments.ExecuteReader())
+        while (r.Read())
+            assignmentIds.Add(Convert.ToInt32(r["AssignmentID"]));
+
+    foreach (var aid in assignmentIds)
+    {
+        // Only link if not already linked
+        var alreadyLinked = connection.CreateCommand();
+        alreadyLinked.CommandText = "SELECT COUNT(*) FROM StudentAssignment WHERE StudentID = @sid AND AssignmentID = @aid";
+        alreadyLinked.Parameters.AddWithValue("@sid", dto.StudentID);
+        alreadyLinked.Parameters.AddWithValue("@aid", aid);
+        if (Convert.ToInt32(alreadyLinked.ExecuteScalar()) > 0) continue;
+
+        var link = connection.CreateCommand();
+        link.CommandText = "INSERT INTO StudentAssignment (StudentID, AssignmentID) VALUES (@sid, @aid)";
+        link.Parameters.AddWithValue("@sid", dto.StudentID);
+        link.Parameters.AddWithValue("@aid", aid);
+        link.ExecuteNonQuery();
+    }
+
     return Results.Ok("Enrolled successfully.");
 });
 
