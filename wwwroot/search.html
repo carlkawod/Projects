@@ -118,22 +118,18 @@
             <div class="modal-body">
                 <div id="createAlert" class="alert" style="display:none;"></div>
                 <div class="mb-3">
-                    <label for="createStudentID" class="form-label">Student ID</label>
+                    <label for="createStudentID" class="form-label">Student ID <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="createStudentID" placeholder="e.g. A00123456"
                         oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '')">
                     <small class="text-muted">Letters and numbers only — no special characters.</small>
                 </div>
                 <div class="mb-3">
-                    <label for="createFirstName" class="form-label">First Name</label>
+                    <label for="createFirstName" class="form-label">First Name <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="createFirstName">
                 </div>
                 <div class="mb-3">
-                    <label for="createLastName" class="form-label">Last Name</label>
+                    <label for="createLastName" class="form-label">Last Name <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="createLastName">
-                </div>
-                <div class="mb-3">
-                    <label for="createYear" class="form-label">Year</label>
-                    <input type="text" class="form-control" id="createYear" placeholder="e.g. Sophomore">
                 </div>
                 <div class="mb-3">
                     <label for="createExpectedGradYear" class="form-label">Expected Graduation Year</label>
@@ -228,6 +224,7 @@
                         <option value="">-- Select a Major --</option>
                         <option value="Computer Science">Computer Science</option>
                         <option value="Computer Information Systems">Computer Information Systems</option>
+                        <option value="Cyber Security">Cyber Security (legacy)</option>
                     </select>
                 </div>
             </div>
@@ -390,8 +387,8 @@
             major:              $('#editMajor').val().trim()
         };
 
-        if (!student.firstName || !student.lastName || !student.year || !student.expectedGradYear) {
-            showAlert('#editAlert', 'danger', 'All fields are required.');
+        if (!student.firstName || !student.lastName || !student.expectedGradYear || !student.major) {
+            showAlert('#editAlert', 'danger', 'All required fields must be filled.');
             return;
         }
 
@@ -423,15 +420,14 @@
             studentID:          $('#createStudentID').val().trim(),
             firstName:          $('#createFirstName').val().trim(),
             lastName:           $('#createLastName').val().trim(),
-            year:               $('#createYear').val().trim(),
+            year:               '',
             expectedGradYear:   $('#createExpectedGradYear').val().trim(),
             email:              $('#createEmail').val().trim(),
             major:              $('#createMajor').val().trim()
         };
 
-        if (!student.studentID || !student.firstName || !student.lastName ||
-            !student.year || !student.expectedGradYear || !student.major) {
-            showAlert('#createAlert', 'danger', 'All fields are required, including Major.');
+        if (!student.studentID || !student.firstName || !student.lastName || !student.major) {
+            showAlert('#createAlert', 'danger', 'Student ID, First Name, Last Name, and Major are required.');
             return;
         }
 
@@ -442,7 +438,7 @@
             data: JSON.stringify(student),
             success: function () {
                 showAlert('#createAlert', 'success', 'Student created successfully!');
-                $('#createStudentID, #createFirstName, #createLastName, #createYear, #createExpectedGradYear, #createEmail').val('');
+                $('#createStudentID, #createFirstName, #createLastName, #createExpectedGradYear, #createEmail').val('');
                 $('#createMajor').val('');
             },
             error: function (xhr) {
