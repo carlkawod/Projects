@@ -93,10 +93,16 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Major</label>
-                    <select class="form-select" id="createCourseMajor">
-                        <option value="Computer Science">Computer Science</option>
-                        <option value="Information Technology">Information Technology</option>
-                    </select>
+                    <div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="createMajorCS" value="Computer Science" checked>
+                            <label class="form-check-label" for="createMajorCS">Computer Science</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="createMajorIT" value="Information Technology">
+                            <label class="form-check-label" for="createMajorIT">Information Technology</label>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -132,10 +138,16 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Major</label>
-                    <select class="form-select" id="editCourseMajor">
-                        <option value="Computer Science">Computer Science</option>
-                        <option value="Information Technology">Information Technology</option>
-                    </select>
+                    <div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="editMajorCS" value="Computer Science">
+                            <label class="form-check-label" for="editMajorCS">Computer Science</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="editMajorIT" value="Information Technology">
+                            <label class="form-check-label" for="editMajorIT">Information Technology</label>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -217,12 +229,108 @@
 </div>
 
 
+<!-- ── POST-CREATE PROMPT ─────────────────────────────────────────────────── -->
+<div class="modal fade" id="postCreateModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title">Course Created!</h5>
+            </div>
+            <div class="modal-body text-center">
+                <p>Would you like to add assignments to <strong id="postCreateCourseName"></strong>?</p>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-secondary" onclick="closePostCreate()">Not Now</button>
+                <button type="button" class="btn btn-dark" onclick="openCourseAddAsgn()">Add Assignments</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ── ADD ASSIGNMENT MODAL ───────────────────────────────────────────────── -->
+<div class="modal fade" id="courseAddAsgnModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title">Add Assignment — <span id="courseAsgnCourseName"></span></h5>
+                <button type="button" class="btn-close btn-close-white" onclick="closeCourseAddAsgn()"></button>
+            </div>
+            <div class="modal-body">
+                <div id="courseAsgnAlert" class="alert" style="display:none;"></div>
+
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label fw-bold">Student:</label>
+                        <select id="courseAsgnStudentSelect" class="form-select"></select>
+                    </div>
+                    <div class="col">
+                        <label class="form-label fw-bold">Semester:</label>
+                        <select id="courseAsgnSemesterSelect" class="form-select"></select>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Assignment Type:</label>
+                    <select id="courseAsgnType" class="form-select" style="width: 200px;">
+                        <option>Exam</option>
+                        <option>Homework</option>
+                        <option>Project</option>
+                        <option>Lab</option>
+                        <option>Quiz</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Assignment Name:</label>
+                    <input type="text" id="courseAsgnName" class="form-control" placeholder="Assignment Name...">
+                </div>
+
+                <label class="form-label fw-bold">Which PLOs does this assignment address?</label>
+                <table class="table table-bordered text-center mt-2">
+                    <thead>
+                        <tr>
+                            <th style="background:#fff; width:40%;"></th>
+                            <th style="background:#4da6ff;">PLO 1</th>
+                            <th style="background:#4da6ff;">PLO 2</th>
+                            <th style="background:#4da6ff;">PLO 3</th>
+                            <th style="background:#4da6ff;">PLO 4</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Assignment addresses PLO?</td>
+                            <td><input type="checkbox" id="caPlo1"></td>
+                            <td><input type="checkbox" id="caPlo2"></td>
+                            <td><input type="checkbox" id="caPlo3"></td>
+                            <td><input type="checkbox" id="caPlo4"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Comments:</label>
+                    <textarea id="courseAsgnComments" class="form-control" placeholder="Any comments..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeCourseAddAsgn()">Cancel</button>
+                <button type="button" class="btn btn-dark" onclick="confirmCourseAddAsgn()">Add Assignment →</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     let allCourses = [];
     let allStudents = [];
     let currentEnrollCourseId = '';
     let enrolledStudentIds = [];
     let currentMajorFilter = 'Computer Science';
+    let newCourseIdAfterCreate = '';
+    let newCourseNameAfterCreate = '';
+
 
     $(document).ready(function () {
         loadCourses();
@@ -259,7 +367,7 @@
         tbody.empty();
 
         const filtered = majorFilter
-            ? allCourses.filter(c => c.major === majorFilter)
+            ? allCourses.filter(c => c.major && c.major.includes(majorFilter))
             : allCourses;
 
         if (filtered.length === 0) {
@@ -300,6 +408,8 @@
         $('#createCourseId').val('');
         $('#createCourseName').val('');
         $('#createCourseCredits').val('3');
+        $('#createMajorCS').prop('checked', true);
+        $('#createMajorIT').prop('checked', false);
         $('#createCourseAlert').hide();
         new bootstrap.Modal(document.getElementById('createCourseModal')).show();
     }
@@ -312,13 +422,23 @@
         if (!courseId)   { showAlert('#createCourseAlert', 'danger', 'Please enter a Course ID.'); return; }
         if (!courseName) { showAlert('#createCourseAlert', 'danger', 'Please enter a Course Name.'); return; }
 
+        const majors = [];
+        if ($('#createMajorCS').is(':checked')) majors.push('Computer Science');
+        if ($('#createMajorIT').is(':checked')) majors.push('Information Technology');
+        if (majors.length === 0) { showAlert('#createCourseAlert', 'danger', 'Please select at least one major.'); return; }
+        const major = majors.join(',');
+
         $.ajax({
             url: '/create-course', method: 'POST',
             contentType: 'application/json',
-            data: JSON.stringify({ CourseID: courseId, CourseName: courseName, Credits: credits, Major: $('#createCourseMajor').val() }),
+            data: JSON.stringify({ CourseID: courseId, CourseName: courseName, Credits: credits, Major: major }),
             success: function () {
+                newCourseIdAfterCreate   = courseId;
+                newCourseNameAfterCreate = courseName;
                 bootstrap.Modal.getInstance(document.getElementById('createCourseModal')).hide();
                 loadCourses();
+                $('#postCreateCourseName').text(courseName);
+                new bootstrap.Modal(document.getElementById('postCreateModal')).show();
             },
             error: function (xhr) { showAlert('#createCourseAlert', 'danger', xhr.responseText || 'Failed to create course.'); }
         });
@@ -331,7 +451,8 @@
         $('#editCourseId').val(id);
         $('#editCourseName').val(name);
         $('#editCourseCredits').val(credits);
-        $('#editCourseMajor').val(major || 'Computer Science');
+        $('#editMajorCS').prop('checked', major.includes('Computer Science'));
+        $('#editMajorIT').prop('checked', major.includes('Information Technology'));
         $('#editCourseAlert').hide();
         new bootstrap.Modal(document.getElementById('editCourseModal')).show();
     }
@@ -340,7 +461,12 @@
         const courseId   = $('#editCourseId').val();
         const courseName = $('#editCourseName').val().trim();
         const credits    = parseInt($('#editCourseCredits').val()) || 3;
-        const major      = $('#editCourseMajor').val();
+
+        const majors = [];
+        if ($('#editMajorCS').is(':checked')) majors.push('Computer Science');
+        if ($('#editMajorIT').is(':checked')) majors.push('Information Technology');
+        if (majors.length === 0) { showAlert('#editCourseAlert', 'danger', 'Please select at least one major.'); return; }
+        const major = majors.join(',');
 
         if (!courseName) { showAlert('#editCourseAlert', 'danger', 'Course Name cannot be empty.'); return; }
 
@@ -492,6 +618,94 @@
                 success: function (ids) { enrolledStudentIds = ids; renderStudentList($('#studentSearchFilter').val()); }
             });
         }
+    }
+
+
+    // ── Post-Create Prompt ────────────────────────────────────────────────────
+
+    function closePostCreate() {
+        bootstrap.Modal.getInstance(document.getElementById('postCreateModal')).hide();
+    }
+
+    function openCourseAddAsgn() {
+        closePostCreate();
+        $('#courseAsgnCourseName').text(newCourseNameAfterCreate);
+        $('#courseAsgnAlert').hide();
+        $('#courseAsgnName').val('');
+        $('#courseAsgnComments').val('');
+        $('#caPlo1, #caPlo2, #caPlo3, #caPlo4').prop('checked', false);
+
+        let studentsLoaded = false, semestersLoaded = false;
+        function tryOpen() {
+            if (studentsLoaded && semestersLoaded)
+                new bootstrap.Modal(document.getElementById('courseAddAsgnModal')).show();
+        }
+
+        $.ajax({
+            url: '/students', method: 'GET',
+            success: function (students) {
+                const sel = $('#courseAsgnStudentSelect');
+                sel.empty();
+                sel.append('<option value="">-- Select a student --</option>');
+                students.forEach(s => sel.append(`<option value="${s.studentId}">${s.lastName}, ${s.firstName} (${s.studentId})</option>`));
+                studentsLoaded = true; tryOpen();
+            }
+        });
+
+        $.ajax({
+            url: '/semesters', method: 'GET',
+            success: function (semesters) {
+                const sel = $('#courseAsgnSemesterSelect');
+                sel.empty();
+                sel.append('<option value="">-- No semester --</option>');
+                semesters.forEach(s => sel.append(`<option value="${s.semesterId}">${s.semesterName}</option>`));
+                semestersLoaded = true; tryOpen();
+            }
+        });
+    }
+
+    function closeCourseAddAsgn() {
+        bootstrap.Modal.getInstance(document.getElementById('courseAddAsgnModal')).hide();
+    }
+
+    function confirmCourseAddAsgn() {
+        const studentId = $('#courseAsgnStudentSelect').val();
+        const name      = $('#courseAsgnName').val().trim();
+
+        if (!studentId) { showAlert('#courseAsgnAlert', 'danger', 'Please select a student.'); return; }
+        if (!name)      { showAlert('#courseAsgnAlert', 'danger', 'Please enter an assignment name.'); return; }
+
+        const payload = {
+            StudentID:      studentId,
+            CourseID:       newCourseIdAfterCreate,
+            SemesterID:     $('#courseAsgnSemesterSelect').val() || null,
+            AssignmentType: $('#courseAsgnType').val(),
+            AssignmentName: name,
+            PLO1: $('#caPlo1').is(':checked'),
+            PLO2: $('#caPlo2').is(':checked'),
+            PLO3: $('#caPlo3').is(':checked'),
+            PLO4: $('#caPlo4').is(':checked'),
+            plo1_1: false, plo1_2: false, plo1_3: false, plo1_4: false,
+            plo2_1: false, plo2_2: false,
+            plo3_1: false, plo3_2: false, plo3_3: false,
+            plo4_1: false,
+            Comments: $('#courseAsgnComments').val()
+        };
+
+        $.ajax({
+            url: '/add-assignment', method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+            success: function () {
+                showAlert('#courseAsgnAlert', 'success', 'Assignment added!');
+                $('#courseAsgnName').val('');
+                $('#courseAsgnComments').val('');
+                $('#caPlo1, #caPlo2, #caPlo3, #caPlo4').prop('checked', false);
+            },
+            error: function (xhr) {
+                showAlert('#courseAsgnAlert', 'danger', xhr.responseText || 'Failed to add assignment.');
+            }
+        });
     }
 
 
