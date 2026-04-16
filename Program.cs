@@ -19,6 +19,30 @@ using (var connection = new SqliteConnection("Data Source=AssesmentReportGenerat
 {
     connection.Open();
 
+    // Add Email and Major columns to Student if missing
+    var checkStudentCols = connection.CreateCommand();
+    checkStudentCols.CommandText = "PRAGMA table_info(Student)";
+    bool hasEmailCol = false, hasMajorStudentCol = false;
+    using (var r = checkStudentCols.ExecuteReader())
+        while (r.Read())
+        {
+            var colName = r["name"].ToString();
+            if (colName == "Email") hasEmailCol = true;
+            if (colName == "Major") hasMajorStudentCol = true;
+        }
+    if (!hasEmailCol)
+    {
+        var alter = connection.CreateCommand();
+        alter.CommandText = "ALTER TABLE Student ADD COLUMN Email TEXT";
+        alter.ExecuteNonQuery();
+    }
+    if (!hasMajorStudentCol)
+    {
+        var alter = connection.CreateCommand();
+        alter.CommandText = "ALTER TABLE Student ADD COLUMN Major TEXT";
+        alter.ExecuteNonQuery();
+    }
+
     // Add SemesterID to Assignment if missing
     var checkSem = connection.CreateCommand();
     checkSem.CommandText = "PRAGMA table_info(Assignment)";
@@ -160,13 +184,15 @@ app.MapPost("/create", async (HttpContext http) =>
 
     var command = connection.CreateCommand();
     command.CommandText = @"
-        INSERT INTO Student (StudentID, FirstName, LastName, Year, ExpectedGradYear)
-        VALUES (@id, @first, @last, @year, @grad)";
+        INSERT INTO Student (StudentID, FirstName, LastName, Year, ExpectedGradYear, Email, Major)
+        VALUES (@id, @first, @last, @year, @grad, @email, @major)";
     command.Parameters.AddWithValue("@id",    student.StudentID);
     command.Parameters.AddWithValue("@first", student.FirstName);
     command.Parameters.AddWithValue("@last",  student.LastName);
     command.Parameters.AddWithValue("@year",  student.Year ?? "");
     command.Parameters.AddWithValue("@grad",  student.ExpectedGradYear ?? "");
+    command.Parameters.AddWithValue("@email", student.Email ?? "");
+    command.Parameters.AddWithValue("@major", student.Major ?? "");
     command.ExecuteNonQuery();
 
     return Results.Ok("Student created.");
@@ -261,13 +287,15 @@ app.MapPut("/edit", async (HttpContext http) =>
     var command = connection.CreateCommand();
     command.CommandText = @"
         UPDATE Student
-        SET FirstName = @first, LastName = @last, Year = @year, ExpectedGradYear = @grad
+        SET FirstName = @first, LastName = @last, Year = @year, ExpectedGradYear = @grad, Email = @email, Major = @major
         WHERE StudentID = @id";
     command.Parameters.AddWithValue("@id",    student.StudentID);
     command.Parameters.AddWithValue("@first", student.FirstName ?? "");
     command.Parameters.AddWithValue("@last",  student.LastName ?? "");
     command.Parameters.AddWithValue("@year",  student.Year ?? "");
     command.Parameters.AddWithValue("@grad",  student.ExpectedGradYear ?? "");
+    command.Parameters.AddWithValue("@email", student.Email ?? "");
+    command.Parameters.AddWithValue("@major", student.Major ?? "");
 
     var rows = command.ExecuteNonQuery();
     return rows == 0
@@ -767,6 +795,8 @@ record StudentDto
     public string? LastName         { get; init; }
     public string? Year             { get; init; }
     public string? ExpectedGradYear { get; init; }
+    public string? Email            { get; init; }
+    public string? Major            { get; init; }
 }
 
 record CourseDto
